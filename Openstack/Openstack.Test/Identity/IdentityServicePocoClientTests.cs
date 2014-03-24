@@ -32,6 +32,7 @@ namespace Openstack.Test.Identity
     public class IdentityServicePocoClientTests
     {
         internal TestIdentityServiceRestClient RestClient;
+        internal string defaultRegion = "region-a.geo-1";
 
         [TestInitialize]
         public void TestSetup()
@@ -41,6 +42,7 @@ namespace Openstack.Test.Identity
             ServiceLocator.Reset();
             var manager = ServiceLocator.Instance.Locate<IServiceLocationOverrideManager>();
             manager.RegisterServiceInstance(typeof(IIdentityServiceRestClientFactory), new TestIdentityServiceRestClientFactory(RestClient));
+            manager.RegisterServiceInstance(typeof(IOpenstackRegionResolver), new TestOpenstackRegionResolver(defaultRegion));
         }
 
         [TestCleanup]
@@ -177,6 +179,58 @@ namespace Openstack.Test.Identity
             Assert.AreEqual(creds.TenantId, result.TenantId);
             Assert.AreEqual(expectedToken, result.AccessTokenId);
             Assert.AreEqual(1, result.ServiceCatalog.Count());
+        }
+
+        [TestMethod]
+        public async Task AuthenticationDoesNotResolveRegionIfCredRegionSupplied()
+        {
+            var expectedRegion = "Some region";
+            var creds = GetValidCredentials();
+            creds.SetRegion(expectedRegion);
+            var payload = @"{
+                                                ""access"": {
+                                                    ""token"": {
+                                                        ""expires"": ""2014-03-18T10:59:46.355Z"",
+                                                        ""id"": ""HPAuth10_af3d1bfe456d18e8d4793e54922f839fa051d9f60f115aca52c9a44f9e3d96fb"",
+                                                        ""tenant"": {
+                                                            ""id"": ""10244656540440"",
+                                                            ""name"": ""10255892528404-Project""
+                                                        }
+                                                    },
+                                                    ""serviceCatalog"":[{
+                                                        ""name"": ""Object Storage"",
+                                                        ""type"": ""object-store"",
+                                                        ""endpoints"": [
+                                                            {
+                                                                ""tenantId"": ""10244656540440"",
+                                                                ""publicURL"": ""https://region-a.geo-1.objects.hpcloudsvc.com/v1/10244656540440"",
+                                                                ""region"": ""region-a.geo-1"",
+                                                                ""versionId"": ""1.0"",
+                                                                ""versionInfo"": ""https://region-a.geo-1.objects.hpcloudsvc.com/v1.0/"",
+                                                                ""versionList"": ""https://region-a.geo-1.objects.hpcloudsvc.com""
+                                                            },
+                                                            {
+                                                                ""tenantId"": ""10244656540440"",
+                                                                ""publicURL"": ""https://region-b.geo-1.objects.hpcloudsvc.com:443/v1/10244656540440"",
+                                                                ""region"": ""region-b.geo-1"",
+                                                                ""versionId"": ""1"",
+                                                                ""versionInfo"": ""https://region-b.geo-1.objects.hpcloudsvc.com:443/v1/"",
+                                                                ""versionList"": ""https://region-b.geo-1.objects.hpcloudsvc.com:443""
+                                                            }
+                                                        ]
+                                                    }]
+                                                }
+                                            }";
+
+            var content = TestHelper.CreateStream(payload);
+
+            var restResp = new HttpResponseAbstraction(content, new HttpHeadersAbstraction(), HttpStatusCode.NonAuthoritativeInformation);
+            this.RestClient.Response = restResp;
+
+            var client = new IdentityServicePocoClient(creds, CancellationToken.None);
+            var result = await client.Authenticate();
+
+            Assert.AreEqual(expectedRegion, result.Region);
         }
 
         [TestMethod]

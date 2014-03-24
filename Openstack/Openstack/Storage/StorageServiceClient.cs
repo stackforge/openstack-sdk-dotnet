@@ -32,16 +32,13 @@ namespace Openstack.Storage
         internal StorageServiceClientContext Context;
         internal const string StorageServiceName = "Object Storage";
 
-        //TODO: make this configurable
-        internal string defaultRegion = "region-a.geo-1";
-
         public Uri GetPublicEndpoint()
         {
             //TODO: This should be removed as soon as the CLI can deprecate it's usage of it. 
             //      The reason is that this breaks encapsulation. The rest layer/client is responsible for resolving it's own endpoint,
             //      This object should not also try and resolve the uri. In general we abstracted the consumer away from the URI, we should not break that
             //      abstraction. 
-            return this.Context.Credential.ServiceCatalog.GetPublicEndpoint(StorageServiceName, this.defaultRegion);
+            return this.Context.Credential.ServiceCatalog.GetPublicEndpoint(StorageServiceName, this.Context.Credential.Region);
         }
 
         /// <summary>
@@ -51,7 +48,7 @@ namespace Openstack.Storage
         /// <param name="token">The cancellation token to be used by this client.</param>
         public StorageServiceClient(IOpenstackCredential credentials, CancellationToken token)
         {
-            this.Context = new StorageServiceClientContext(credentials, token, StorageServiceName, defaultRegion);
+            this.Context = new StorageServiceClientContext(credentials, token, StorageServiceName);
         }
 
         /// <inheritdoc/>

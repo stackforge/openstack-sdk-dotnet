@@ -14,6 +14,8 @@
 // limitations under the License.
 // ============================================================================ */
 
+using Openstack.Common;
+
 namespace Openstack
 {
     using System.Collections.Generic;
@@ -35,7 +37,7 @@ namespace Openstack
         /// </summary>
         public OpenstackClient()
         {
-            //TODO: remove the need for a default constructor, as state becomes an issue. This will need to be done in conjuntion with changes in the ClientManager
+            //TODO: remove the need for a default constructor, as state becomes an issue. This will need to be done in conjunction with changes in the ClientManager
         }
 
         /// <summary>
@@ -54,6 +56,13 @@ namespace Openstack
         {
             var identityClient = this.CreateServiceClient<IIdentityServiceClient>();
             this.Credential = await identityClient.Authenticate();
+        }
+
+        /// <inheritdoc/>
+        public void SetRegion(string region)
+        {
+            region.AssertIsNotNullOrEmpty("region", "Cannot set the region on the client. Region must not be null or empty");
+            this.Credential.SetRegion(region);
         }
 
         /// <inheritdoc/>

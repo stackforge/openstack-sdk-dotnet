@@ -37,6 +37,13 @@ namespace Openstack
         Task Connect();
 
         /// <summary>
+        /// Changes the default region for the client.
+        /// </summary>
+        /// <param name="region">The region to be set.</param>
+        /// <returns></returns>
+        void SetRegion(string region);
+
+        /// <summary>
         /// Creates a client for a given Openstack service.
         /// </summary>
         /// <typeparam name="T">The type of client to create.</typeparam>

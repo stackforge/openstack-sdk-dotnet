@@ -100,6 +100,38 @@ namespace Openstack.Test
         }
 
         [TestMethod]
+        public void CanSetRegion()
+        {
+            var expectedRegion = "newregion";
+            var client = new OpenstackClient( 
+                    new OpenstackCredential(new Uri("http://someplace.org"), "someuser", new SecureString(),
+                        "sometenant","oldregion"), CancellationToken.None);
+            client.SetRegion(expectedRegion);
+
+            Assert.AreEqual(expectedRegion, client.Credential.Region);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void CannotSetRegionWithNull()
+        {
+            var client = new OpenstackClient(
+                    new OpenstackCredential(new Uri("http://someplace.org"), "someuser", new SecureString(),
+                        "sometenant", "oldregion"), CancellationToken.None);
+            client.SetRegion(null);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void CannotSetRegionWithEmptyString()
+        {
+            var client = new OpenstackClient(
+                    new OpenstackCredential(new Uri("http://someplace.org"), "someuser", new SecureString(),
+                        "sometenant", "oldregion"), CancellationToken.None);
+            client.SetRegion(string.Empty);
+        }
+
+        [TestMethod]
         public void CanSupportAnyVersion()
         {
             var client = new OpenstackClient();

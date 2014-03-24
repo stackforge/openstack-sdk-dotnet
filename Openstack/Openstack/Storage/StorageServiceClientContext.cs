@@ -40,23 +40,17 @@ namespace Openstack.Storage
         public string StorageServiceName { get; set; }
 
         /// <summary>
-        /// Gets or sets the region to use when connecting to the remote service.
-        /// </summary>
-        public string Region { get; set; }
-
-        /// <summary>
         /// Creates a new instance of the StorageServiceClientContext class.
         /// </summary>
         /// <param name="credential">The credential for this context.</param>
         /// <param name="cancellationToken">The cancellation token for this context.</param>
         /// <param name="serviceName">The name of the storage service.</param>
         /// <param name="region">The region of the storage service.</param>
-        internal StorageServiceClientContext(IOpenstackCredential credential, CancellationToken cancellationToken, string serviceName, string region)
+        internal StorageServiceClientContext(IOpenstackCredential credential, CancellationToken cancellationToken, string serviceName)
         {
             this.Credential = credential;
             this.CancellationToken = cancellationToken;
             this.StorageServiceName = serviceName;
-            this.Region = region;
         }
     }
 }

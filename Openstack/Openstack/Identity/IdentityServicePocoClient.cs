@@ -14,6 +14,8 @@
 // limitations under the License.
 // ============================================================================ */
 
+using System.Linq;
+
 namespace Openstack.Identity
 {
     using System;
@@ -28,6 +30,7 @@ namespace Openstack.Identity
     {
         internal IOpenstackCredential credential;
         internal CancellationToken cancellationToken;
+        internal const string IdentityServiceName = "Identity";
 
         /// <summary>
         /// Creates a new instance of the IdentityServicePocoClient class.
@@ -65,6 +68,16 @@ namespace Openstack.Identity
 
             this.credential.SetAccessTokenId(accessToken);
             this.credential.SetServiceCatalog(serviceCatalog);
+
+            if (string.IsNullOrEmpty(this.credential.Region))
+            {
+                var resolver = ServiceLocator.Instance.Locate<IOpenstackRegionResolver>();
+                var region = resolver.Resolve(this.credential.AuthenticationEndpoint, this.credential.ServiceCatalog, IdentityServiceName);
+
+                //TODO: figure out if we want to throw in the case where the region cannot be resolved... 
+
+                this.credential.SetRegion(region);
+            }
 
             return this.credential;
         }

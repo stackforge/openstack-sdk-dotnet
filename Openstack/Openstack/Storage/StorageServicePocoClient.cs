@@ -85,7 +85,7 @@ namespace Openstack.Storage
                 throw new InvalidOperationException(string.Format("Failed to get storage account. The remote server returned the following status code: '{0}'.", resp.StatusCode));
             }
 
-            var endpoint = this._context.Credential.ServiceCatalog.GetPublicEndpoint(this._context.StorageServiceName, this._context.Region);
+            var endpoint = this._context.Credential.ServiceCatalog.GetPublicEndpoint(this._context.StorageServiceName, this._context.Credential.Region);
             var accountName = endpoint.Segments.Last().TrimEnd('/');
 
             var converter = ServiceLocator.Instance.Locate<IStorageAccountPayloadConverter>();

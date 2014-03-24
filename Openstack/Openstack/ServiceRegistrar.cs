@@ -35,6 +35,7 @@ namespace Openstack
             manager.RegisterServiceInstance(typeof(IIdentityServicePocoClientFactory), new IdentityServicePocoClientFactory());
             manager.RegisterServiceInstance(typeof(IIdentityServiceRestClientFactory), new IdentityServiceRestClientFactory());
             manager.RegisterServiceInstance(typeof(IOpenstackServiceEndpointResolver), new OpenstackServiceEndpointResolver());
+            manager.RegisterServiceInstance(typeof(IOpenstackRegionResolver), new OpenstackRegionResolver());
 
             //Converters
             manager.RegisterServiceInstance(typeof(IStorageContainerPayloadConverter), new StorageContainerPayloadConverter());

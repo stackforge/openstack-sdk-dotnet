@@ -61,6 +61,11 @@ namespace Openstack.Test
                 throw new NotImplementedException();
             }
 
+            public void SetRegion(string region)
+            {
+                throw new NotImplementedException();
+            }
+
             public T CreateServiceClient<T>() where T : IOpenstackServiceClient
             {
                 throw new NotImplementedException();
@@ -91,6 +96,11 @@ namespace Openstack.Test
             public IOpenstackCredential Credential { get; private set; }
 
             public Task Connect()
+            {
+                throw new NotImplementedException();
+            }
+
+            public void SetRegion(string region)
             {
                 throw new NotImplementedException();
             }
@@ -130,6 +140,11 @@ namespace Openstack.Test
             public IOpenstackCredential Credential { get; private set; }
 
             public Task Connect()
+            {
+                throw new NotImplementedException();
+            }
+
+            public void SetRegion(string region)
             {
                 throw new NotImplementedException();
             }

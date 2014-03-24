@@ -27,27 +27,27 @@ namespace Openstack.Identity
         /// <summary>
         /// Gets the public Uri of the endpoint.
         /// </summary>
-        public string PublicUri { get; private set; }
+        public string PublicUri { get; internal set; }
 
         /// <summary>
         /// Gets the region of the endpoint.
         /// </summary>
-        public string Region { get; private set; }
+        public string Region { get; internal set; }
 
         /// <summary>
         /// Gets the version of the endpoint.
         /// </summary>
-        public string Version { get; private set; }
+        public string Version { get; internal set; }
 
         /// <summary>
         /// Gets the Uri for the endpoints version information.
         /// </summary>
-        public Uri VersionInformation { get; private set; }
+        public Uri VersionInformation { get; internal set; }
 
         /// <summary>
         /// Gets the Uri for the endpoints list of versions.
         /// </summary>
-        public Uri VersionList { get; private set; }
+        public Uri VersionList { get; internal set; }
 
         /// <summary>
         /// Creates a new instance of the OpenstackServiceEndpoint class.

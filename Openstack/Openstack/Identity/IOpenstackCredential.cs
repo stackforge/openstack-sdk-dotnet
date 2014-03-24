@@ -37,11 +37,21 @@ namespace Openstack.Identity
         string TenantId { get; }
 
         /// <summary>
+        /// Gets the current region for this credential.
+        /// </summary>
+        string Region { get; }
+
+        /// <summary>
         /// Sets the access token to be used for the current instance of Openstack.
         /// </summary>
         /// <param name="accessTokenId">The access token id.</param>
         void SetAccessTokenId(string accessTokenId);
 
+        /// <summary>
+        /// Sets the current region to use for the current instance of Openstack.
+        /// </summary>
+        /// <param name="region">The region.</param>
+        void SetRegion(string region);
 
         /// <summary>
         /// Sets the service catalog to be used for the current instance of Openstack.

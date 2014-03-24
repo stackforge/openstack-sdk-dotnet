@@ -272,7 +272,7 @@ namespace Openstack.Storage
         /// <returns>The public endpoint for the remote storage service.</returns>
         internal static Uri GetServiceEndpoint(StorageServiceClientContext context)
         {
-            return context.Credential.ServiceCatalog.GetPublicEndpoint(context.StorageServiceName, context.Region);
+            return context.Credential.ServiceCatalog.GetPublicEndpoint(context.StorageServiceName, context.Credential.Region);
         }
     }
 }

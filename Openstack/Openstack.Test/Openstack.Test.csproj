@@ -72,6 +72,7 @@
     <Compile Include="Identity\OpenstackServiceCatalogPayloadConverterTests.cs" />
     <Compile Include="Identity\OpenstackServiceCatalogTests.cs" />
     <Compile Include="Identity\IdentityServiceClientDefinitionTests.cs" />
+    <Compile Include="Identity\OpenstackRegionResolverTests.cs" />
     <Compile Include="ServiceLocation\ServiceLocationAssemblyScannerTests.cs" />
     <Compile Include="ServiceLocation\ServiceLocatorTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -88,6 +89,7 @@
     <Compile Include="OpenstackClientManagerTests.cs" />
     <Compile Include="OpenstackServiceClientManagerTests.cs" />
     <Compile Include="Storage\StorageServiceClientDefinitionTests.cs" />
+    <Compile Include="TestOpenstackRegionResolver.cs" />
     <Compile Include="TestOpenstackServiceEndpointResolver.cs" />
     <Compile Include="ObjectExtentionsTests.cs" />
     <Compile Include="OpenstackClientTests.cs" />
