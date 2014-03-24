@@ -14,6 +14,8 @@
 // limitations under the License.
 // ============================================================================ */
 
+using System;
+
 namespace Openstack.Storage
 {
     using System.Collections.Generic;
@@ -25,6 +27,12 @@ namespace Openstack.Storage
     /// </summary>
     public interface IStorageServiceClient : IOpenstackServiceClient
     {
+        /// <summary>
+        /// Gets the current public endpoint that this client is using.
+        /// </summary>
+        /// <returns>The public Uri.</returns>
+        Uri GetPublicEndpoint();
+
         /// <summary>
         /// Creates a storage container on the remote Openstack instance.
         /// </summary>

@@ -35,6 +35,15 @@ namespace Openstack.Storage
         //TODO: make this configurable
         internal string defaultRegion = "region-a.geo-1";
 
+        public Uri GetPublicEndpoint()
+        {
+            //TODO: This should be removed as soon as the CLI can deprecate it's usage of it. 
+            //      The reason is that this breaks encapsulation. The rest layer/client is responsible for resolving it's own endpoint,
+            //      This object should not also try and resolve the uri. In general we abstracted the consumer away from the URI, we should not break that
+            //      abstraction. 
+            return this.Context.Credential.ServiceCatalog.GetPublicEndpoint(StorageServiceName, this.defaultRegion);
+        }
+
         /// <summary>
         /// Creates a new instance of the StorageServiceClient class.
         /// </summary>

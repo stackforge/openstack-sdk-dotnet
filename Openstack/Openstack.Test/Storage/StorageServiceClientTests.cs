@@ -32,6 +32,8 @@ namespace Openstack.Test.Storage
     public class StorageServiceClientTests
     {
         internal TestStorageServicePocoClient ServicePocoClient;
+        internal TestOpenstackServiceEndpointResolver resovler;
+        
         internal string authId = "12345";
         internal string endpoint = "http://teststorageendpoint.com/v1/1234567890";
 
@@ -39,15 +41,18 @@ namespace Openstack.Test.Storage
         public void TestSetup()
         {
             this.ServicePocoClient = new TestStorageServicePocoClient();
+            this.resovler = new TestOpenstackServiceEndpointResolver();
 
             ServiceLocator.Reset();
             var manager = ServiceLocator.Instance.Locate<IServiceLocationOverrideManager>();
             manager.RegisterServiceInstance(typeof(IStorageServicePocoClientFactory), new TestStorageServicePocoClientFactory(ServicePocoClient));
+            manager.RegisterServiceInstance(typeof(IOpenstackServiceEndpointResolver), resovler);
         }
 
         [TestCleanup]
         public void TestCleanup()
         {
+            this.resovler = new TestOpenstackServiceEndpointResolver();
             this.ServicePocoClient = new TestStorageServicePocoClient();
             ServiceLocator.Reset();
         }
@@ -57,6 +62,16 @@ namespace Openstack.Test.Storage
             var creds = new OpenstackCredential(new Uri(this.endpoint), "SomeUser", "Password".ConvertToSecureString(), "SomeTenant");
             creds.SetAccessTokenId(this.authId);
             return creds;
+        }
+
+        [TestMethod]
+        public void CanGetPublicEndpoint()
+        {
+            var expectedUri = new Uri(endpoint);
+            this.resovler.Endpoint = expectedUri;
+
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            Assert.AreEqual(expectedUri, client.GetPublicEndpoint());
         }
 
         [TestMethod]
