@@ -35,8 +35,8 @@ namespace Openstack.Identity
                 var publicUri = (string) endpoint["publicURL"];
                 var region = (string)endpoint["region"];
                 var version = (string)endpoint["versionId"];
-                var versionInfo = new Uri((string)endpoint["versionInfo"]);
-                var versionList = new Uri((string)endpoint["versionList"]);
+                var versionInfo = (string)endpoint["versionInfo"];
+                var versionList = (string)endpoint["versionList"];
 
                 return new OpenstackServiceEndpoint(publicUri, region, version, versionInfo, versionList);
             }

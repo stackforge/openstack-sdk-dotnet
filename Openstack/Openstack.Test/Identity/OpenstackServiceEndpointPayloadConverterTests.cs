@@ -30,7 +30,7 @@ namespace Openstack.Test.Identity
             var expectedPublicUri = "https://region-a.geo-1.block.hpcloudsvc.com/v1/10244656540440";
             var expectedRegion = "region-a.geo-1";
             var expectedVersion = "1.0";
-            var expectedVersionList = "https://region-a.geo-1.block.hpcloudsvc.com/";
+            var expectedVersionList = "https://region-a.geo-1.block.hpcloudsvc.com";
             var expectedVersionInfo = "https://region-a.geo-1.block.hpcloudsvc.com/v1";
 
             var endpointPayload = @" {
@@ -165,8 +165,7 @@ namespace Openstack.Test.Identity
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
-        public void CannotConvertJsonPayloadWithBadVersionInfoUri()
+        public void CanConvertJsonPayloadWithBadVersionInfoUri()
         {
             var endpointPayload = @" {
                         ""tenantId"": ""10244656540440"",
@@ -183,8 +182,7 @@ namespace Openstack.Test.Identity
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
-        public void CannotConvertJsonPayloadWithBadVersionListcUri()
+        public void CanConvertJsonPayloadWithBadVersionListcUri()
         {
             var endpointPayload = @" {
                         ""tenantId"": ""10244656540440"",
@@ -194,6 +192,40 @@ namespace Openstack.Test.Identity
                         ""versionId"": ""1.0"",
                         ""versionInfo"": ""https://region-a.geo-1.block.hpcloudsvc.com/v1"",
                         ""versionList"": ""htBADtps://region-a.ge&BAD&o-1.block.hpcloudsvc.com""
+                    }";
+
+            var converter = new OpenstackServiceEndpointPayloadConverter();
+            converter.Convert(endpointPayload);
+        }
+
+        [TestMethod]
+        public void CanConvertJsonPayloadWithEmptyVersionInfoUri()
+        {
+            var endpointPayload = @" {
+                        ""tenantId"": ""10244656540440"",
+                        ""publicURL"": ""https://region-a.geo-1.block.hpcloudsvc.com/v1/10244656540440"",
+                        ""publicURL2"": """",
+                        ""region"": ""region-a.geo-1"",
+                        ""versionId"": ""1.0"",
+                        ""versionInfo"": """",
+                        ""versionList"": ""https://region-a.geo-1.block.hpcloudsvc.com""
+                    }";
+
+            var converter = new OpenstackServiceEndpointPayloadConverter();
+            converter.Convert(endpointPayload);
+        }
+
+        [TestMethod]
+        public void CanConvertJsonPayloadWithEmptyVersionListcUri()
+        {
+            var endpointPayload = @" {
+                        ""tenantId"": ""10244656540440"",
+                        ""publicURL"": ""https://region-a.geo-1.block.hpcloudsvc.com/v1/10244656540440"",
+                        ""publicURL2"": """",
+                        ""region"": ""region-a.geo-1"",
+                        ""versionId"": ""1.0"",
+                        ""versionInfo"": ""https://region-a.geo-1.block.hpcloudsvc.com/v1"",
+                        ""versionList"": """"
                     }";
 
             var converter = new OpenstackServiceEndpointPayloadConverter();

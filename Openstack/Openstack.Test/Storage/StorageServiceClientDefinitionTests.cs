@@ -33,7 +33,7 @@ namespace Openstack.Test.Storage
                         new List<OpenstackServiceEndpoint>()
                         {
                             new OpenstackServiceEndpoint("http://someplace.com", "somewhere", "1.0",
-                                new Uri("http://someplace.com"), new Uri("http://someplace.com"))
+                               "http://www.someplace.com", "http://www.someplace.com")
                         })
                 };
             creds.SetServiceCatalog(catalog);
@@ -52,7 +52,7 @@ namespace Openstack.Test.Storage
                         new List<OpenstackServiceEndpoint>()
                         {
                             new OpenstackServiceEndpoint("http://someplace.com", "somewhere", "2.0.0.0",
-                                new Uri("http://someplace.com"), new Uri("http://someplace.com"))
+                                "http://www.someplace.com", "http://www.someplace.com")
                         })
                 };
             creds.SetServiceCatalog(catalog);

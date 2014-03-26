@@ -42,12 +42,12 @@ namespace Openstack.Identity
         /// <summary>
         /// Gets the Uri for the endpoints version information.
         /// </summary>
-        public Uri VersionInformation { get; internal set; }
+        public string VersionInformation { get; internal set; }
 
         /// <summary>
         /// Gets the Uri for the endpoints list of versions.
         /// </summary>
-        public Uri VersionList { get; internal set; }
+        public string VersionList { get; internal set; }
 
         /// <summary>
         /// Creates a new instance of the OpenstackServiceEndpoint class.
@@ -57,7 +57,7 @@ namespace Openstack.Identity
         /// <param name="version">The version of the endpoint.</param>
         /// <param name="versionInfo">The link to version information.</param>
         /// <param name="versionList">The link to a list of versions.</param>
-        internal OpenstackServiceEndpoint(string publicUri, string region, string version, Uri versionInfo, Uri versionList)
+        internal OpenstackServiceEndpoint(string publicUri, string region, string version, string versionInfo, string versionList)
         {
             publicUri.AssertIsNotNull("publicUri", "Cannot create a service endpoint with a null public URI.");
             region.AssertIsNotNull("region", "Cannot create a service endpoint with a null public URI.");

@@ -33,7 +33,7 @@ namespace Openstack.Test.Identity
                 new List<OpenstackServiceEndpoint>()
                 {
                     new OpenstackServiceEndpoint(expectedEndpoint.ToString(), "some region", "1.0",
-                        new Uri("http://www.someplace.com"), new Uri("http://www.someplace.com"))
+                        "http://www.someplace.com", "http://www.someplace.com")
                 });
             var catalog = new OpenstackServiceCatalog {serviceDef};
             var endpoint = catalog.GetPublicEndpoint("Test Service", "some region");
@@ -49,14 +49,14 @@ namespace Openstack.Test.Identity
                 new List<OpenstackServiceEndpoint>()
                 {
                     new OpenstackServiceEndpoint(expectedEndpoint.ToString(), "some region", "1.0",
-                        new Uri("http://www.someplace.com"), new Uri("http://www.someplace.com"))
+                        "http://www.someplace.com", "http://www.someplace.com")
                 }));
 
             catalog.Add(new OpenstackServiceDefinition("Other Test Service", "Test-Service",
                 new List<OpenstackServiceEndpoint>()
                 {
                     new OpenstackServiceEndpoint("http://other.endpoint.org", "some region", "1.0",
-                        new Uri("http://www.someotherplace.com"), new Uri("http://www.someplace.com"))
+                        "http://www.someplace.com", "http://www.someplace.com")
                 }));
            
             var endpoint = catalog.GetPublicEndpoint("Test Service", "some region");
@@ -72,14 +72,14 @@ namespace Openstack.Test.Identity
                 new List<OpenstackServiceEndpoint>()
                 {
                     new OpenstackServiceEndpoint("http://some.endpoint.org", "some region", "1.0",
-                        new Uri("http://www.someplace.com"), new Uri("http://www.someplace.com"))
+                        "http://www.someplace.com", "http://www.someplace.com")
                 }));
 
             catalog.Add(new OpenstackServiceDefinition("Other Test Service", "Test-Service",
                 new List<OpenstackServiceEndpoint>()
                 {
                     new OpenstackServiceEndpoint("http://other.endpoint.org", "some region", "1.0",
-                        new Uri("http://www.someotherplace.com"), new Uri("http://www.someplace.com"))
+                        "http://www.someplace.com", "http://www.someplace.com")
                 }));
 
             catalog.GetPublicEndpoint("Missing Service", "some region");
@@ -97,7 +97,7 @@ namespace Openstack.Test.Identity
                 new List<OpenstackServiceEndpoint>()
                 {
                     new OpenstackServiceEndpoint("http://other.endpoint.org", "some region", "1.0",
-                        new Uri("http://www.someotherplace.com"), new Uri("http://www.someplace.com"))
+                        "http://www.someplace.com", "http://www.someplace.com")
                 }));
 
             catalog.GetPublicEndpoint("Test Service", "some region");
@@ -113,10 +113,10 @@ namespace Openstack.Test.Identity
                 new List<OpenstackServiceEndpoint>()
                 {
                     new OpenstackServiceEndpoint("http://public.endpoint.org", "some region", "1.0",
-                        new Uri("http://www.someotherplace.com"), new Uri("http://www.someplace.com")),
+                        "http://www.someplace.com", "http://www.someplace.com"),
 
                     new OpenstackServiceEndpoint("http://other.endpoint.org", "some other region", "1.0",
-                        new Uri("http://www.someotherplace.com"), new Uri("http://www.someplace.com"))
+                        "http://www.someplace.com", "http://www.someplace.com")
                 }));
 
             var endpoint = catalog.GetPublicEndpoint("Test Service", "some region");
@@ -131,7 +131,7 @@ namespace Openstack.Test.Identity
                 new List<OpenstackServiceEndpoint>()
                 {
                     new OpenstackServiceEndpoint(expectedEndpoint.ToString(), "some region", "1.0",
-                        new Uri("http://www.someplace.com"), new Uri("http://www.someplace.com"))
+                        "http://www.someplace.com", "http://www.someplace.com")
                 });
             var catalog = new OpenstackServiceCatalog { serviceDef };
             Assert.IsTrue(catalog.Exists("Test Service"));
@@ -145,7 +145,7 @@ namespace Openstack.Test.Identity
                 new List<OpenstackServiceEndpoint>()
                 {
                     new OpenstackServiceEndpoint(expectedEndpoint.ToString(), "some region", "1.0",
-                        new Uri("http://www.someplace.com"), new Uri("http://www.someplace.com"))
+                        "http://www.someplace.com", "http://www.someplace.com")
                 });
             var catalog = new OpenstackServiceCatalog { serviceDef };
             Assert.IsFalse(catalog.Exists("NOT IN CATALOG"));
@@ -159,7 +159,7 @@ namespace Openstack.Test.Identity
                 new List<OpenstackServiceEndpoint>()
                 {
                     new OpenstackServiceEndpoint(expectedEndpoint.ToString(), "some region", "1.0",
-                        new Uri("http://www.someplace.com"), new Uri("http://www.someplace.com"))
+                        "http://www.someplace.com", "http://www.someplace.com")
                 });
             var catalog = new OpenstackServiceCatalog { serviceDef };
             var services = catalog.GetServicesInAvailabilityZone("some region").ToList();
@@ -175,14 +175,14 @@ namespace Openstack.Test.Identity
                 new List<OpenstackServiceEndpoint>()
                 {
                     new OpenstackServiceEndpoint("http://some.endpoint.com", "some region", "1.0",
-                        new Uri("http://www.someplace.com"), new Uri("http://www.someplace.com"))
+                        "http://www.someplace.com", "http://www.someplace.com")
                 }));
 
             catalog.Add(new OpenstackServiceDefinition("Other Test Service", "Test-Service",
                 new List<OpenstackServiceEndpoint>()
                 {
                     new OpenstackServiceEndpoint("http://other.endpoint.org", "some region", "1.0",
-                        new Uri("http://www.someotherplace.com"), new Uri("http://www.someplace.com"))
+                        "http://www.someplace.com", "http://www.someplace.com")
                 }));
 
             var services = catalog.GetServicesInAvailabilityZone("some region").ToList();
@@ -197,7 +197,7 @@ namespace Openstack.Test.Identity
                 new List<OpenstackServiceEndpoint>()
                 {
                     new OpenstackServiceEndpoint(expectedEndpoint.ToString(), "some region", "1.0",
-                        new Uri("http://www.someplace.com"), new Uri("http://www.someplace.com"))
+                        "http://www.someplace.com", "http://www.someplace.com")
                 });
             var catalog = new OpenstackServiceCatalog { serviceDef };
             var services = catalog.GetServicesInAvailabilityZone("some other region").ToList();
@@ -212,9 +212,9 @@ namespace Openstack.Test.Identity
                 new List<OpenstackServiceEndpoint>()
                 {
                     new OpenstackServiceEndpoint(expectedEndpoint.ToString(), "some region", "1.0",
-                        new Uri("http://www.someplace.com"), new Uri("http://www.someplace.com")),
+                        "http://www.someplace.com", "http://www.someplace.com"),
                     new OpenstackServiceEndpoint(expectedEndpoint.ToString(), "some other region", "1.0",
-                        new Uri("http://www.someplace.com"), new Uri("http://www.someplace.com"))
+                        "http://www.someplace.com", "http://www.someplace.com")
                 });
             var catalog = new OpenstackServiceCatalog { serviceDef };
             var services = catalog.GetServicesInAvailabilityZone("some other region").ToList();

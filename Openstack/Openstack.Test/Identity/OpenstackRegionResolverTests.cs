@@ -18,14 +18,14 @@ namespace Openstack.Test.Identity
                 new List<OpenstackServiceEndpoint>()
                 {
                     new OpenstackServiceEndpoint("http://other.endpoint.org", expectedRegion , "1.0",
-                        new Uri("http://www.someplace.com"), new Uri("http://www.someplace.com"))
+                        "http://www.someplace.com", "http://www.someplace.com")
                 }));
 
             catalog.Add(new OpenstackServiceDefinition("Other Test Service", "Test-Service",
                 new List<OpenstackServiceEndpoint>()
                 {
                     new OpenstackServiceEndpoint("http://other.endpoint.org", "some other region", "1.0",
-                        new Uri("http://www.someotherplace.com"), new Uri("http://www.someplace.com"))
+                        "http://www.someplace.com", "http://www.someplace.com")
                 }));
             var resolver = new OpenstackRegionResolver();
             var region = resolver.Resolve(new Uri("http://other.endpoint.org/v2/tokens"), catalog, "Test Service");
@@ -41,14 +41,14 @@ namespace Openstack.Test.Identity
                 new List<OpenstackServiceEndpoint>()
                 {
                     new OpenstackServiceEndpoint("http://other.endpoint.org", "Some Region" , "1.0",
-                        new Uri("http://www.someplace.com"), new Uri("http://www.someplace.com"))
+                        "http://www.someplace.com", "http://www.someplace.com")
                 }));
 
             catalog.Add(new OpenstackServiceDefinition("Other Test Service", "Test-Service",
                 new List<OpenstackServiceEndpoint>()
                 {
                     new OpenstackServiceEndpoint("http://other.endpoint.org", "some other region", "1.0",
-                        new Uri("http://www.someotherplace.com"), new Uri("http://www.someplace.com"))
+                        "http://www.someplace.com", "http://www.someplace.com")
                 }));
             var resolver = new OpenstackRegionResolver();
             var region = resolver.Resolve(new Uri("http://nomatching.endpoint.org/v2/tokens"), catalog, "Test Service");
@@ -64,14 +64,14 @@ namespace Openstack.Test.Identity
                 new List<OpenstackServiceEndpoint>()
                 {
                     new OpenstackServiceEndpoint("http://other.endpoint.org", "Some Region" , "1.0",
-                        new Uri("http://www.someplace.com"), new Uri("http://www.someplace.com"))
+                        "http://www.someplace.com", "http://www.someplace.com")
                 }));
 
             catalog.Add(new OpenstackServiceDefinition("Other Test Service", "Test-Service",
                 new List<OpenstackServiceEndpoint>()
                 {
                     new OpenstackServiceEndpoint("http://other.endpoint.org", "some other region", "1.0",
-                        new Uri("http://www.someotherplace.com"), new Uri("http://www.someplace.com"))
+                        "http://www.someplace.com", "http://www.someplace.com")
                 }));
             var resolver = new OpenstackRegionResolver();
             var region = resolver.Resolve(new Uri("http://nomatching.endpoint.org/v2/tokens"), catalog, "No Matching Service");
@@ -87,7 +87,7 @@ namespace Openstack.Test.Identity
                 new List<OpenstackServiceEndpoint>()
                 {
                     new OpenstackServiceEndpoint("http://other.endpoint.org", "Some Region" , "1.0",
-                        new Uri("http://www.someplace.com"), new Uri("http://www.someplace.com"))
+                        "http://www.someplace.com", "http://www.someplace.com")
                 }));
 
             catalog[0].Endpoints.First().Region = string.Empty;
@@ -96,7 +96,7 @@ namespace Openstack.Test.Identity
                 new List<OpenstackServiceEndpoint>()
                 {
                     new OpenstackServiceEndpoint("http://other.endpoint.org", "some other region", "1.0",
-                        new Uri("http://www.someotherplace.com"), new Uri("http://www.someplace.com"))
+                        "http://www.someplace.com", "http://www.someplace.com")
                 }));
             var resolver = new OpenstackRegionResolver();
             var region = resolver.Resolve(new Uri("http://nomatching.endpoint.org/v2/tokens"), catalog, "Test Service");
