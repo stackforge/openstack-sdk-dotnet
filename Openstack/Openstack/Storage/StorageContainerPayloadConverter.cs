@@ -97,14 +97,17 @@ namespace Openstack.Storage
             payload.AssertIsNotNull("payload");
 
             var objectConverter = ServiceLocator.Instance.Locate<IStorageObjectPayloadConverter>();
+            var folderConverter = ServiceLocator.Instance.Locate<IStorageFolderPayloadConverter>();
 
             try
             {
                 var totalBytes = long.Parse(headers["X-Container-Bytes-Used"].First());
                 var totalObjects = int.Parse(headers["X-Container-Object-Count"].First());
+                var metadata = headers.Where(kvp => kvp.Key.StartsWith("X-Container-Meta")).ToDictionary(header => header.Key.Substring(17, header.Key.Length - 17), header => header.Value.First());
                 var objects = objectConverter.Convert(name, payload);
+                var folders = folderConverter.Convert(objects);
 
-                return new StorageContainer(name, totalBytes, totalObjects, objects);
+                return new StorageContainer(name, totalBytes, totalObjects, metadata, objects, folders);
             }
             catch (Exception ex)
             {

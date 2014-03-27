@@ -92,6 +92,8 @@
     <Compile Include="OpenstackClientManagerTests.cs" />
     <Compile Include="OpenstackServiceClientManagerTests.cs" />
     <Compile Include="Storage\StorageServiceClientDefinitionTests.cs" />
+    <Compile Include="Storage\StorageFolderTests.cs" />
+    <Compile Include="Storage\StorageFolderPayloadConverterTests.cs" />
     <Compile Include="TestOpenstackRegionResolver.cs" />
     <Compile Include="TestOpenstackServiceEndpointResolver.cs" />
     <Compile Include="ObjectExtentionsTests.cs" />

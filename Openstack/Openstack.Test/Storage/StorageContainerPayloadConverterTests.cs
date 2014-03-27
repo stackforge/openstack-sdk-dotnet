@@ -254,6 +254,111 @@ namespace Openstack.Test.Storage
         }
 
         [TestMethod]
+        public void CanParseContainerWithValidJsonPayloadWithNestedFoldersAndObjects()
+        {
+            var containerName = "TestContainer";
+            var validObjectJson = @"[
+                                        {
+                                            ""hash"": ""d41d8cd98f00b204e9800998ecf8427e"",
+                                            ""last_modified"": ""2014-03-27T20:57:11.150910"",
+                                            ""bytes"": 0,
+                                            ""name"": ""a/"",
+                                            ""content_type"": ""application/octet-stream""
+                                        },
+                                        {
+                                            ""hash"": ""d41d8cd98f00b204e9800998ecf8427e"",
+                                            ""last_modified"": ""2014-03-27T20:57:36.676350"",
+                                            ""bytes"": 0,
+                                            ""name"": ""a/b/"",
+                                            ""content_type"": ""application/octet-stream""
+                                        },
+                                        {
+                                            ""hash"": ""437b930db84b8079c2dd804a71936b5f"",
+                                            ""last_modified"": ""2014-03-27T20:58:36.676620"",
+                                            ""bytes"": 9,
+                                            ""name"": ""a/b/b"",
+                                            ""content_type"": ""text/plain;charset=UTF-8""
+                                        },
+                                        {
+                                            ""hash"": ""437b930db84b8079c2dd804a71936b5f"",
+                                            ""last_modified"": ""2014-03-27T20:58:43.935540"",
+                                            ""bytes"": 9,
+                                            ""name"": ""a/b/c"",
+                                            ""content_type"": ""text/plain;charset=UTF-8""
+                                        },
+                                        {
+                                            ""hash"": ""437b930db84b8079c2dd804a71936b5f"",
+                                            ""last_modified"": ""2014-03-27T20:58:54.142580"",
+                                            ""bytes"": 9,
+                                            ""name"": ""a/b/c/object3"",
+                                            ""content_type"": ""text/plain;charset=UTF-8""
+                                        },
+                                        {
+                                            ""hash"": ""437b930db84b8079c2dd804a71936b5f"",
+                                            ""last_modified"": ""2014-03-27T20:58:25.771530"",
+                                            ""bytes"": 9,
+                                            ""name"": ""a/object2"",
+                                            ""content_type"": ""text/plain;charset=UTF-8""
+                                        },
+                                        {
+                                            ""hash"": ""d41d8cd98f00b204e9800998ecf8427e"",
+                                            ""last_modified"": ""2014-03-27T20:57:47.122360"",
+                                            ""bytes"": 0,
+                                            ""name"": ""a/x/"",
+                                            ""content_type"": ""application/octet-stream""
+                                        },
+                                        {
+                                            ""hash"": ""437b930db84b8079c2dd804a71936b5f"",
+                                            ""last_modified"": ""2014-03-27T20:58:15.696360"",
+                                            ""bytes"": 9,
+                                            ""name"": ""object1"",
+                                            ""content_type"": ""text/plain;charset=UTF-8""
+                                        }
+                                    ]";
+
+            var converter = new StorageContainerPayloadConverter();
+            var headers = new HttpHeadersAbstraction
+            {
+                {"X-Container-Bytes-Used", "45"},
+                {"X-Container-Object-Count", "8"}
+            };
+
+            var container = converter.Convert(containerName, headers, validObjectJson);
+            Assert.IsNotNull(container);
+            Assert.AreEqual(containerName, container.Name);
+            Assert.AreEqual(45, container.TotalBytesUsed);
+            Assert.AreEqual(8, container.TotalObjectCount);
+            Assert.AreEqual(8, container.Objects.ToList().Count());
+            Assert.IsTrue(container.Objects.ToList().Any(o => o.Name == "object1"));
+
+            var folders = container.Folders.ToList();
+            Assert.AreEqual(1, folders.Count());
+
+            var aNode = folders.First();
+            Assert.AreEqual("a", aNode.Name);
+            Assert.AreEqual(2, aNode.Folders.Count);
+            Assert.AreEqual(1, aNode.Objects.Count);
+            Assert.IsTrue(aNode.Objects.Any(f => f.Name == "a/object2"));
+
+            var xNode = aNode.Folders.First(f => f.Name == "x");
+            Assert.AreEqual(0, xNode.Folders.Count);
+            Assert.AreEqual(0, xNode.Objects.Count);
+
+            var bNode = aNode.Folders.First(f => f.Name == "b");
+            Assert.AreEqual(1, bNode.Folders.Count);
+            Assert.AreEqual(2, bNode.Objects.Count);
+            Assert.IsTrue(bNode.Folders.Any(f => f.Name == "c"));
+            Assert.IsTrue(bNode.Objects.Any(f => f.Name == "a/b/c"));
+            Assert.IsTrue(bNode.Objects.Any(f => f.Name == "a/b/b"));
+
+            var cNode = bNode.Folders.First(f => f.Name == "c");
+            Assert.AreEqual(0, cNode.Folders.Count);
+            Assert.AreEqual(1, cNode.Objects.Count);
+            Assert.IsTrue(cNode.Objects.Any(f => f.Name == "a/b/c/object3"));
+
+        }
+
+        [TestMethod]
         [ExpectedException(typeof(HttpParseException))]
         public void CannotParseContainerWithMissingBytesUsedHeader()
         {

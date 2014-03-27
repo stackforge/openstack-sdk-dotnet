@@ -40,6 +40,7 @@ namespace Openstack
             //Converters
             manager.RegisterServiceInstance(typeof(IStorageContainerPayloadConverter), new StorageContainerPayloadConverter());
             manager.RegisterServiceInstance(typeof(IStorageObjectPayloadConverter), new StorageObjectPayloadConverter());
+            manager.RegisterServiceInstance(typeof(IStorageFolderPayloadConverter), new StorageFolderPayloadConverter());
             manager.RegisterServiceInstance(typeof(IStorageAccountPayloadConverter), new StorageAccountPayloadConverter());
             manager.RegisterServiceInstance(typeof(IAccessTokenPayloadConverter), new AccessTokenPayloadConverter());
             manager.RegisterServiceInstance(typeof(IOpenstackServiceCatalogPayloadConverter), new OpenstackServiceCatalogPayloadConverter());

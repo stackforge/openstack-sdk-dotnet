@@ -46,6 +46,11 @@ namespace Openstack.Storage
         public IEnumerable<StorageObject> Objects { get; private set; }
 
         /// <summary>
+        /// Gets a list of storage folders that are in the container.
+        /// </summary>
+        public IEnumerable<StorageFolder> Folders { get; private set; }
+
+        /// <summary>
         /// Gets the metadata associated with the storage container.
         /// </summary>
         public IDictionary<string, string> Metadata { get; private set; }
@@ -78,18 +83,34 @@ namespace Openstack.Storage
         /// <param name="totalObjects">The total number of objects in the container.</param>
         /// <param name="objects">A list of storage objects that are in the container.</param>
         /// <param name="metadata">Metadata associated with the storage container.</param>
-        internal StorageContainer(string name, long totalBytes, int totalObjects, IDictionary<string,string> metadata, IEnumerable<StorageObject> objects)
+        internal StorageContainer(string name, long totalBytes, int totalObjects, IDictionary<string,string> metadata, IEnumerable<StorageObject> objects) 
+            : this(name, totalBytes,totalObjects, metadata, objects, new List<StorageFolder>())
+        {
+        }
+
+        /// <summary>
+        /// Creates a new instance of the StorageContainer class.
+        /// </summary>
+        /// <param name="name">The name of the storage container.</param>
+        /// <param name="totalBytes">The total number of bytes used in the container.</param>
+        /// <param name="totalObjects">The total number of objects in the container.</param>
+        /// <param name="objects">A list of storage objects that are in the container.</param>
+        /// <param name="folders">A list of storage folders that are in the container.</param>
+        /// <param name="metadata">Metadata associated with the storage container.</param>
+        internal StorageContainer(string name, long totalBytes, int totalObjects, IDictionary<string, string> metadata, IEnumerable<StorageObject> objects, IEnumerable<StorageFolder> folders)
         {
             name.AssertIsNotNullOrEmpty("name");
             totalBytes.AssertIsNotNull("totalBytes");
             totalObjects.AssertIsNotNull("totalObjects");
             metadata.AssertIsNotNull("metadata");
             objects.AssertIsNotNull("objects");
+            folders.AssertIsNotNull("folders");
 
             this.Name = name;
             this.TotalBytesUsed = totalBytes;
             this.TotalObjectCount = totalObjects;
             this.Objects = objects.ToList();
+            this.Folders = folders.ToList();
             this.Metadata = metadata;
         }
     }

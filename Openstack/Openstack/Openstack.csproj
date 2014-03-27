@@ -90,6 +90,7 @@
     <Compile Include="ServiceRegistrar.cs" />
     <Compile Include="Storage\ContainerNameValidator.cs" />
     <Compile Include="Storage\IStorageAccountPayloadConverter.cs" />
+    <Compile Include="Storage\IStorageFolderPayloadConverter.cs" />
     <Compile Include="Storage\IStorageServiceClient.cs" />
     <Compile Include="Storage\IStorageContainerPayloadConverter.cs" />
     <Compile Include="Storage\IStorageObjectPayloadConverter.cs" />
@@ -97,6 +98,8 @@
     <Compile Include="Storage\IStorageServicePocoClientFactory.cs" />
     <Compile Include="Storage\IStorageServiceRestClient.cs" />
     <Compile Include="Storage\IStorageServiceRestClientFactory.cs" />
+    <Compile Include="Storage\StorageFolder.cs" />
+    <Compile Include="Storage\StorageFolderPayloadConverter.cs" />
     <Compile Include="Storage\StorageServiceClient.cs" />
     <Compile Include="Storage\StorageServiceClientContext.cs" />
     <Compile Include="Storage\StorageServiceClientDefinition.cs" />
