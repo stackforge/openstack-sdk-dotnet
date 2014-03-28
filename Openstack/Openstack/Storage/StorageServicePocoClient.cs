@@ -21,8 +21,10 @@ namespace Openstack.Storage
     using System.Linq;
     using System.Net;
     using System.Threading.Tasks;
+    using System.Collections.Generic;
     using Openstack.Common;
     using Openstack.Common.ServiceLocation;
+
 
     /// <inheritdoc/>
     internal class StorageServicePocoClient : IStorageServicePocoClient
@@ -212,6 +214,68 @@ namespace Openstack.Storage
             if (resp.StatusCode != HttpStatusCode.Accepted)
             {
                 throw new InvalidOperationException(string.Format("Failed to update storage object '{0}'. The remote server returned the following status code: '{1}'.", obj.Name, resp.StatusCode));
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task<StorageFolder> GetStorageFolder(string containerName, string folderName)
+        {
+            containerName.AssertIsNotNullOrEmpty("containerName", "Cannot get a storage folder with a container name that is null or empty.");
+            folderName.AssertIsNotNullOrEmpty("folderName", "Cannot get a storage folder with a folder name that is null or empty.");
+
+            var client = this.GetRestClient();
+            var resp = await client.GetFolder(containerName, folderName);
+
+            if (resp.StatusCode != HttpStatusCode.OK && resp.StatusCode != HttpStatusCode.NoContent)
+            {
+                throw new InvalidOperationException(string.Format("Failed to get storage folder '{0}'. The remote server returned the following status code: '{1}'.", folderName, resp.StatusCode));
+            }
+
+            try
+            {
+                var converter = ServiceLocator.Instance.Locate<IStorageFolderPayloadConverter>();
+                var folder = converter.Convert(containerName, folderName, await resp.ReadContentAsStringAsync());
+                return folder;
+            }
+            catch (InvalidDataException)
+            {
+                throw new InvalidOperationException(string.Format("Failed to get storage folder '{0}'. The requested folder could not be found.", folderName));
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task CreateStorageFolder(string containerName, string folderName)
+        {
+            containerName.AssertIsNotNullOrEmpty("containerName", "Cannot create a storage folder with a container name that is null or empty.");
+            folderName.AssertIsNotNullOrEmpty("folderName", "Cannot create a storage folder with a folder name that is null or empty.");
+
+            var client = this.GetRestClient();
+            var resp = await client.CreateObject(containerName, folderName, new Dictionary<string, string>(), new MemoryStream());
+
+            if (resp.StatusCode != HttpStatusCode.Created)
+            {
+                throw new InvalidOperationException(string.Format("Failed to create storage folder '{0}'. The remote server returned the following status code: '{1}'.", folderName, resp.StatusCode));
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task DeleteStorageFolder(string containerName, string folderName)
+        {
+            containerName.AssertIsNotNullOrEmpty("containerName", "Cannot delete a storage object with a container name that is null or empty.");
+            folderName.AssertIsNotNullOrEmpty("objectName", "Cannot delete a storage object with a name that is null or empty.");
+
+            var folder = await this.GetStorageFolder(containerName, folderName);
+            if (folder.Folders.Count > 0 || folder.Objects.Count > 0)
+            {
+                throw new InvalidOperationException(string.Format("Failed to delete storage folder '{0}'. The folder is not empty and cannot be deleted.", folderName));
+            }
+
+            var client = this.GetRestClient();
+            var resp = await client.DeleteObject(containerName, folderName);
+
+            if (resp.StatusCode != HttpStatusCode.OK && resp.StatusCode != HttpStatusCode.NoContent)
+            {
+                throw new InvalidOperationException(string.Format("Failed to delete storage folder '{0}'. The remote server returned the following status code: '{1}'.", folderName, resp.StatusCode));
             }
         }
 

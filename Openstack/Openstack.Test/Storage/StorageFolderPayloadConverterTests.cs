@@ -14,6 +14,8 @@
 // limitations under the License.
 // ============================================================================ */
 
+using System.IO;
+
 namespace Openstack.Test.Storage
 {
     using System;
@@ -213,7 +215,7 @@ namespace Openstack.Test.Storage
         }
 
         [TestMethod]
-        public void CanConvertFolders()
+        public void CanConvertFoldersWithObjects()
         {
             var objects = new List<StorageObject>()
             {
@@ -260,6 +262,171 @@ namespace Openstack.Test.Storage
         {
            var converter = new StorageFolderPayloadConverter();
            var resp = converter.Convert(null);
+        }
+
+        [TestMethod]
+        public void CanConvertFolderWithValidJsonAndNoSubFoldersOrFolderObject()
+        {
+            var containerName = "container";
+            var folderName = "a/b/c/";
+            var payload = @"[
+                                {
+                                    ""hash"": ""d41d8cd98f00b204e9800998ecf8427e"",
+                                    ""last_modified"": ""2014-03-07T21:31:31.588170"",
+                                    ""bytes"": 0,
+                                    ""name"": ""a/b/c/BLAH"",
+                                    ""content_type"": ""application/octet-stream""
+                                }]";
+
+            var converter = new StorageFolderPayloadConverter();
+            var resp = converter.Convert(containerName, folderName, payload);
+
+            Assert.AreEqual(1, resp.Objects.Count);
+            Assert.AreEqual(0, resp.Folders.Count);
+            Assert.AreEqual("a/b/c", resp.FullName);
+            Assert.AreEqual("c", resp.Name);
+
+            var obj = resp.Objects.First();
+            Assert.AreEqual("a/b/c/BLAH", obj.Name);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidDataException))]
+        public void CannotConvertEmptyJsonArrayPayload()
+        {
+            var containerName = "container";
+            var folderName = "a/b/c/";
+            var payload = @"[]";
+
+            var converter = new StorageFolderPayloadConverter();
+            converter.Convert(containerName, folderName, payload);
+        }
+
+        [TestMethod]
+        public void CanConvertFolderWithValidJsonFolderObjectAndNoSubFolders()
+        {
+            var containerName = "container";
+            var folderName = "a/b/c/";
+            var payload = @"[
+                                {
+                                    ""hash"": ""d41d8cd98f00b204e9800998ecf8427e"",
+                                    ""last_modified"": ""2014-03-07T21:31:31.588170"",
+                                    ""bytes"": 0,
+                                    ""name"": ""a/b/c/"",
+                                    ""content_type"": ""application/octet-stream""
+                                },
+                                {
+                                    ""hash"": ""d41d8cd98f00b204e9800998ecf8427e"",
+                                    ""last_modified"": ""2014-03-07T21:31:31.588170"",
+                                    ""bytes"": 0,
+                                    ""name"": ""a/b/c/BLAH"",
+                                    ""content_type"": ""application/octet-stream""
+                                }]";
+
+            var converter = new StorageFolderPayloadConverter();
+            var resp = converter.Convert(containerName, folderName, payload);
+
+            Assert.AreEqual(1, resp.Objects.Count);
+            Assert.AreEqual(0, resp.Folders.Count);
+            Assert.AreEqual("a/b/c", resp.FullName);
+            Assert.AreEqual("c", resp.Name);
+
+            var obj = resp.Objects.First();
+            Assert.AreEqual("a/b/c/BLAH", obj.Name);
+        }
+
+        [TestMethod]
+        public void CanConvertFolderWithValidJsonSubFoldersAndNoFolderObject()
+        {
+            var containerName = "container";
+            var folderName = "a/b/c/";
+            var payload = @"[
+                                {
+                                    ""hash"": ""d41d8cd98f00b204e9800998ecf8427e"",
+                                    ""last_modified"": ""2014-03-07T21:31:31.588170"",
+                                    ""bytes"": 0,
+                                    ""name"": ""a/b/c/BLAH"",
+                                    ""content_type"": ""application/octet-stream""
+                                },
+                                {
+                                        ""subdir"": ""a/b/c/d/""
+                                },
+                                {
+                                        ""subdir"": ""a/b/c/x/""
+                                }]";
+
+            var converter = new StorageFolderPayloadConverter();
+            var resp = converter.Convert(containerName, folderName, payload);
+
+            Assert.AreEqual(1, resp.Objects.Count);
+            Assert.AreEqual(2, resp.Folders.Count);
+            Assert.AreEqual("a/b/c", resp.FullName);
+            Assert.AreEqual("c", resp.Name);
+
+            var obj = resp.Objects.First();
+            Assert.AreEqual("a/b/c/BLAH", obj.Name);
+
+            var dNode = resp.Folders.First(f => f.FullName == "a/b/c/d");
+            var xNode = resp.Folders.First(f => f.FullName == "a/b/c/x");
+
+            Assert.AreEqual("d", dNode.Name);
+            Assert.AreEqual(0, dNode.Folders.Count);
+            Assert.AreEqual(0, dNode.Objects.Count);
+
+            Assert.AreEqual("x", xNode.Name);
+            Assert.AreEqual(0, xNode.Folders.Count);
+            Assert.AreEqual(0, xNode.Objects.Count);
+        }
+
+        [TestMethod]
+        public void CanConvertFolderWithValidJsonFolderObjectAndSubFolders()
+        {
+            var containerName = "container";
+            var folderName = "a/b/c/";
+            var payload = @"[
+                                {
+                                    ""hash"": ""d41d8cd98f00b204e9800998ecf8427e"",
+                                    ""last_modified"": ""2014-03-07T21:31:31.588170"",
+                                    ""bytes"": 0,
+                                    ""name"": ""a/b/c/"",
+                                    ""content_type"": ""application/octet-stream""
+                                },
+                                {
+                                    ""hash"": ""d41d8cd98f00b204e9800998ecf8427e"",
+                                    ""last_modified"": ""2014-03-07T21:31:31.588170"",
+                                    ""bytes"": 0,
+                                    ""name"": ""a/b/c/BLAH"",
+                                    ""content_type"": ""application/octet-stream""
+                                },
+                                {
+                                        ""subdir"": ""a/b/c/d/""
+                                },
+                                {
+                                        ""subdir"": ""a/b/c/x/""
+                                }
+                            ]";
+
+            var converter = new StorageFolderPayloadConverter();
+            var resp = converter.Convert(containerName, folderName, payload);
+
+            Assert.AreEqual("c", resp.Name);
+            Assert.AreEqual("a/b/c", resp.FullName);
+            Assert.AreEqual(1, resp.Objects.Count);
+            Assert.AreEqual(2, resp.Folders.Count);
+
+            var obj = resp.Objects.First();
+            Assert.AreEqual("a/b/c/BLAH", obj.Name);
+
+            var dNode = resp.Folders.First(f => f.FullName == "a/b/c/d");
+            var xNode = resp.Folders.First(f => f.FullName == "a/b/c/x");
+
+            Assert.AreEqual("d", dNode.Name);
+            Assert.AreEqual(0, dNode.Folders.Count);
+            Assert.AreEqual(0, dNode.Objects.Count);
+
+            Assert.AreEqual("x", xNode.Name);
+            Assert.AreEqual(0, xNode.Folders.Count);
+            Assert.AreEqual(0, xNode.Objects.Count);
         }
     }
 }

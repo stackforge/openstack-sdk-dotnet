@@ -22,6 +22,7 @@ namespace Openstack.Storage
     using System.Linq;
     using System.Net.Http;
     using System.Threading.Tasks;
+    using Openstack.Common;
     using Openstack.Common.Http;
     using Openstack.Common.ServiceLocation;
 
@@ -82,6 +83,21 @@ namespace Openstack.Storage
             var client = this.GetHttpClient(this.context);
 
             client.Uri = CreateRequestUri(GetServiceEndpoint(this.context), containerName, objectName);
+            client.Method = HttpMethod.Get;
+
+            return await client.SendAsync();
+        }
+
+        /// <inheritdoc/>
+        public async Task<IHttpResponseAbstraction> GetFolder(string containerName, string folderName)
+        {
+            AssertContainerNameIsValid(containerName);
+            folderName.AssertIsNotNullOrEmpty("folderName","Cannot get a folder with a null or empty folder name.");
+
+            var client = this.GetHttpClient(this.context);
+
+            var baseUri = CreateRequestUri(GetServiceEndpoint(this.context), containerName);
+            client.Uri = new Uri(string.Format("{0}?prefix={1}&delimiter=/", baseUri, folderName));
             client.Method = HttpMethod.Get;
 
             return await client.SendAsync();

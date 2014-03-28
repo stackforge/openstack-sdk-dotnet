@@ -122,6 +122,47 @@ namespace Openstack.Storage
         }
 
         /// <inheritdoc/>
+        public async Task<StorageFolder> GetStorageFolder(string containerName, string folderName)
+        {
+            containerName.AssertIsNotNullOrEmpty("containerName", "Cannot get a storage folder with a container name that is null or empty.");
+            folderName.AssertIsNotNullOrEmpty("folderName", "Cannot get a storage folder with a name that is null or empty.");
+
+            folderName = EnsureTrailingSlashOnFolderName(folderName);
+
+            var client = this.GetPocoClient();
+            return await client.GetStorageFolder(containerName, folderName);
+        }
+
+        /// <inheritdoc/>
+        public async Task CreateStorageFolder(string containerName, string folderName)
+        {
+            containerName.AssertIsNotNullOrEmpty("containerName", "Cannot create a storage folder with a container name that is null or empty.");
+            folderName.AssertIsNotNullOrEmpty("folderName", "Cannot create a storage folder with a name that is null or empty.");
+
+            folderName = EnsureTrailingSlashOnFolderName(folderName);
+            var validator = ServiceLocator.Instance.Locate<IStorageFolderNameValidator>();
+            if (!validator.Validate(folderName))
+            {
+                throw new ArgumentException(string.Format("Folder name '{0}' is invalid. Folder names cannot includes  consecutive slashes.", folderName), "folderName");
+            }
+
+            var client = this.GetPocoClient();
+            await client.CreateStorageFolder(containerName, folderName);
+        }
+
+        /// <inheritdoc/>
+        public async Task DeleteStorageFolder(string containerName, string folderName)
+        {
+            containerName.AssertIsNotNullOrEmpty("containerName", "Cannot delete a storage folder with a container name that is null or empty.");
+            folderName.AssertIsNotNullOrEmpty("folderName", "Cannot delete a storage folder with a name that is null or empty.");
+
+            folderName = EnsureTrailingSlashOnFolderName(folderName);
+
+            var client = this.GetPocoClient();
+            await client.DeleteStorageFolder(containerName, folderName);
+        }
+
+        /// <inheritdoc/>
         public async Task<StorageContainer> GetStorageContainer(string containerName)
         {
             containerName.AssertIsNotNullOrEmpty("containerName", "Cannot get a storage container with a container name that is null or empty.");
@@ -187,6 +228,20 @@ namespace Openstack.Storage
         internal IStorageServicePocoClient GetPocoClient()
         {
             return ServiceLocator.Instance.Locate<IStorageServicePocoClientFactory>().Create(this.Context);
+        }
+
+        /// <summary>
+        /// Ensures that a folder name has a single trailing slash on the end.
+        /// </summary>
+        /// <param name="folderName">The folder name.</param>
+        /// <returns>The folder name with a slash on the end.</returns>
+        internal string EnsureTrailingSlashOnFolderName(string folderName)
+        {
+            if (!folderName.EndsWith("/"))
+            {
+                folderName += "/";
+            }
+            return folderName;
         }
     }
 }

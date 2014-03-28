@@ -88,6 +88,7 @@
     <Compile Include="Identity\OpenstackServiceEndpointPayloadConverter.cs" />
     <Compile Include="Identity\OpenstackServiceEndpointResolver.cs" />
     <Compile Include="ServiceRegistrar.cs" />
+    <Compile Include="Storage\FolderNameValidator.cs" />
     <Compile Include="Storage\ContainerNameValidator.cs" />
     <Compile Include="Storage\IStorageAccountPayloadConverter.cs" />
     <Compile Include="Storage\IStorageFolderPayloadConverter.cs" />

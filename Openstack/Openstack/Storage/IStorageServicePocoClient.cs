@@ -99,5 +99,28 @@ namespace Openstack.Storage
         /// <returns>An async task.</returns>
         Task UpdateStorageObject(StorageObject obj);
 
+        /// <summary>
+        /// Gets a storage folder from the remote Openstack instance. The returned folder is a shallow object graph representation.
+        /// </summary>
+        /// <param name="containerName">The name of the parent container.</param>
+        /// <param name="folderName">The name of the folder to get.</param>
+        /// <returns>A shallow object representation of the folder and it's contained objects and sub folders.</returns>
+        Task<StorageFolder> GetStorageFolder(string containerName, string folderName);
+
+        /// <summary>
+        /// Creates a storage folder on the remote Openstack instance.
+        /// </summary>
+        /// <param name="containerName">The name of the parent container.</param>
+        /// <param name="folderName">The name of the folder to create.</param>
+        /// <returns>An async task.</returns>
+        Task CreateStorageFolder(string containerName, string folderName);
+
+        /// <summary>
+        /// Deletes a storage folder from the remote Openstack instance.
+        /// </summary>
+        /// <param name="containerName">The name of the parent container.</param>
+        /// <param name="folderName">The name of the folder to delete.</param>
+        /// <returns>An async task.</returns>
+        Task DeleteStorageFolder(string containerName, string folderName);
     }
 }

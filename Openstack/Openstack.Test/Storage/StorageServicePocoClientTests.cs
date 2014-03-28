@@ -553,6 +553,233 @@ namespace Openstack.Test.Storage
 
         #endregion
 
+        #region Get Storage Folder Tests
+
+        [TestMethod]
+        public async Task CanGetStorageFolderWithOkResponseAndNoSubFolders()
+        {
+            var containerName = "TestContainer";
+            var folderName = "a/b/c/";
+            var headers = new HttpHeadersAbstraction()
+            {
+                {"X-Container-Bytes-Used", "1234"},
+                {"X-Container-Object-Count", "1"}
+            };
+
+            var payload = @"[
+                                {
+                                    ""hash"": ""d41d8cd98f00b204e9800998ecf8427e"",
+                                    ""last_modified"": ""2014-03-07T21:31:31.588170"",
+                                    ""bytes"": 0,
+                                    ""name"": ""a/b/c/BLAH"",
+                                    ""content_type"": ""application/octet-stream""
+                                }]";
+
+            var content = TestHelper.CreateStream(payload);
+
+            var restResp = new HttpResponseAbstraction(content, headers, HttpStatusCode.OK);
+            this.StorageServiceRestClient.Response = restResp;
+
+            var client = new StorageServicePocoClientFactory().Create(GetValidContext()) as StorageServicePocoClient;
+            var result = await client.GetStorageFolder(containerName, folderName);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual("a/b/c", result.FullName);
+            Assert.AreEqual("c", result.Name);
+            Assert.IsNotNull(result.Objects);
+            Assert.AreEqual(1, result.Objects.Count());
+            Assert.IsNotNull(result.Folders);
+            Assert.AreEqual(0, result.Folders.Count());
+        }
+
+        [TestMethod]
+        public async Task CanGetStorageFolderWithNoContentResponse()
+        {
+            var containerName = "TestContainer";
+            var folderName = "a/b/c/";
+            var headers = new HttpHeadersAbstraction()
+            {
+                {"X-Container-Bytes-Used", "1234"},
+                {"X-Container-Object-Count", "1"}
+            };
+
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), headers, HttpStatusCode.NoContent);
+            this.StorageServiceRestClient.Response = restResp;
+
+            var client = new StorageServicePocoClientFactory().Create(GetValidContext()) as StorageServicePocoClient;
+            var result = await client.GetStorageFolder(containerName, folderName);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual("a/b/c", result.FullName);
+            Assert.AreEqual("c", result.Name);
+            Assert.IsNotNull(result.Objects);
+            Assert.AreEqual(0, result.Objects.Count());
+            Assert.IsNotNull(result.Folders);
+            Assert.AreEqual(0, result.Folders.Count());
+        }
+
+        [TestMethod]
+        public async Task CanGetStorageFolderWithOkResponseAndSubFolders()
+        {
+            var containerName = "TestContainer";
+            var folderName = "a/b/c/";
+            var headers = new HttpHeadersAbstraction()
+            {
+                {"X-Container-Bytes-Used", "1234"},
+                {"X-Container-Object-Count", "1"}
+            };
+
+            var payload = @"[
+                                {
+                                    ""hash"": ""d41d8cd98f00b204e9800998ecf8427e"",
+                                    ""last_modified"": ""2014-03-07T21:31:31.588170"",
+                                    ""bytes"": 0,
+                                    ""name"": ""a/b/c/"",
+                                    ""content_type"": ""application/octet-stream""
+                                },
+                                {
+                                    ""hash"": ""d41d8cd98f00b204e9800998ecf8427e"",
+                                    ""last_modified"": ""2014-03-07T21:31:31.588170"",
+                                    ""bytes"": 0,
+                                    ""name"": ""a/b/c/BLAH"",
+                                    ""content_type"": ""application/octet-stream""
+                                },
+                                {
+                                        ""subdir"": ""a/b/c/d/""
+                                },
+                                {
+                                        ""subdir"": ""a/b/c/x/""
+                                }
+                            ]";
+
+            var content = TestHelper.CreateStream(payload);
+
+            var restResp = new HttpResponseAbstraction(content, headers, HttpStatusCode.OK);
+            this.StorageServiceRestClient.Response = restResp;
+
+            var client = new StorageServicePocoClientFactory().Create(GetValidContext()) as StorageServicePocoClient;
+            var resp = await client.GetStorageFolder(containerName, folderName);
+
+            Assert.AreEqual("c", resp.Name);
+            Assert.AreEqual("a/b/c", resp.FullName);
+            Assert.AreEqual(1, resp.Objects.Count);
+            Assert.AreEqual(2, resp.Folders.Count);
+
+            var obj = resp.Objects.First();
+            Assert.AreEqual("a/b/c/BLAH", obj.Name);
+
+            var dNode = resp.Folders.First(f => f.FullName == "a/b/c/d");
+            var xNode = resp.Folders.First(f => f.FullName == "a/b/c/x");
+
+            Assert.AreEqual("d", dNode.Name);
+            Assert.AreEqual(0, dNode.Folders.Count);
+            Assert.AreEqual(0, dNode.Objects.Count);
+
+            Assert.AreEqual("x", xNode.Name);
+            Assert.AreEqual(0, xNode.Folders.Count);
+            Assert.AreEqual(0, xNode.Objects.Count);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionthrownWhenGettingAStorageFolderThatDoesNotExistAndCannotBeInferred()
+        {
+            var containerName = "TestContainer";
+            var folderName = "a/b/c/";
+            var headers = new HttpHeadersAbstraction()
+            {
+                {"X-Container-Bytes-Used", "1234"},
+                {"X-Container-Object-Count", "1"}
+            };
+
+            var payload = @"[]";
+
+            var content = TestHelper.CreateStream(payload);
+
+            var restResp = new HttpResponseAbstraction(content, headers, HttpStatusCode.OK);
+            this.StorageServiceRestClient.Response = restResp;
+
+            var client = new StorageServicePocoClientFactory().Create(GetValidContext()) as StorageServicePocoClient;
+            var resp = await client.GetStorageFolder(containerName, folderName);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionthrownWhenGettingAStorageFolderThatDoesNotExist()
+        {
+            var containerName = "TestContainer";
+            var fodlerName = "a/b/b/";
+
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.NotFound);
+            this.StorageServiceRestClient.Response = restResp;
+
+            var client = new StorageServicePocoClient(GetValidContext());
+            await client.GetStorageFolder(containerName, fodlerName);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionthrownWhenGettingAStoragFolderAndNotAuthed()
+        {
+            var containerName = "TestContainer";
+            var fodlerName = "a/b/b/";
+
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.Unauthorized);
+            this.StorageServiceRestClient.Response = restResp;
+
+            var client = new StorageServicePocoClient(GetValidContext());
+            await client.GetStorageFolder(containerName, fodlerName);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionthrownWhenGettingAStorageFolderAndServerError()
+        {
+            var containerName = "TestContainer";
+            var fodlerName = "a/b/b/";
+
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.InternalServerError);
+            this.StorageServiceRestClient.Response = restResp;
+
+            var client = new StorageServicePocoClient(GetValidContext());
+            await client.GetStorageFolder(containerName, fodlerName);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task CannotGetStorageFolderWithNullContainerName()
+        {
+            var client = new StorageServicePocoClientFactory().Create(GetValidContext()) as StorageServicePocoClient;
+            await client.GetStorageFolder(null, "a/b/c/");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task CannotGetStorageFolderWithNullFolderName()
+        {
+            var client = new StorageServicePocoClientFactory().Create(GetValidContext()) as StorageServicePocoClient;
+            await client.GetStorageFolder("container", null);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task CannotGetStorageFolderWithEmptyContainerName()
+        {
+            var client = new StorageServicePocoClientFactory().Create(GetValidContext()) as StorageServicePocoClient;
+            await client.GetStorageFolder(string.Empty, "a/b/c/");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task CannotGetStorageFolderWithEmptyFolderName()
+        {
+            var client = new StorageServicePocoClientFactory().Create(GetValidContext()) as StorageServicePocoClient;
+            await client.GetStorageFolder("container", string.Empty);
+        }
+
+
+        #endregion
+
         #region Create Storage Object Tests
 
         [TestMethod]
@@ -670,6 +897,109 @@ namespace Openstack.Test.Storage
 
             var client = new StorageServicePocoClient(GetValidContext());
             await client.CreateStorageObject(objRequest, content);
+        }
+
+        #endregion
+
+        #region Create Storage Folder Tests
+
+        [TestMethod]
+        public async Task CanCreateStorageFolderWithCreatedResponse()
+        {
+            var containerName = "TestContainer";
+            var folderName = "a/b/b/";
+
+            var headers = new HttpHeadersAbstraction()
+            {
+                {"Content-Length", "1234"},
+                {"Content-Type", "application/octet-stream"},
+                {"Last-Modified", "Wed, 12 Mar 2014 23:42:23 GMT"},
+                {"ETag", "d41d8cd98f00b204e9800998ecf8427e"}
+            };
+
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), headers, HttpStatusCode.Created);
+            this.StorageServiceRestClient.Response = restResp;
+
+            var client = new StorageServicePocoClient(GetValidContext());
+            await client.CreateStorageFolder(containerName, folderName);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionThrownWhenCreatingaStorageFolderMissingLength()
+        {
+            var containerName = "TestContainer";
+            var folderName = "a/b/b/";
+
+            var headers = new HttpHeadersAbstraction()
+            {
+                {"Content-Length", "1234"},
+                {"Content-Type", "application/octet-stream"},
+                {"Last-Modified", "Wed, 12 Mar 2014 23:42:23 GMT"},
+                {"ETag", "d41d8cd98f00b204e9800998ecf8427e"}
+            };
+
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), headers, HttpStatusCode.LengthRequired);
+            this.StorageServiceRestClient.Response = restResp;
+
+            var client = new StorageServicePocoClient(GetValidContext());
+            await client.CreateStorageFolder(containerName, folderName);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionThrownWhenCreatingaStorageFolderWithBadETag()
+        {
+            var containerName = "TestContainer";
+            var folderName = "a/b/b/";
+
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), (HttpStatusCode)422);
+            this.StorageServiceRestClient.Response = restResp;
+
+            var client = new StorageServicePocoClient(GetValidContext());
+            await client.CreateStorageFolder(containerName, folderName);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionThrownWhenCreatingaStorageFolderWithBadAuth()
+        {
+            var containerName = "TestContainer";
+            var folderName = "a/b/b/";
+
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.Unauthorized);
+            this.StorageServiceRestClient.Response = restResp;
+
+            var client = new StorageServicePocoClient(GetValidContext());
+            await client.CreateStorageFolder(containerName, folderName);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionThrownWhenCreatingaStorageFolderHasInternalServerError()
+        {
+            var containerName = "TestContainer";
+            var folderName = "a/b/b/";
+
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.InternalServerError);
+            this.StorageServiceRestClient.Response = restResp;
+
+            var client = new StorageServicePocoClient(GetValidContext());
+            await client.CreateStorageFolder(containerName, folderName);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionThrownWhenCreatingaStorageFolderTimesOut()
+        {
+            var containerName = "TestContainer";
+            var folderName = "a/b/b/";
+
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.RequestTimeout);
+            this.StorageServiceRestClient.Response = restResp;
+
+            var client = new StorageServicePocoClient(GetValidContext());
+            await client.CreateStorageFolder(containerName, folderName);
         }
 
         #endregion
@@ -877,6 +1207,94 @@ namespace Openstack.Test.Storage
 
             var client = new StorageServicePocoClient(GetValidContext());
             await client.DeleteStorageObject(containerName, objectName);
+        }
+
+        #endregion
+
+        #region Delete Storage Folder Tests
+
+        [TestMethod]
+        public async Task CanDeleteStorageFolderWithNoContentResponse()
+        {
+            var containerName = "TestContainer";
+            var folderName = "a/b/c/";
+
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.NoContent);
+            this.StorageServiceRestClient.Response = restResp;
+
+            var client = new StorageServicePocoClient(GetValidContext());
+            await client.DeleteStorageFolder(containerName, folderName);
+        }
+
+        [TestMethod]
+        public async Task CanDeleteStorageFolderWithOkResponse()
+        {
+            var containerName = "TestContainer";
+            var folderName = "a/b/c/";
+
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.OK);
+            this.StorageServiceRestClient.Response = restResp;
+
+            var client = new StorageServicePocoClient(GetValidContext());
+            await client.DeleteStorageFolder(containerName, folderName);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionThrownWhenDeletingAStorageFolderThatHasChildren()
+        {
+            var containerName = "TestContainer";
+            var folderName = "a/b/c/";
+            var headers = new HttpHeadersAbstraction()
+            {
+                {"X-Container-Bytes-Used", "1234"},
+                {"X-Container-Object-Count", "1"}
+            };
+
+            var payload = @"[
+                                {
+                                    ""hash"": ""d41d8cd98f00b204e9800998ecf8427e"",
+                                    ""last_modified"": ""2014-03-07T21:31:31.588170"",
+                                    ""bytes"": 0,
+                                    ""name"": ""a/b/c/BLAH"",
+                                    ""content_type"": ""application/octet-stream""
+                                }]";
+
+            var content = TestHelper.CreateStream(payload);
+
+            var restResp = new HttpResponseAbstraction(content, headers, HttpStatusCode.OK);
+            this.StorageServiceRestClient.Response = restResp;
+
+            var client = new StorageServicePocoClient(GetValidContext());
+            await client.DeleteStorageFolder(containerName, folderName);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionThrownWhenDeletingAStorageFolderWithBadAuth()
+        {
+            var containerName = "TestContainer";
+            var folderName = "a/b/c/";
+
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.Unauthorized);
+            this.StorageServiceRestClient.Response = restResp;
+
+            var client = new StorageServicePocoClient(GetValidContext());
+            await client.DeleteStorageFolder(containerName, folderName);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionThrownWhenDeletingAStorageFolderWithInternalServerError()
+        {
+            var containerName = "TestContainer";
+            var folderName = "a/b/c/";
+
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.InternalServerError);
+            this.StorageServiceRestClient.Response = restResp;
+
+            var client = new StorageServicePocoClient(GetValidContext());
+            await client.DeleteStorageFolder(containerName, folderName);
         }
 
         #endregion

@@ -18,6 +18,7 @@ namespace Openstack.Storage
 {
     using System.Collections.Generic;
     using Openstack.Common.Http;
+    using Newtonsoft.Json.Linq;
 
     /// <summary>
     /// Converts a Json payload into a storage object.
@@ -40,5 +41,13 @@ namespace Openstack.Storage
         /// <param name="headers">The collection of headers</param>
         /// <returns>The storage object.</returns>
         StorageObject Convert(string containerName, string objectName, IHttpHeadersAbstraction headers);
+
+        /// <summary>
+        /// Converts a Json token into a storage object.
+        /// </summary>
+        /// <param name="obj">The token.</param>
+        /// <param name="containerName">The name of the parent container.</param>
+        /// <returns>The storage object.</returns>
+        StorageObject ConvertSingle(JToken obj, string containerName);
     }
 }

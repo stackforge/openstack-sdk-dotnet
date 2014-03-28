@@ -373,17 +373,15 @@ namespace Openstack.Test.Storage
 
             if (objectName != null)
             {
-                if (!this.Objects.ContainsKey(objectName))
-                {
-                    return TestHelper.CreateResponse(HttpStatusCode.NotFound);
-                }
-
-                var obj = this.Objects[objectName];
-                var objectHeaders = GenerateObjectResponseHeaders(obj);
-
-                return TestHelper.CreateResponse(HttpStatusCode.OK, objectHeaders, obj.Content);
+                return this.GetObject(objectName);
             }
 
+            var query = this.Uri.ParseQueryString();
+            if (query.HasKeys() && query["prefix"] != null && query["delimiter"] != null)
+            {
+                return this.GetObject(query["prefix"]);
+            }
+           
             if (!this.Containers.ContainsKey(containerName))
             {
                 return TestHelper.CreateResponse(HttpStatusCode.NotFound);
@@ -394,6 +392,19 @@ namespace Openstack.Test.Storage
             var content = TestHelper.CreateStream("[]");
 
             return TestHelper.CreateResponse(HttpStatusCode.OK, headers, content);
+        }
+
+        public IHttpResponseAbstraction GetObject(string objectName)
+        {
+            if (!this.Objects.ContainsKey(objectName))
+            {
+                return TestHelper.CreateResponse(HttpStatusCode.NotFound);
+            }
+
+            var obj = this.Objects[objectName];
+            var objectHeaders = GenerateObjectResponseHeaders(obj);
+
+            return TestHelper.CreateResponse(HttpStatusCode.OK, objectHeaders, obj.Content);
         }
 
         public string GetContainerName(string[] uriSegments)

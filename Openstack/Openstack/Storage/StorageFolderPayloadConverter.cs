@@ -17,16 +17,22 @@
 namespace Openstack.Storage
 {
     using System;
+    using System.IO;
+    using System.Web;
     using System.Linq;
     using Openstack.Common;
+    using Newtonsoft.Json.Linq;
     using System.ComponentModel;
     using System.Collections.Generic;
     using System.Text.RegularExpressions;
+    using Openstack.Common.ServiceLocation;
 
+    /// <inheritdoc/>
     internal class StorageFolderPayloadConverter : IStorageFolderPayloadConverter
     {
         internal const string consecutiveSlashRegex = @"/{2,}";
 
+        /// <inheritdoc/>
         public IEnumerable<StorageFolder> Convert(IEnumerable<StorageObject> objects)
         {
             objects.AssertIsNotNull("objects", "Cannot build folders with a null object collection.");
@@ -83,6 +89,65 @@ namespace Openstack.Storage
                 }
             }
             return folders;
+        }
+
+        /// <inheritdoc/>
+        public StorageFolder Convert(string containerName, string folderName, string payload)
+        {
+            if (String.IsNullOrEmpty(payload))
+            {
+                return new StorageFolder(folderName, new List<StorageFolder>());
+            }
+
+            try
+            {
+                var array = JArray.Parse(payload);
+                if (array.Count == 0)
+                {
+                    throw new InvalidDataException("Folder cannot be converted. The folder does not exist, has no children, and cannot be inferred.");
+                }
+
+                var subFolders = array.Where(t => t["subdir"] != null);
+                var rawObjects = array.Where(t => t["subdir"] == null);
+
+                var objectConverter = ServiceLocator.Instance.Locate<IStorageObjectPayloadConverter>();
+
+                var objects = rawObjects.Select(t => objectConverter.ConvertSingle(t,containerName)).ToList();
+                objects.RemoveAll(o => string.Compare(o.Name, folderName, StringComparison.InvariantCulture) == 0);
+
+                return new StorageFolder(folderName, subFolders.Select(ParseSubFolder), objects);
+                
+            }
+            catch (HttpParseException)
+            {
+                throw;
+            }
+            catch (InvalidDataException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new HttpParseException(string.Format("Storage Container payload could not be parsed. Payload: '{0}'", payload), ex);
+            }
+        }
+
+        /// <summary>
+        /// Converts a JToken object into a StorageFolder object.
+        /// </summary>
+        /// <param name="token">The JToken to convert.</param>
+        /// <returns>A StorageFolder object.</returns>
+        internal StorageFolder ParseSubFolder(JToken token)
+        {
+            try
+            {
+                var fullName = (string) token["subdir"];
+                return new StorageFolder(fullName, new List<StorageFolder>());
+            }
+            catch (Exception ex)
+            {
+                throw new HttpParseException(string.Format("Storage Folder payload could not be parsed. Payload: '{0}'", token), ex);
+            }
         }
     }
 }

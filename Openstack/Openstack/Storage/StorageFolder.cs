@@ -20,19 +20,45 @@ namespace Openstack.Storage
     using Openstack.Common;
     using System.Collections.Generic;
 
+    /// <summary>
+    /// Represents a storage folder on a remote Openstack instance.
+    /// </summary>
     public class StorageFolder
     {
+        /// <summary>
+        /// The "friendly" name of the folder
+        /// </summary>
         public string Name { get; private set; }
 
+        /// <summary>
+        /// The full name/path of the folder.
+        /// </summary>
         public string FullName { get; private set; }
 
+        /// <summary>
+        /// A collection of sub-folders inside this folder.
+        /// </summary>
         public ICollection<StorageFolder> Folders { get; private set; }
 
+        /// <summary>
+        /// A collection of objects inside this folder.
+        /// </summary>
         public ICollection<StorageObject> Objects { get; private set; }
 
+        /// <summary>
+        /// Creates a new instance of the StorageFolder class.
+        /// </summary>
+        /// <param name="fullName">The full name/path of the folder.</param>
+        /// <param name="folders">A collection of sub-folders that are inside this folder.</param>
         public StorageFolder(string fullName, IEnumerable<StorageFolder> folders) : this(fullName, folders, new List<StorageObject>())
         { }
 
+        /// <summary>
+        /// Creates a new instance of the StorageFolder class.
+        /// </summary>
+        /// <param name="fullName">The full name/path of the folder.</param>
+        /// <param name="folders">A collection of sub-folders that are inside this folder.</param>
+        /// <param name="objects">A collection of objects that are inside this folder.</param>
         public StorageFolder(string fullName, IEnumerable<StorageFolder> folders, IEnumerable<StorageObject> objects )
         {
             fullName.AssertIsNotNullOrEmpty("fullName", "Cannot create a storage folder with a null or empty full name.");
@@ -45,6 +71,11 @@ namespace Openstack.Storage
             this.Objects = objects.ToList();
         }
 
+        /// <summary>
+        /// Extracts the "friendly" name from the folders full name/path.
+        /// </summary>
+        /// <param name="fullFolderName">The full name/path of the folder.</param>
+        /// <returns>The "friendly" name of the folder. (e.g. "b" if the folder path is "a/b/")</returns>
         internal static string ExtractFolderName(string fullFolderName)
         {
             var fullName = fullFolderName.Trim('/');

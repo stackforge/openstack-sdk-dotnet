@@ -543,6 +543,7 @@ namespace Openstack.Test.Storage
 
         #region Get Storage Object Tests
 
+        [TestMethod]
         public async Task GetStorageObjectIncludesAuthHeader()
         {
             var containerName = "newContainer";
@@ -1286,6 +1287,97 @@ namespace Openstack.Test.Storage
             Assert.IsTrue(resp.Headers.Any(kvp => kvp.Key == "X-Account-Container-Count"));
             Assert.IsTrue(resp.Headers.Any(kvp => kvp.Key == "X-Account-Object-Count"));
             Assert.IsTrue(resp.Headers.Any(kvp => kvp.Key == "X-Account-Bytes-Used"));
+        }
+
+        #endregion
+
+        #region Get Storage Folder Tests
+
+        [TestMethod]
+        public async Task GetStorageFolderIncludesAuthHeader()
+        {
+            var containerName = "newContainer";
+            var folderName = "newFolder";
+
+            var client =
+                new StorageServiceRestClient(GetValidContext());
+
+            await client.GetFolder(containerName, folderName);
+
+            Assert.IsTrue(this.simulator.Headers.ContainsKey("X-Auth-Token"));
+            Assert.AreEqual(this.authId, this.simulator.Headers["X-Auth-Token"]);
+        }
+
+        [TestMethod]
+        public async Task GetStorageFolderFormsCorrectUrlAndMethod()
+        {
+            var containerName = "newContainer";
+            var folderName = "a/b/b/";
+
+            var client =
+                new StorageServiceRestClient(GetValidContext());
+
+            await client.GetFolder(containerName, folderName);
+
+            Assert.AreEqual(string.Format("{0}/{1}?prefix={2}&delimiter=/", endpoint, containerName, folderName), this.simulator.Uri.ToString());
+            Assert.AreEqual(HttpMethod.Get, this.simulator.Method);
+        }
+
+        [TestMethod]
+        public async Task ErrorIsReturnedWhenFolderIsNotFound()
+        {
+            var containerName = "newContainer";
+            var folderName = "a/b/b/";
+
+            var client =
+                 new StorageServiceRestClient(GetValidContext());
+
+            var resp = await client.GetFolder(containerName, folderName);
+
+            Assert.AreEqual(HttpStatusCode.NotFound, resp.StatusCode);
+        }
+
+        [TestMethod]
+        public async Task CanGetStorageFolder()
+        {
+            var containerName = "newContainer";
+            var folderName = "a/b/b/";
+
+            var content = TestHelper.CreateStream(string.Empty);
+            content.Position = 0;
+
+            this.simulator.Objects.Add(folderName, new StorageRestSimulator.StorageItem(folderName) { Content = content });
+
+            var client =
+                 new StorageServiceRestClient(GetValidContext());
+
+            var resp = await client.GetFolder(containerName, folderName);
+
+            Assert.AreEqual(HttpStatusCode.OK, resp.StatusCode);
+        }
+
+        [TestMethod]
+        public async Task CanGetStorageFolderWithMetadata()
+        {
+            var containerName = "newContainer";
+            var folderName = "a/b/b/";
+
+            var content = TestHelper.CreateStream(string.Empty);
+            content.Position = 0;
+
+            var metaData = new Dictionary<string, string> { { "X-Object-Meta-Test1", "Test1" }, { "X-Object-Meta-Test2", "Test2" } };
+
+            this.simulator.Objects.Add(folderName, new StorageRestSimulator.StorageItem(folderName) { MetaData = metaData, Content = content });
+
+            var client =
+                 new StorageServiceRestClient(GetValidContext());
+
+            var resp = await client.GetFolder(containerName, folderName);
+
+            Assert.AreEqual(HttpStatusCode.OK, resp.StatusCode);
+
+            Assert.IsTrue(resp.Headers.Any(kvp => kvp.Key == "X-Object-Meta-Test2"));
+            Assert.AreEqual("Test2", resp.Headers.First(kvp => kvp.Key == "X-Object-Meta-Test2").Value.First());
         }
 
         #endregion

@@ -56,13 +56,8 @@ namespace Openstack.Storage
             return objects;
         }
 
-        /// <summary>
-        /// Converts a Json token into a storage object.
-        /// </summary>
-        /// <param name="obj">The token.</param>
-        /// <param name="containerName">The name of the parent container.</param>
-        /// <returns>The storage object.</returns>
-        internal StorageObject ConvertSingle(JToken obj, string containerName)
+        /// <inheritdoc/>
+        public StorageObject ConvertSingle(JToken obj, string containerName)
         {
             string name = string.Empty;
 

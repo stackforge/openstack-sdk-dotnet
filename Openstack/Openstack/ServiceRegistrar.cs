@@ -30,6 +30,7 @@ namespace Openstack
             manager.RegisterServiceInstance(typeof(IStorageServicePocoClientFactory), new StorageServicePocoClientFactory());
             manager.RegisterServiceInstance(typeof(IStorageServiceRestClientFactory), new StorageServiceRestClientFactory());
             manager.RegisterServiceInstance(typeof(IStorageContainerNameValidator), new StorageContainerNameValidator());
+            manager.RegisterServiceInstance(typeof(IStorageFolderNameValidator), new StorageFolderNameValidator());
 
             //Identity related clients/services
             manager.RegisterServiceInstance(typeof(IIdentityServicePocoClientFactory), new IdentityServicePocoClientFactory());

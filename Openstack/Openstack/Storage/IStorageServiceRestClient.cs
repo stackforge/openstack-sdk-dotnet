@@ -53,6 +53,14 @@ namespace Openstack.Storage
         Task<IHttpResponseAbstraction> GetObject(string containerName, string objectName);
 
         /// <summary>
+        /// Gets a storage folder from the remote Openstack instance.
+        /// </summary>
+        /// <param name="containerName">The name of the parent storage container.</param>
+        /// <param name="folderName">The name of the folder.</param>
+        /// <returns>The Http response from the remote service.</returns>
+        Task<IHttpResponseAbstraction> GetFolder(string containerName, string folderName);
+
+        /// <summary>
         /// Gets a storage container from the remote Openstack instance.
         /// </summary>
         /// <param name="containerName">The name of the storage container.</param>

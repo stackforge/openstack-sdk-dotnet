@@ -219,6 +219,88 @@ namespace Openstack.Test.Storage
         }
 
         [TestMethod]
+        public async Task CanGetStorageFolder()
+        {
+            var containerName = "TestContainer";
+            var folderName = "TestFolder/";
+
+            var obj = new StorageFolder(folderName, new List<StorageFolder>());
+
+            this.ServicePocoClient.GetStorageFolderDelegate = (s, s1) =>
+            {
+                Assert.AreEqual(s, containerName);
+                Assert.AreEqual(s1, folderName);
+                return Task.Factory.StartNew(() => obj);
+            };
+
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var resp = await client.GetStorageFolder(containerName, folderName);
+
+            Assert.AreEqual(obj, resp);
+        }
+
+        [TestMethod]
+        public async Task CanGetStorageFolderWithoutTrailingSlash()
+        {
+            var containerName = "TestContainer";
+            var folderName = "TestFolder";
+
+            var obj = new StorageFolder(folderName, new List<StorageFolder>());
+
+            this.ServicePocoClient.GetStorageFolderDelegate = (s, s1) =>
+            {
+                Assert.AreEqual(s, containerName);
+                Assert.AreEqual(s1, folderName +"/");
+                return Task.Factory.StartNew(() => obj);
+            };
+
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var resp = await client.GetStorageFolder(containerName, folderName);
+
+            Assert.AreEqual(obj, resp);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task GettingStorageFolderWithNullContainerNameThrows()
+        {
+            var folderName = "TestFolder";
+
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            await client.GetStorageFolder(null, folderName);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task GettingStorageFolderWithEmptyContainerNameThrows()
+        {
+            var folderName = "TestFolder";
+
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            await client.GetStorageFolder(string.Empty, folderName);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task GettingStorageFolderWithNullObjectNameThrows()
+        {
+            var containerName = "TestContainer";
+
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            await client.GetStorageFolder(containerName, null);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task GettingStorageFolderWithEmptyObjectNameThrows()
+        {
+            var containerName = "TestContainer";
+
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            await client.GetStorageFolder(containerName, string.Empty);
+        }
+
+        [TestMethod]
         public async Task CanCreateStorageObjects()
         {
             var containerName = "TestContainer";
@@ -302,6 +384,99 @@ namespace Openstack.Test.Storage
 
             var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
             await client.CreateStorageObject(containerName, objectName, null, new MemoryStream());
+        }
+
+        [TestMethod]
+        public async Task CanCreateStorageFolder()
+        {
+            var containerName = "TestContainer";
+            var folderName = "TestFolder/";
+
+            var obj = new StorageFolder(folderName, new List<StorageFolder>());
+
+            this.ServicePocoClient.CreateStorageFolderDelegate = async (s, s1) =>
+            {
+                await Task.Run(() =>
+                {
+                    Assert.AreEqual(s1, folderName);
+                    Assert.AreEqual(s, containerName);
+                });
+            };
+
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            await client.CreateStorageFolder(containerName, folderName);
+        }
+
+        [TestMethod]
+        public async Task CanCreateStorageFolderWithoutTrailingSlash()
+        {
+            var containerName = "TestContainer";
+            var folderName = "TestFolder";
+
+            var obj = new StorageFolder(folderName, new List<StorageFolder>());
+
+            this.ServicePocoClient.CreateStorageFolderDelegate = async (s, s1) =>
+            {
+                await Task.Run(() =>
+                {
+                    Assert.AreEqual(s1, folderName +"/");
+                    Assert.AreEqual(s, containerName);
+                });
+            };
+
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            await client.CreateStorageFolder(containerName, folderName);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task CreatingStorageFolderWithInvalidFolderNameThrows()
+        {
+            var containerName = "someContainer";
+            var folderName = "Test//Folder";
+
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            await client.CreateStorageFolder(containerName, folderName);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task CreatingStorageFolderWithNullContainerNameThrows()
+        {
+            var folderName = "TestFolder";
+
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            await client.CreateStorageFolder(null, folderName);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task CreatingStorageFolderWithEmptyContainerNameThrows()
+        {
+            var folderName = "TestFolder";
+
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            await client.CreateStorageFolder(string.Empty, folderName);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task CreatingStorageFolderWithNullObjectNameThrows()
+        {
+            var containerName = "TestContainer";
+
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            await client.CreateStorageFolder(containerName, null);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task CreatingStorageFolderWithEmptyObjectNameThrows()
+        {
+            var containerName = "TestContainer";
+
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            await client.CreateStorageFolder(containerName, string.Empty);
         }
 
         [TestMethod]
@@ -488,6 +663,76 @@ namespace Openstack.Test.Storage
         {
             var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
             await client.DeleteStorageObject("TestContainer", string.Empty);
+        }
+
+        [TestMethod]
+        public async Task CanDeleteStorageFolder()
+        {
+            var containerName = "TestContainer";
+            var folderName = "TestFolder/";
+
+            this.ServicePocoClient.DeleteStorageFolderDelegate = async (s, s1) =>
+            {
+                await Task.Run(() =>
+                {
+                    Assert.AreEqual(s, containerName);
+                    Assert.AreEqual(s1, folderName);
+                });
+            };
+
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            await client.DeleteStorageFolder(containerName, folderName);
+        }
+
+        [TestMethod]
+        public async Task CanDeleteStorageFolderWithoutTrailingSlash()
+        {
+            var containerName = "TestContainer";
+            var folderName = "TestFolder";
+
+            this.ServicePocoClient.DeleteStorageFolderDelegate = async (s, s1) =>
+            {
+                await Task.Run(() =>
+                {
+                    Assert.AreEqual(s, containerName);
+                    Assert.AreEqual(s1, folderName +"/");
+                });
+            };
+
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            await client.DeleteStorageFolder(containerName, folderName);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task DeletingStorageFolderWithNullContainerNameThrows()
+        {
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            await client.DeleteStorageFolder(null, "TestFolder");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task DeletingStorageFolderWithEmptyContainerNameThrows()
+        {
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            await client.DeleteStorageFolder(string.Empty, "TestFolder");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task DeletingStorageFolderWithNullObjectNameThrows()
+        {
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            await client.DeleteStorageFolder("TestContainer", null);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task DeletingStorageFolderWithEmptyObjectNameThrows()
+        {
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            await client.DeleteStorageFolder("TestContainer", string.Empty);
         }
 
         [TestMethod]

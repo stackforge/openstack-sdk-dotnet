@@ -41,6 +41,11 @@ namespace Openstack.Test.Storage
             return Task.Factory.StartNew(() => Response);
         }
 
+        public Task<IHttpResponseAbstraction> GetFolder(string containerName, string folderName)
+        {
+            return Task.Factory.StartNew(() => Response);
+        }
+
         public Task<IHttpResponseAbstraction> GetContainer(string containerName)
         {
             return Task.Factory.StartNew(() => Response);

@@ -20,6 +20,20 @@ namespace Openstack.Storage
 
     public interface IStorageFolderPayloadConverter
     {
+        /// <summary>
+        /// Converts a list of storage objects into a deep folder structure. 
+        /// </summary>
+        /// <param name="objects">The list of objects to convert.</param>
+        /// <returns>A deep folder structure.</returns>
         IEnumerable<StorageFolder> Convert(IEnumerable<StorageObject> objects);
+
+        /// <summary>
+        /// Converts a Json payload into a shallow storage folder object.
+        /// </summary>
+        /// <param name="containerName">The name of the parent container.</param>
+        /// <param name="folderName">The full name of the folder.</param>
+        /// <param name="payload">The Json payload.</param>
+        /// <returns>A shallow storage folder object.</returns>
+        StorageFolder Convert(string containerName, string folderName, string payload);
     }
 }
