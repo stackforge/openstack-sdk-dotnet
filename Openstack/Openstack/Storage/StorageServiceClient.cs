@@ -122,6 +122,35 @@ namespace Openstack.Storage
         }
 
         /// <inheritdoc/>
+        public async Task<StorageManifest> CreateStorageManifest(string containerName, string manifestName, IDictionary<string, string> metadata, IEnumerable<StorageObject> objects)
+        {
+            containerName.AssertIsNotNullOrEmpty("containerName", "Cannot create a storage manifest with a container name that is null or empty.");
+            manifestName.AssertIsNotNullOrEmpty("manifestNamee", "Cannot create a storage manifest with a name that is null or empty.");
+            metadata.AssertIsNotNull("metadata","Cannot create a storage manifest with null metadata.");
+
+            var client = this.GetPocoClient();
+
+            var manifest = new StaticLargeObjectManifest(containerName, manifestName, metadata, objects.ToList());
+
+            return await client.CreateStorageManifest(manifest);
+        }
+
+        /// <inheritdoc/>
+        public async Task<StorageManifest> CreateStorageManifest(string containerName, string manifestName, IDictionary<string, string> metadata, string segmentsPath)
+        {
+            containerName.AssertIsNotNullOrEmpty("containerName", "Cannot create a storage manifest with a container name that is null or empty.");
+            manifestName.AssertIsNotNullOrEmpty("manifestNamee", "Cannot create a storage manifest with a name that is null or empty.");
+            metadata.AssertIsNotNull("metadata", "Cannot create a storage manifest with null metadata.");
+            segmentsPath.AssertIsNotNullOrEmpty("segmentsPath", "Cannot create storage manifest with a null or empty segments path.");
+
+            var client = this.GetPocoClient();
+
+            var manifest = new  DynamicLargeObjectManifest(containerName, manifestName, metadata, segmentsPath);
+
+            return await client.CreateStorageManifest(manifest);
+        }
+
+        /// <inheritdoc/>
         public async Task<StorageFolder> GetStorageFolder(string containerName, string folderName)
         {
             containerName.AssertIsNotNullOrEmpty("containerName", "Cannot get a storage folder with a container name that is null or empty.");
@@ -200,7 +229,7 @@ namespace Openstack.Storage
             var container = await client.GetStorageContainer(containerName);
             foreach (var storageObject in container.Objects)
             {
-                objects.Add(await client.GetStorageObject(containerName, storageObject.Name));
+                objects.Add(await client.GetStorageObject(containerName, storageObject.FullName));
             }
 
             return objects;

@@ -387,6 +387,200 @@ namespace Openstack.Test.Storage
         }
 
         [TestMethod]
+        public async Task CanCreateStaticStorageManifest()
+        {
+            var containerName = "TestContainer";
+            var objectName = "TestObject";
+
+            var obj = new StorageObject(objectName, containerName, DateTime.UtcNow, "12345", 12345,
+                "application/octet-stream", new Dictionary<string, string>());
+
+            this.ServicePocoClient.CreateStorageManifestDelegate = async (m) =>
+            {
+                Assert.IsInstanceOfType(m,typeof(StaticLargeObjectManifest));
+                return await Task.Run(() => m);
+            };
+
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            await client.CreateStorageManifest(containerName, objectName, new Dictionary<string, string>(), new List<StorageObject>() { obj });
+        }
+
+        [TestMethod]
+        public async Task CanCreateDynamicStorageManifest()
+        {
+            var containerName = "TestContainer";
+            var objectName = "TestObject";
+
+           this.ServicePocoClient.CreateStorageManifestDelegate = async (m) =>
+            {
+                Assert.IsInstanceOfType(m, typeof(DynamicLargeObjectManifest));
+                return await Task.Run(() => m);
+            };
+
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            await client.CreateStorageManifest(containerName, objectName, new Dictionary<string, string>(), "segments");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task CreatingDynamicStorageManifestWithNullContainerNameThrows()
+        {
+            var manifestName = "TestManifest";
+            var segmentPath = "segments";
+
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            await client.CreateStorageManifest(null, manifestName, new Dictionary<string, string>(), segmentPath);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task CreatingDynamicStorageManifestWithEmptyContainerNameThrows()
+        {
+            var manifestName = "TestManifest";
+            var segmentPath = "segments";
+
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            await client.CreateStorageManifest(string.Empty, manifestName, new Dictionary<string, string>(), segmentPath);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task CreatingDynamicStorageManifestWithNullManifestNameThrows()
+        {
+            var containerName = "TestContainer";
+            var segmentPath = "segments";
+
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            await client.CreateStorageManifest(containerName, null, new Dictionary<string, string>(), segmentPath);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task CreatingDynamicStorageManifestWithEmptyManifestNameThrows()
+        {
+            var containerName = "TestContainer";
+            var segmentPath = "segments";
+
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            await client.CreateStorageManifest(containerName, string.Empty, new Dictionary<string, string>(), segmentPath);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task CreatingDynamicStorageManifestWithNullSegmentPathThrows()
+        {
+            var containerName = "TestContainer";
+            var manifestName = "TestManifest";
+
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            await client.CreateStorageManifest(containerName, manifestName, new Dictionary<string, string>(), (string)null);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task CreatingDynamicStorageManifestWithEmptySegmentPathThrows()
+        {
+            var containerName = "TestContainer";
+            var manifestName = "TestManifest";
+
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            await client.CreateStorageManifest(containerName, manifestName, new Dictionary<string, string>(), string.Empty);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task CreatingDynamicStorageManifestWithNullMetadataThrows()
+        {
+            var containerName = "TestContainer";
+            var manifestName = "TestManifest";
+            var segmentPath = "segments";
+
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            await client.CreateStorageManifest(containerName, manifestName, null, segmentPath);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task CreatingStaticStorageManifestWithNullContainerNameThrows()
+        {
+            var containerName = "TestContainer";
+            var objectName = "TestObject";
+
+            var obj = new StorageObject(objectName, containerName, DateTime.UtcNow, "12345", 12345,
+                "application/octet-stream", new Dictionary<string, string>());
+
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            await client.CreateStorageManifest(null, objectName, new Dictionary<string, string>(), new List<StorageObject>() { obj });
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task CreatingStaticStorageManifestWithEmptyContainerNameThrows()
+        {
+            var containerName = "TestContainer";
+            var objectName = "TestObject";
+
+            var obj = new StorageObject(objectName, containerName, DateTime.UtcNow, "12345", 12345,
+                "application/octet-stream", new Dictionary<string, string>());
+
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            await client.CreateStorageManifest(string.Empty, objectName, new Dictionary<string, string>(), new List<StorageObject>() { obj });
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task CreatingStaticStorageManifestWithNullManifestNameThrows()
+        {
+            var containerName = "TestContainer";
+            var objectName = "TestObject";
+
+            var obj = new StorageObject(objectName, containerName, DateTime.UtcNow, "12345", 12345,
+                "application/octet-stream", new Dictionary<string, string>());
+
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            await client.CreateStorageManifest(containerName, null, new Dictionary<string, string>(), new List<StorageObject>() { obj });
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task CreatingStaticStorageManifestWithEmptyManifestNameThrows()
+        {
+            var containerName = "TestContainer";
+            var objectName = "TestObject";
+
+            var obj = new StorageObject(objectName, containerName, DateTime.UtcNow, "12345", 12345,
+                "application/octet-stream", new Dictionary<string, string>());
+
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            await client.CreateStorageManifest(containerName, string.Empty, new Dictionary<string, string>(), new List<StorageObject>() { obj });
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task CreatingStaticStorageManifestWithNullObjectListThrows()
+        {
+            var containerName = "TestContainer";
+            var objectName = "TestObject";
+
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            await client.CreateStorageManifest(containerName, objectName, new Dictionary<string, string>(), (List<StorageObject>)null);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task CreatingStaticStorageManifestWithNullMetadataThrows()
+        {
+            var containerName = "TestContainer";
+            var objectName = "TestObject";
+
+            var obj = new StorageObject(objectName, containerName, DateTime.UtcNow, "12345", 12345,
+                "application/octet-stream", new Dictionary<string, string>());
+
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            await client.CreateStorageManifest(containerName, objectName, null, new List<StorageObject>() { obj });
+        }
+
+        [TestMethod]
         public async Task CanCreateStorageFolder()
         {
             var containerName = "TestContainer";

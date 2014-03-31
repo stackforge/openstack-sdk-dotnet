@@ -37,6 +37,26 @@ namespace Openstack.Storage
         Task<IHttpResponseAbstraction> CreateObject(string containerName, string objectName, IDictionary<string, string> metadata, Stream content);
 
         /// <summary>
+        /// Creates a dynamic large object manifest on the remote Openstack instance.
+        /// </summary>
+        /// <param name="containerName">The name of the parent storage container.</param>
+        /// <param name="manifestName">The name of the storage manifest.</param>
+        /// <param name="metadata">Metadata associated with the storage manifest.</param>
+        /// <param name="segmentsPath">The path to the segment objects that the manifest points to.</param>
+        /// <returns>The Http response from the remote service.</returns>
+        Task<IHttpResponseAbstraction> CreateDynamicManifest(string containerName, string manifestName, IDictionary<string, string> metadata, string segmentsPath);
+
+        /// <summary>
+        /// Creates a static large object manifest on the remote Openstack instance.
+        /// </summary>
+        /// <param name="containerName">The name of the parent storage container.</param>
+        /// <param name="manifestName">The name of the storage manifest.</param>
+        /// <param name="metadata">Metadata associated with the storage manifest.</param>
+        /// <param name="content">The manifests content.</param>
+        /// <returns>The Http response from the remote service.</returns>
+        Task<IHttpResponseAbstraction> CreateStaticManifest(string containerName, string manifestName, IDictionary<string, string> metadata, Stream content);
+
+        /// <summary>
         /// Creates a storage container on the remote Openstack instance.
         /// </summary>
         /// <param name="containerName">The name of the storage container.</param>
@@ -113,6 +133,14 @@ namespace Openstack.Storage
         /// <param name="objectName">The name of the storage object.</param>
         /// <returns>The Http response from the remote service.</returns>
         Task<IHttpResponseAbstraction> GetObjectMetadata(string containerName, string objectName);
+
+        /// <summary>
+        /// Gets the metadata for a storage manifest from the remote Openstack instance.
+        /// </summary>
+        /// <param name="containerName">The name of the parent storage container.</param>
+        /// <param name="manifestName">The name of the storage manifest.</param>
+        /// <returns>The Http response from the remote service.</returns>
+        Task<IHttpResponseAbstraction> GetManifestMetadata(string containerName, string manifestName);
 
         /// <summary>
         /// Copies an object on the remote Openstack instance.

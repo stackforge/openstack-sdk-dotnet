@@ -24,7 +24,7 @@ namespace Openstack.Storage
     using System.Collections.Generic;
     using Openstack.Common;
     using Openstack.Common.ServiceLocation;
-
+    using Openstack.Common.Http;
 
     /// <inheritdoc/>
     internal class StorageServicePocoClient : IStorageServicePocoClient
@@ -43,12 +43,12 @@ namespace Openstack.Storage
         /// <inheritdoc/>
         public async Task<StorageObject> CreateStorageObject(StorageObject obj, Stream content)
         {
-            obj.ContainerName.AssertIsNotNullOrEmpty("containerName", "Cannot create a storage object with a null or empty container name.");
-            obj.AssertIsNotNull("obj","Cannot Create a null storage object.");
+            obj.AssertIsNotNull("obj", "Cannot create a null storage object.");
+            obj.ContainerName.AssertIsNotNullOrEmpty("obj.ContainerName", "Cannot create a storage object with a null or empty container name.");
             obj.Name.AssertIsNotNullOrEmpty("obj.Name","Cannot create a storage object without a name.");
 
             var client = this.GetRestClient();
-            var resp = await client.CreateObject(obj.ContainerName, obj.Name, obj.Metadata, content);
+            var resp = await client.CreateObject(obj.ContainerName, obj.FullName, obj.Metadata, content);
 
             if (resp.StatusCode != HttpStatusCode.Created)
             {
@@ -56,9 +56,46 @@ namespace Openstack.Storage
             }
 
             var converter = ServiceLocator.Instance.Locate<IStorageObjectPayloadConverter>();
-            var respObj = converter.Convert(obj.ContainerName, obj.Name, resp.Headers);
+            var respObj = converter.Convert(obj.ContainerName, obj.FullName, resp.Headers);
 
             return respObj;
+        }
+
+        public async Task<StorageManifest> CreateStorageManifest(StorageManifest manifest)
+        {
+            manifest.AssertIsNotNull("manifest", "Cannot create a null storage manifest.");
+            manifest.ContainerName.AssertIsNotNullOrEmpty("manifest.ContainerName", "Cannot create a storage manifest with a null or empty container name.");
+            manifest.Name.AssertIsNotNullOrEmpty("manifest.Name", "Cannot create a storage manifest without a name.");
+
+            var client = this.GetRestClient();
+            IHttpResponseAbstraction resp;
+
+            var dynamicManifest = manifest as DynamicLargeObjectManifest;
+            var staticManifest = manifest as StaticLargeObjectManifest;
+
+            if (dynamicManifest == null && staticManifest == null)
+            {
+                throw new InvalidOperationException(string.Format("Failed to create storage manifest '{0}'. The given manifest type is not supported: '{1}'.", manifest.Name, manifest.GetType().Name));
+            }
+
+            if (dynamicManifest != null) //dynamic large object manifest
+            {
+                resp = await client.CreateDynamicManifest(dynamicManifest.ContainerName, dynamicManifest.FullName, dynamicManifest.Metadata, dynamicManifest.SegmentsPath);
+            }
+            else //static large object manifest
+            {
+                var converter = ServiceLocator.Instance.Locate<IStorageObjectPayloadConverter>();
+                var manifestPayload = converter.Convert(staticManifest.Objects).ConvertToStream();
+
+                resp = await client.CreateStaticManifest(staticManifest.ContainerName, staticManifest.FullName, staticManifest.Metadata, manifestPayload);
+            }
+
+            if (resp.StatusCode != HttpStatusCode.Created)
+            {
+                throw new InvalidOperationException(string.Format("Failed to create storage manifest '{0}'. The remote server returned the following status code: '{1}'.", manifest.Name, resp.StatusCode));
+            }
+
+            return await this.GetStorageManifest(manifest.ContainerName, manifest.FullName);
         }
 
         /// <inheritdoc/>
@@ -132,7 +169,43 @@ namespace Openstack.Storage
             var converter = ServiceLocator.Instance.Locate<IStorageObjectPayloadConverter>();
             var obj = converter.Convert(containerName, objectName, resp.Headers);
 
+            //If the request object is actually a manifest object, then make sure we go back out and get the details of the manifest.
+            if (obj is StorageManifest)
+            {
+                return await GetStorageManifest(containerName, objectName);
+            }
+
             return obj;
+        }
+
+        public async Task<StorageManifest> GetStorageManifest(string containerName, string manifestName)
+        {
+            containerName.AssertIsNotNullOrEmpty("containerName", "Cannot get a storage manifest with a container name that is null or empty.");
+            manifestName.AssertIsNotNullOrEmpty("manifestName", "Cannot get a storage manifest with a name that is null or empty.");
+
+            var client = this.GetRestClient();
+            var resp = await client.GetManifestMetadata(containerName, manifestName);
+
+            if (resp.StatusCode != HttpStatusCode.OK && resp.StatusCode != HttpStatusCode.NoContent)
+            {
+                throw new InvalidOperationException(string.Format("Failed to get storage manifest '{0}'. The remote server returned the following status code: '{1}'.", manifestName, resp.StatusCode));
+            }
+
+            var objectConverter = ServiceLocator.Instance.Locate<IStorageObjectPayloadConverter>();
+            var obj = objectConverter.Convert(containerName, manifestName, resp.Headers);
+
+            if (!(obj is StorageManifest))
+            {
+                throw new InvalidOperationException(string.Format("Failed to get storage manifest '{0}'. The requested object is not a manifest.", manifestName));
+            }
+
+            if (obj is StaticLargeObjectManifest)
+            {
+                var manifest = obj as StaticLargeObjectManifest;
+                manifest.Objects = objectConverter.Convert(containerName, await resp.ReadContentAsStringAsync()).ToList();
+            }
+
+            return obj as StorageManifest;
         }
 
         /// <inheritdoc/>
@@ -160,17 +233,17 @@ namespace Openstack.Storage
         }
 
         /// <inheritdoc/>
-        public async Task DeleteStorageObject(string containerName, string objectName)
+        public async Task DeleteStorageObject(string containerName, string itemName)
         {
             containerName.AssertIsNotNullOrEmpty("containerName", "Cannot delete a storage object with a container name that is null or empty.");
-            objectName.AssertIsNotNullOrEmpty("objectName", "Cannot delete a storage object with a name that is null or empty.");
+            itemName.AssertIsNotNullOrEmpty("objectName", "Cannot delete a storage object with a name that is null or empty.");
 
             var client = this.GetRestClient();
-            var resp = await client.DeleteObject(containerName, objectName);
+            var resp = await client.DeleteObject(containerName, itemName);
 
             if (resp.StatusCode != HttpStatusCode.OK && resp.StatusCode != HttpStatusCode.NoContent)
             {
-                throw new InvalidOperationException(string.Format("Failed to delete storage object '{0}'. The remote server returned the following status code: '{1}'.", objectName, resp.StatusCode));
+                throw new InvalidOperationException(string.Format("Failed to delete storage object '{0}'. The remote server returned the following status code: '{1}'.", itemName, resp.StatusCode));
             }
         }
 
@@ -203,17 +276,17 @@ namespace Openstack.Storage
         }
 
         /// <inheritdoc/>
-        public async Task UpdateStorageObject(StorageObject obj)
+        public async Task UpdateStorageObject(StorageObject item)
         {
-            obj.ContainerName.AssertIsNotNullOrEmpty("containerName", "Cannot update a storage object with a container name that is null or empty.");
-            obj.Name.AssertIsNotNullOrEmpty("objectName", "Cannot update a storage object with a name that is null or empty.");
+            item.ContainerName.AssertIsNotNullOrEmpty("containerName", "Cannot update a storage object with a container name that is null or empty.");
+            item.Name.AssertIsNotNullOrEmpty("objectName", "Cannot update a storage object with a name that is null or empty.");
 
             var client = this.GetRestClient();
-            var resp = await client.UpdateObject(obj.ContainerName, obj.Name, obj.Metadata);
+            var resp = await client.UpdateObject(item.ContainerName, item.Name, item.Metadata);
 
             if (resp.StatusCode != HttpStatusCode.Accepted)
             {
-                throw new InvalidOperationException(string.Format("Failed to update storage object '{0}'. The remote server returned the following status code: '{1}'.", obj.Name, resp.StatusCode));
+                throw new InvalidOperationException(string.Format("Failed to update storage object '{0}'. The remote server returned the following status code: '{1}'.", item.Name, resp.StatusCode));
             }
         }
 

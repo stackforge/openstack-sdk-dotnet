@@ -74,6 +74,76 @@ namespace Openstack.Test.Storage
             return new StorageServiceClientContext(creds, token, "Object Storage");
         }
 
+        #region CreateManifest Tests
+
+        [TestMethod]
+        public async Task CreateStaticStorageManifestIncludesAuthHeader()
+        {
+            var manifestName = "NewManifest";
+            var containerName = "newContainer";
+
+            var client =
+                new StorageServiceRestClient(GetValidContext());
+            var data = "Some random data";
+            var content = TestHelper.CreateStream(data);
+
+            await client.CreateStaticManifest(containerName, manifestName, new Dictionary<string, string>(), content);
+
+            Assert.IsTrue(this.simulator.Headers.ContainsKey("X-Auth-Token"));
+            Assert.AreEqual(this.authId, this.simulator.Headers["X-Auth-Token"]);
+        }
+
+        [TestMethod]
+        public async Task CreateDynamicStorageManifestIncludesAuthHeader()
+        {
+            var manifestName = "NewManifest";
+            var segPath = "blah/blah";
+            var containerName = "newContainer";
+
+            var client = new StorageServiceRestClient(GetValidContext());
+
+            await client.CreateDynamicManifest(containerName, manifestName, new Dictionary<string, string>(), segPath);
+
+            Assert.IsTrue(this.simulator.Headers.ContainsKey("X-Auth-Token"));
+            Assert.AreEqual(this.authId, this.simulator.Headers["X-Auth-Token"]);
+        }
+
+        [TestMethod]
+        public async Task CreateStaticManifestFormsCorrectUrlAndMethod()
+        {
+            var manifestName = "NewManifest";
+            var containerName = "newContainer";
+
+            var client =
+                new StorageServiceRestClient(GetValidContext());
+            var data = "Some random data";
+            var content = TestHelper.CreateStream(data);
+
+            await client.CreateStaticManifest(containerName, manifestName, new Dictionary<string, string>(), content);
+
+            Assert.AreEqual(string.Format("{0}/{1}/{2}?multipart-manifest=put", endpoint, containerName, manifestName), this.simulator.Uri.ToString());
+            Assert.AreEqual(HttpMethod.Put, this.simulator.Method);
+        }
+
+        [TestMethod]
+        public async Task CreateDynamicManifestFormsCorrectUrlMethodAndHeader()
+        {
+            var manifestName = "NewManifest";
+            var segPath = "blah/blah";
+            var containerName = "newContainer";
+
+            var client = new StorageServiceRestClient(GetValidContext());
+
+            await client.CreateDynamicManifest(containerName, manifestName, new Dictionary<string, string>(), segPath);
+
+            Assert.AreEqual(string.Format("{0}/{1}/{2}", endpoint, containerName, manifestName), this.simulator.Uri.ToString());
+            Assert.AreEqual(HttpMethod.Put, this.simulator.Method);
+            Assert.IsTrue(this.simulator.Headers.ContainsKey("X-Object-Manifest"));
+            Assert.AreEqual(segPath, this.simulator.Headers["X-Object-Manifest"]);
+        }
+
+        #endregion
+
         #region CreateObject Tests
 
         [TestMethod]
@@ -1373,6 +1443,97 @@ namespace Openstack.Test.Storage
                  new StorageServiceRestClient(GetValidContext());
 
             var resp = await client.GetFolder(containerName, folderName);
+
+            Assert.AreEqual(HttpStatusCode.OK, resp.StatusCode);
+
+            Assert.IsTrue(resp.Headers.Any(kvp => kvp.Key == "X-Object-Meta-Test2"));
+            Assert.AreEqual("Test2", resp.Headers.First(kvp => kvp.Key == "X-Object-Meta-Test2").Value.First());
+        }
+
+        #endregion
+
+        #region Get Storage Manifest Tests
+
+        [TestMethod]
+        public async Task GetStorageManifestIncludesAuthHeader()
+        {
+            var containerName = "newContainer";
+            var manifestName = "newManifest";
+
+            var client =
+                new StorageServiceRestClient(GetValidContext());
+
+            await client.GetManifestMetadata(containerName, manifestName);
+
+            Assert.IsTrue(this.simulator.Headers.ContainsKey("X-Auth-Token"));
+            Assert.AreEqual(this.authId, this.simulator.Headers["X-Auth-Token"]);
+        }
+
+        [TestMethod]
+        public async Task GetStorageManifestFormsCorrectUrlAndMethod()
+        {
+            var containerName = "newContainer";
+            var manifestName = "a/b/b/manifest";
+
+            var client =
+                new StorageServiceRestClient(GetValidContext());
+
+            await client.GetManifestMetadata(containerName, manifestName);
+
+            Assert.AreEqual(string.Format("{0}/{1}/{2}?multipart-manifest=get", endpoint, containerName, manifestName), this.simulator.Uri.ToString());
+            Assert.AreEqual(HttpMethod.Get, this.simulator.Method);
+        }
+
+        [TestMethod]
+        public async Task ErrorIsReturnedWhenManifestIsNotFound()
+        {
+            var containerName = "newContainer";
+            var manifestName = "a/b/b/manifest";
+
+            var client =
+                 new StorageServiceRestClient(GetValidContext());
+
+            var resp = await client.GetManifestMetadata(containerName, manifestName);
+
+            Assert.AreEqual(HttpStatusCode.NotFound, resp.StatusCode);
+        }
+
+        [TestMethod]
+        public async Task CanGetStorageManifest()
+        {
+            var containerName = "newContainer";
+            var manifestName = "a/b/b/manifest";
+
+            var content = TestHelper.CreateStream("[]");
+            content.Position = 0;
+
+            this.simulator.Objects.Add(manifestName, new StorageRestSimulator.StorageItem(manifestName) { Content = content });
+
+            var client =
+                 new StorageServiceRestClient(GetValidContext());
+
+            var resp = await client.GetManifestMetadata(containerName, manifestName);
+
+            Assert.AreEqual(HttpStatusCode.OK, resp.StatusCode);
+        }
+
+        [TestMethod]
+        public async Task CanGetStorageManifestWithMetadata()
+        {
+            var containerName = "newContainer";
+            var manifestName = "a/b/b/manifest";
+
+            var content = TestHelper.CreateStream(string.Empty);
+            content.Position = 0;
+
+            var metaData = new Dictionary<string, string> { { "X-Object-Meta-Test1", "Test1" }, { "X-Object-Meta-Test2", "Test2" } };
+
+            this.simulator.Objects.Add(manifestName, new StorageRestSimulator.StorageItem(manifestName) { MetaData = metaData, Content = content });
+
+            var client =
+                 new StorageServiceRestClient(GetValidContext());
+
+            var resp = await client.GetManifestMetadata(containerName, manifestName);
 
             Assert.AreEqual(HttpStatusCode.OK, resp.StatusCode);
 

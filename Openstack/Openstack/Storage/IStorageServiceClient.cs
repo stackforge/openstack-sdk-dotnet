@@ -123,6 +123,26 @@ namespace Openstack.Storage
         Task UpdateStorageObject(StorageObject obj);
 
         /// <summary>
+        /// Creates a storage manifest on the remote Openstack instance.
+        /// </summary>
+        /// <param name="containerName">The name of the parent container.</param>
+        /// <param name="manifestName">The name of the manifest.</param>
+        /// <param name="metadata">Metadata for the manifest.</param>
+        /// <param name="objects">The list of storage objects.</param>
+        /// <returns>An async task.</returns>
+        Task<StorageManifest> CreateStorageManifest(string containerName, string manifestName, IDictionary<string, string> metadata, IEnumerable<StorageObject> objects);
+
+        /// <summary>
+        /// Creates a storage manifest on the remote Openstack instance.
+        /// </summary>
+        /// <param name="containerName">The name of the parent container.</param>
+        /// <param name="manifestName">The name of the manifest.</param>
+        /// <param name="metadata">Metadata for the manifest.</param>
+        /// <param name="segmentsPath">The path to the segment objects in the manifest.</param>
+        /// <returns>An async task.</returns>
+        Task<StorageManifest> CreateStorageManifest(string containerName, string manifestName, IDictionary<string, string> metadata, string segmentsPath);
+
+        /// <summary>
         /// Gets a storage folder from the remote Openstack instance. The returned folder is a shallow object graph representation.
         /// </summary>
         /// <param name="containerName">The name of the parent container.</param>

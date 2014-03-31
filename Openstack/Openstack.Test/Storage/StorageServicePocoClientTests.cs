@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -90,7 +91,7 @@ namespace Openstack.Test.Storage
             var content = TestHelper.CreateStream(payload);
 
             var restResp = new HttpResponseAbstraction(content, headers, HttpStatusCode.OK);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClientFactory().Create(GetValidContext()) as StorageServicePocoClient;
             var result = await client.GetStorageContainer(containerName);
@@ -114,7 +115,7 @@ namespace Openstack.Test.Storage
             };
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), headers, HttpStatusCode.NoContent);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             var result = await client.GetStorageContainer(containerName);
@@ -134,7 +135,7 @@ namespace Openstack.Test.Storage
             var containerName = "TestContainer";
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.NotFound);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             await client.GetStorageContainer(containerName);
@@ -147,7 +148,7 @@ namespace Openstack.Test.Storage
             var containerName = "TestContainer";
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.Unauthorized);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             await client.GetStorageContainer(containerName);
@@ -160,7 +161,7 @@ namespace Openstack.Test.Storage
             var containerName = "TestContainer";
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.InternalServerError);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             await client.GetStorageContainer(containerName);
@@ -199,7 +200,7 @@ namespace Openstack.Test.Storage
             var content = TestHelper.CreateStream(payload);
 
             var restResp = new HttpResponseAbstraction(content, headers, HttpStatusCode.OK);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             var result = await client.GetStorageAccount();
@@ -225,7 +226,7 @@ namespace Openstack.Test.Storage
             };
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), headers, HttpStatusCode.NoContent);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             var result = await client.GetStorageAccount();
@@ -244,7 +245,7 @@ namespace Openstack.Test.Storage
         public async Task ExceptionthrownWhenGettingAStorageAccountAndNotAuthed()
         {
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.Unauthorized);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             await client.GetStorageAccount();
@@ -255,7 +256,7 @@ namespace Openstack.Test.Storage
         public async Task ExceptionthrownWhenGettingAStorageAccountAndServerError()
         {
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.InternalServerError);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             await client.GetStorageAccount();
@@ -283,7 +284,7 @@ namespace Openstack.Test.Storage
             var content = TestHelper.CreateStream(data);
 
             var restResp = new HttpResponseAbstraction(content, headers, HttpStatusCode.OK);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
 
@@ -308,7 +309,7 @@ namespace Openstack.Test.Storage
             var objectName = "TestObject";
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.NotFound);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             await client.DownloadStorageObject(containerName, objectName, new MemoryStream());
@@ -322,7 +323,7 @@ namespace Openstack.Test.Storage
             var objectName = "TestObject";
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.Unauthorized);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             await client.DownloadStorageObject(containerName, objectName, new MemoryStream());
@@ -336,7 +337,7 @@ namespace Openstack.Test.Storage
             var objectName = "TestObject";
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.InternalServerError);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             await client.DownloadStorageObject(containerName, objectName, new MemoryStream());
@@ -401,18 +402,69 @@ namespace Openstack.Test.Storage
             };
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), headers, HttpStatusCode.OK);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             var result = await client.GetStorageObject(containerName, objectName);
 
             Assert.IsNotNull(result);
+            Assert.IsInstanceOfType(result,typeof(StorageObject));
+            Assert.IsNotInstanceOfType(result, typeof(StorageManifest));
             Assert.AreEqual(objectName, result.Name);
             Assert.AreEqual(containerName, result.ContainerName);
             Assert.AreEqual(1234, result.Length);
             Assert.AreEqual("application/octet-stream", result.ContentType);
             Assert.AreEqual("d41d8cd98f00b204e9800998ecf8427e", result.ETag);
             Assert.AreEqual(DateTime.Parse("Wed, 12 Mar 2014 23:42:23 GMT"), result.LastModified);
+        }
+
+        [TestMethod]
+        public async Task CanGetStorageObjectWithOkResponseThatIsAManifest()
+        {
+            var containerName = "TestContainer";
+            var objectName = "TestObject";
+
+            var headers = new HttpHeadersAbstraction()
+            {
+                {"Content-Length", "1234"},
+                {"Content-Type", "application/octet-stream"},
+                {"Last-Modified", "Wed, 12 Mar 2014 23:42:23 GMT"},
+                {"ETag", "d41d8cd98f00b204e9800998ecf8427e"},
+                {"X-Object-Meta-Test1","Test1"},
+                {"X-Static-Large-Object","True"}
+            };
+
+            var payload = @"[
+                                {
+                                    ""hash"": ""d41d8cd98f00b204e9800998ecf8427e"",
+                                    ""last_modified"": ""2014-03-07T21:31:31.588170"",
+                                    ""bytes"": 0,
+                                    ""name"": ""a/b/c/BLAH"",
+                                    ""content_type"": ""application/octet-stream""
+                                }]";
+
+            var content = TestHelper.CreateStream(payload);
+
+            var restResp = new HttpResponseAbstraction(content, headers, HttpStatusCode.OK);
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new StorageServicePocoClient(GetValidContext());
+            var result = await client.GetStorageObject(containerName, objectName);
+
+            Assert.IsNotNull(result);
+            Assert.IsInstanceOfType(result, typeof(StaticLargeObjectManifest));
+            Assert.AreEqual(objectName, result.Name);
+            Assert.AreEqual(containerName, result.ContainerName);
+            Assert.AreEqual(1234, result.Length);
+            Assert.AreEqual("application/octet-stream", result.ContentType);
+            Assert.AreEqual("d41d8cd98f00b204e9800998ecf8427e", result.ETag);
+            Assert.AreEqual(DateTime.Parse("Wed, 12 Mar 2014 23:42:23 GMT"), result.LastModified);
+
+            var manifest = result as StaticLargeObjectManifest;
+            Assert.IsNotNull(manifest.Objects);
+            Assert.AreEqual(1, manifest.Objects.Count());
+            Assert.AreEqual("a/b/c/BLAH", manifest.Objects.First().FullName);
         }
 
         [TestMethod]
@@ -430,7 +482,7 @@ namespace Openstack.Test.Storage
             };
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), headers, HttpStatusCode.NoContent);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             var result = await client.GetStorageObject(containerName, objectName);
@@ -460,7 +512,7 @@ namespace Openstack.Test.Storage
             };
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), headers, HttpStatusCode.NoContent);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             var result = await client.GetStorageObject(containerName, objectName);
@@ -485,7 +537,7 @@ namespace Openstack.Test.Storage
             var objectName = "TestObject";
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.NotFound);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             await client.GetStorageObject(containerName, objectName);
@@ -499,7 +551,7 @@ namespace Openstack.Test.Storage
             var objectName = "TestObject";
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.Unauthorized);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             await client.GetStorageObject(containerName, objectName);
@@ -513,7 +565,7 @@ namespace Openstack.Test.Storage
             var objectName = "TestObject";
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.InternalServerError);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             await client.GetStorageObject(containerName, objectName);
@@ -553,6 +605,193 @@ namespace Openstack.Test.Storage
 
         #endregion
 
+        #region Get Storage Manifest Tests
+
+        [TestMethod]
+        public async Task CanGetStaticStorageManifestWithOkResponseAndPayload()
+        {
+            var containerName = "TestContainer";
+            var manifestName = "a/b/c/manifest";
+
+            var headers = new HttpHeadersAbstraction()
+            {
+                {"Content-Length", "1234"},
+                {"Content-Type", "application/octet-stream"},
+                {"Last-Modified", "Wed, 12 Mar 2014 23:42:23 GMT"},
+                {"ETag", "d41d8cd98f00b204e9800998ecf8427e"},
+                {"X-Object-Meta-Test1","Test1"},
+                {"X-Static-Large-Object","True"}
+            };
+
+            var payload = @"[
+                                {
+                                    ""hash"": ""d41d8cd98f00b204e9800998ecf8427e"",
+                                    ""last_modified"": ""2014-03-07T21:31:31.588170"",
+                                    ""bytes"": 0,
+                                    ""name"": ""a/b/c/BLAH"",
+                                    ""content_type"": ""application/octet-stream""
+                                }]";
+
+            var content = TestHelper.CreateStream(payload);
+
+            var restResp = new HttpResponseAbstraction(content, headers, HttpStatusCode.OK);
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new StorageServicePocoClientFactory().Create(GetValidContext()) as StorageServicePocoClient;
+            var result = await client.GetStorageManifest(containerName, manifestName);
+
+            Assert.IsNotNull(result);
+            Assert.IsInstanceOfType(result, typeof(StaticLargeObjectManifest));
+            Assert.AreEqual(manifestName, result.FullName);
+            Assert.AreEqual("manifest", result.Name);
+
+            var manifest = result as StaticLargeObjectManifest;
+            Assert.IsNotNull(manifest.Objects);
+            Assert.AreEqual(1, manifest.Objects.Count());
+            Assert.AreEqual("a/b/c/BLAH", manifest.Objects.First().FullName);
+        }
+
+        [TestMethod]
+        public async Task CanGetDynamicStorageManifestWithOkResponseAndPayload()
+        {
+            var containerName = "TestContainer";
+            var manifestName = "a/b/c/manifest";
+
+            var headers = new HttpHeadersAbstraction()
+            {
+                {"Content-Length", "1234"},
+                {"Content-Type", "application/octet-stream"},
+                {"Last-Modified", "Wed, 12 Mar 2014 23:42:23 GMT"},
+                {"ETag", "d41d8cd98f00b204e9800998ecf8427e"},
+                {"X-Object-Meta-Test1","Test1"},
+                {"X-Object-Manifest","a/b"}
+            };
+
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), headers, HttpStatusCode.NoContent);
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new StorageServicePocoClientFactory().Create(GetValidContext()) as StorageServicePocoClient;
+            var result = await client.GetStorageManifest(containerName, manifestName);
+
+            Assert.IsNotNull(result);
+            Assert.IsInstanceOfType(result, typeof(DynamicLargeObjectManifest));
+            Assert.AreEqual(manifestName, result.FullName);
+            Assert.AreEqual("manifest", result.Name);
+            var manifest = result as DynamicLargeObjectManifest;
+            Assert.AreEqual("a/b", manifest.SegmentsPath);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task CannotGetStaticStorageManifestWhenObjectIsNotManifest()
+        {
+            var containerName = "TestContainer";
+            var manifestName = "a/b/c/manifest";
+
+            var headers = new HttpHeadersAbstraction()
+            {
+                {"Content-Length", "1234"},
+                {"Content-Type", "application/octet-stream"},
+                {"Last-Modified", "Wed, 12 Mar 2014 23:42:23 GMT"},
+                {"ETag", "d41d8cd98f00b204e9800998ecf8427e"},
+                {"X-Object-Meta-Test1","Test1"},
+                {"X-Static-Large-Object","False"}
+            };
+
+            var payload = @"[
+                                {
+                                    ""hash"": ""d41d8cd98f00b204e9800998ecf8427e"",
+                                    ""last_modified"": ""2014-03-07T21:31:31.588170"",
+                                    ""bytes"": 0,
+                                    ""name"": ""a/b/c/BLAH"",
+                                    ""content_type"": ""application/octet-stream""
+                                }]";
+
+            var content = TestHelper.CreateStream(payload);
+
+            var restResp = new HttpResponseAbstraction(content, headers, HttpStatusCode.OK);
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new StorageServicePocoClientFactory().Create(GetValidContext()) as StorageServicePocoClient;
+            await client.GetStorageManifest(containerName, manifestName);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionthrownWhenGettingAStorageManifestThatDoesNotExist()
+        {
+            var containerName = "TestContainer";
+            var manifestName = "a/b/b/manifest";
+
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.NotFound);
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new StorageServicePocoClient(GetValidContext());
+            await client.GetStorageManifest(containerName, manifestName);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionthrownWhenGettingAStoragManifestAndNotAuthed()
+        {
+            var containerName = "TestContainer";
+            var manifestName = "a/b/b/manifest";
+
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.Unauthorized);
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new StorageServicePocoClient(GetValidContext());
+            await client.GetStorageManifest(containerName, manifestName);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionthrownWhenGettingAStorageManifestAndServerError()
+        {
+            var containerName = "TestContainer";
+            var manifestName = "a/b/b/manifest";
+
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.InternalServerError);
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new StorageServicePocoClient(GetValidContext());
+            await client.GetStorageManifest(containerName, manifestName);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task CannotGetStorageManifestWithNullContainerName()
+        {
+            var client = new StorageServicePocoClientFactory().Create(GetValidContext()) as StorageServicePocoClient;
+            await client.GetStorageManifest(null, "a/b/c/manifest");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task CannotGetStorageManifestWithNullFolderName()
+        {
+            var client = new StorageServicePocoClientFactory().Create(GetValidContext()) as StorageServicePocoClient;
+            await client.GetStorageManifest("container", null);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task CannotGetStorageManifestWithEmptyContainerName()
+        {
+            var client = new StorageServicePocoClientFactory().Create(GetValidContext()) as StorageServicePocoClient;
+            await client.GetStorageManifest(string.Empty, "a/b/c/manifest");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task CannotGetStorageManifestWithEmptyFolderName()
+        {
+            var client = new StorageServicePocoClientFactory().Create(GetValidContext()) as StorageServicePocoClient;
+            await client.GetStorageManifest("container", string.Empty);
+        }
+
+        #endregion
+
         #region Get Storage Folder Tests
 
         [TestMethod]
@@ -578,7 +817,7 @@ namespace Openstack.Test.Storage
             var content = TestHelper.CreateStream(payload);
 
             var restResp = new HttpResponseAbstraction(content, headers, HttpStatusCode.OK);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClientFactory().Create(GetValidContext()) as StorageServicePocoClient;
             var result = await client.GetStorageFolder(containerName, folderName);
@@ -604,7 +843,7 @@ namespace Openstack.Test.Storage
             };
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), headers, HttpStatusCode.NoContent);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClientFactory().Create(GetValidContext()) as StorageServicePocoClient;
             var result = await client.GetStorageFolder(containerName, folderName);
@@ -655,7 +894,7 @@ namespace Openstack.Test.Storage
             var content = TestHelper.CreateStream(payload);
 
             var restResp = new HttpResponseAbstraction(content, headers, HttpStatusCode.OK);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClientFactory().Create(GetValidContext()) as StorageServicePocoClient;
             var resp = await client.GetStorageFolder(containerName, folderName);
@@ -666,7 +905,7 @@ namespace Openstack.Test.Storage
             Assert.AreEqual(2, resp.Folders.Count);
 
             var obj = resp.Objects.First();
-            Assert.AreEqual("a/b/c/BLAH", obj.Name);
+            Assert.AreEqual("a/b/c/BLAH", obj.FullName);
 
             var dNode = resp.Folders.First(f => f.FullName == "a/b/c/d");
             var xNode = resp.Folders.First(f => f.FullName == "a/b/c/x");
@@ -697,7 +936,7 @@ namespace Openstack.Test.Storage
             var content = TestHelper.CreateStream(payload);
 
             var restResp = new HttpResponseAbstraction(content, headers, HttpStatusCode.OK);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClientFactory().Create(GetValidContext()) as StorageServicePocoClient;
             var resp = await client.GetStorageFolder(containerName, folderName);
@@ -711,7 +950,7 @@ namespace Openstack.Test.Storage
             var fodlerName = "a/b/b/";
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.NotFound);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             await client.GetStorageFolder(containerName, fodlerName);
@@ -725,7 +964,7 @@ namespace Openstack.Test.Storage
             var fodlerName = "a/b/b/";
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.Unauthorized);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             await client.GetStorageFolder(containerName, fodlerName);
@@ -739,7 +978,7 @@ namespace Openstack.Test.Storage
             var fodlerName = "a/b/b/";
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.InternalServerError);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             await client.GetStorageFolder(containerName, fodlerName);
@@ -777,6 +1016,231 @@ namespace Openstack.Test.Storage
             await client.GetStorageFolder("container", string.Empty);
         }
 
+        #endregion
+
+        #region Create Storage Manifest Tests
+
+        [TestMethod]
+        public async Task CanCreateStaticManifestWithCreatedResponse()
+        {
+            var containerName = "TestContainer";
+            var manifestName = "a/b/c/manifest";
+
+            var headers = new HttpHeadersAbstraction()
+            {
+                {"Content-Length", "1234"},
+                {"Content-Type", "application/octet-stream"},
+                {"Last-Modified", "Wed, 12 Mar 2014 23:42:23 GMT"},
+                {"ETag", "d41d8cd98f00b204e9800998ecf8427e"}
+            };
+
+            var headers2 = new HttpHeadersAbstraction()
+            {
+                {"Content-Length", "1234"},
+                {"Content-Type", "application/octet-stream"},
+                {"Last-Modified", "Wed, 12 Mar 2014 23:42:23 GMT"},
+                {"ETag", "d41d8cd98f00b204e9800998ecf8427e"},
+                {"X-Static-Large-Object","True"}
+            };
+
+            var payload = @"[
+                                {
+                                    ""hash"": ""d41d8cd98f00b204e9800998ecf8427e"",
+                                    ""last_modified"": ""2014-03-07T21:31:31.588170"",
+                                    ""bytes"": 0,
+                                    ""name"": ""a/b/c/BLAH"",
+                                    ""content_type"": ""application/octet-stream""
+                                }]";
+
+            var content = TestHelper.CreateStream(payload);
+
+            var restResp1 = new HttpResponseAbstraction(new MemoryStream(), headers, HttpStatusCode.Created);
+            var restResp2 = new HttpResponseAbstraction(content, headers2, HttpStatusCode.OK);
+            this.StorageServiceRestClient.Responses.Enqueue(restResp1);
+            this.StorageServiceRestClient.Responses.Enqueue(restResp2);
+
+            var client = new StorageServicePocoClientFactory().Create(GetValidContext()) as StorageServicePocoClient;
+
+            var manifest = new StaticLargeObjectManifest(containerName, manifestName,
+                new List<StorageObject>()
+                {
+                    new StorageObject("a/b/c/BLAH", containerName, new Dictionary<string, string>())
+                });
+
+            var result = await client.CreateStorageManifest(manifest);
+
+            Assert.IsTrue(this.StorageServiceRestClient.CreateStaticManifestCalled);
+            Assert.IsInstanceOfType(result, typeof(StaticLargeObjectManifest));
+            Assert.AreEqual(manifestName, result.FullName);
+            Assert.AreEqual(containerName, result.ContainerName);
+            Assert.AreEqual(1, ((StaticLargeObjectManifest)result).Objects.Count);
+            Assert.AreEqual("a/b/c/BLAH", ((StaticLargeObjectManifest)result).Objects.First().FullName);
+        }
+
+        [TestMethod]
+        public async Task CanCreateDynamicManifestWithCreatedResponse()
+        {
+            var containerName = "TestContainer";
+            var manifestName = "a/b/c/manifest";
+            var segPath = "TestContainer/a/b/c";
+
+            var headers = new HttpHeadersAbstraction()
+            {
+                {"Content-Length", "1234"},
+                {"Content-Type", "application/octet-stream"},
+                {"Last-Modified", "Wed, 12 Mar 2014 23:42:23 GMT"},
+                {"ETag", "d41d8cd98f00b204e9800998ecf8427e"}
+            };
+
+            var headers2 = new HttpHeadersAbstraction()
+            {
+                {"Content-Length", "1234"},
+                {"Content-Type", "application/octet-stream"},
+                {"Last-Modified", "Wed, 12 Mar 2014 23:42:23 GMT"},
+                {"ETag", "d41d8cd98f00b204e9800998ecf8427e"},
+                {"X-Object-Manifest",segPath}
+            };
+
+            var restResp1 = new HttpResponseAbstraction(new MemoryStream(), headers, HttpStatusCode.Created);
+            var restResp2 = new HttpResponseAbstraction(new MemoryStream(), headers2, HttpStatusCode.OK);
+            this.StorageServiceRestClient.Responses.Enqueue(restResp1);
+            this.StorageServiceRestClient.Responses.Enqueue(restResp2);
+
+            var client = new StorageServicePocoClientFactory().Create(GetValidContext()) as StorageServicePocoClient;
+
+            var manifest = new DynamicLargeObjectManifest(containerName, manifestName, segPath);
+                
+            var result = await client.CreateStorageManifest(manifest);
+
+            Assert.IsTrue(this.StorageServiceRestClient.CreatedDynamicManifestCalled);
+            Assert.IsInstanceOfType(result, typeof(DynamicLargeObjectManifest));
+            Assert.AreEqual(manifestName, result.FullName);
+            Assert.AreEqual(containerName, result.ContainerName);
+            Assert.AreEqual(segPath, ((DynamicLargeObjectManifest)result).SegmentsPath);
+        }
+
+        internal class TestManifest : StorageManifest
+        {
+            public new string ContainerName { get; set; }
+
+            public new string FullName { get; set; }
+
+            public TestManifest(string container, string name)
+                : base(container, name)
+            {
+                this.ContainerName = container;
+                this.FullName = name;
+            }
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task CannotCreateManifestWithUnknownManifestType()
+        {
+            var containerName = "TestContainer";
+            var manifestName = "a/b/c/manifest";
+
+            var client = new StorageServicePocoClientFactory().Create(GetValidContext()) as StorageServicePocoClient;
+
+            var manifest = new TestManifest(containerName, manifestName);
+
+            await client.CreateStorageManifest(manifest);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task CannotCreateManifestWithNullContainerName()
+        {
+            var manifestName = "a/b/c/manifest";
+
+            var client = new StorageServicePocoClientFactory().Create(GetValidContext()) as StorageServicePocoClient;
+
+            var manifest = new TestManifest(null, manifestName);
+
+            await client.CreateStorageManifest(manifest);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task CannotCreateManifestWithEmptyContainerName()
+        {
+            var manifestName = "a/b/c/manifest";
+
+            var client = new StorageServicePocoClientFactory().Create(GetValidContext()) as StorageServicePocoClient;
+
+            var manifest = new TestManifest(string.Empty, manifestName);
+
+            await client.CreateStorageManifest(manifest);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task CannotCreateManifestWithNullManifestName()
+        {
+            var containerName = "TestContainer";
+
+            var client = new StorageServicePocoClientFactory().Create(GetValidContext()) as StorageServicePocoClient;
+
+            var manifest = new TestManifest(containerName, null);
+
+            await client.CreateStorageManifest(manifest);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task CannotCreateManifestWithEmptyManifestName()
+        {
+            var containerName = "TestContainer";
+
+            var client = new StorageServicePocoClientFactory().Create(GetValidContext()) as StorageServicePocoClient;
+
+            var manifest = new TestManifest(containerName, string.Empty);
+
+            await client.CreateStorageManifest(manifest);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task CannotCreateManifestWithNullManifest()
+        {
+           var client = new StorageServicePocoClientFactory().Create(GetValidContext()) as StorageServicePocoClient;
+
+           await client.CreateStorageManifest(null);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionThrownWhenCreatingaStorageManifestWithBadAuth()
+        {
+            var containerName = "TestContainer";
+            var manifestName = "a/b/c/manifest";
+            var segPath = "TestContainer/a/b/c";
+
+            var manifest = new DynamicLargeObjectManifest(containerName, manifestName, segPath);
+
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.Unauthorized);
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new StorageServicePocoClient(GetValidContext());
+            await client.CreateStorageManifest(manifest);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionThrownWhenCreatingaStorageManifestHasInternalServerError()
+        {
+            var containerName = "TestContainer";
+            var manifestName = "a/b/c/manifest";
+            var segPath = "TestContainer/a/b/c";
+
+            var manifest = new DynamicLargeObjectManifest(containerName, manifestName, segPath);
+
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.InternalServerError);
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new StorageServicePocoClient(GetValidContext());
+            await client.CreateStorageManifest(manifest);
+        }
 
         #endregion
 
@@ -800,13 +1264,45 @@ namespace Openstack.Test.Storage
             var content = TestHelper.CreateStream("Some Content");
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), headers, HttpStatusCode.Created);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             var result = await client.CreateStorageObject(objRequest, content);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(objectName, result.Name);
+            Assert.AreEqual(containerName, result.ContainerName);
+            Assert.AreEqual(1234, result.Length);
+            Assert.AreEqual("application/octet-stream", result.ContentType);
+            Assert.AreEqual("d41d8cd98f00b204e9800998ecf8427e", result.ETag);
+            Assert.AreEqual(DateTime.Parse("Wed, 12 Mar 2014 23:42:23 GMT"), result.LastModified);
+        }
+
+        [TestMethod]
+        public async Task CanCreateStorageObjectWithFoldersAndCreatedResponse()
+        {
+            var containerName = "TestContainer";
+            var objectName = "a/b/TestObject";
+
+            var headers = new HttpHeadersAbstraction()
+            {
+                {"Content-Length", "1234"},
+                {"Content-Type", "application/octet-stream"},
+                {"Last-Modified", "Wed, 12 Mar 2014 23:42:23 GMT"},
+                {"ETag", "d41d8cd98f00b204e9800998ecf8427e"}
+            };
+
+            var objRequest = new StorageObject(objectName, containerName);
+            var content = TestHelper.CreateStream("Some Content");
+
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), headers, HttpStatusCode.Created);
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new StorageServicePocoClient(GetValidContext());
+            var result = await client.CreateStorageObject(objRequest, content);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(objectName, result.FullName);
             Assert.AreEqual(containerName, result.ContainerName);
             Assert.AreEqual(1234, result.Length);
             Assert.AreEqual("application/octet-stream", result.ContentType);
@@ -825,7 +1321,7 @@ namespace Openstack.Test.Storage
             var content = TestHelper.CreateStream("Some Content");
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.LengthRequired);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             await client.CreateStorageObject(objRequest, content);
@@ -842,7 +1338,7 @@ namespace Openstack.Test.Storage
             var content = TestHelper.CreateStream("Some Content");
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), (HttpStatusCode)422);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             await client.CreateStorageObject(objRequest, content);
@@ -859,7 +1355,7 @@ namespace Openstack.Test.Storage
             var content = TestHelper.CreateStream("Some Content");
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.Unauthorized);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             await client.CreateStorageObject(objRequest, content);
@@ -876,7 +1372,7 @@ namespace Openstack.Test.Storage
             var content = TestHelper.CreateStream("Some Content");
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.InternalServerError);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             await client.CreateStorageObject(objRequest, content);
@@ -893,7 +1389,7 @@ namespace Openstack.Test.Storage
             var content = TestHelper.CreateStream("Some Content");
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.RequestTimeout);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             await client.CreateStorageObject(objRequest, content);
@@ -918,7 +1414,7 @@ namespace Openstack.Test.Storage
             };
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), headers, HttpStatusCode.Created);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             await client.CreateStorageFolder(containerName, folderName);
@@ -940,7 +1436,7 @@ namespace Openstack.Test.Storage
             };
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), headers, HttpStatusCode.LengthRequired);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             await client.CreateStorageFolder(containerName, folderName);
@@ -954,7 +1450,7 @@ namespace Openstack.Test.Storage
             var folderName = "a/b/b/";
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), (HttpStatusCode)422);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             await client.CreateStorageFolder(containerName, folderName);
@@ -968,7 +1464,7 @@ namespace Openstack.Test.Storage
             var folderName = "a/b/b/";
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.Unauthorized);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             await client.CreateStorageFolder(containerName, folderName);
@@ -982,7 +1478,7 @@ namespace Openstack.Test.Storage
             var folderName = "a/b/b/";
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.InternalServerError);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             await client.CreateStorageFolder(containerName, folderName);
@@ -996,7 +1492,7 @@ namespace Openstack.Test.Storage
             var folderName = "a/b/b/";
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.RequestTimeout);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             await client.CreateStorageFolder(containerName, folderName);
@@ -1018,7 +1514,7 @@ namespace Openstack.Test.Storage
             };
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), headers, HttpStatusCode.Created);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var containerReq = new StorageContainer(containerName, new Dictionary<string, string>());
 
@@ -1042,7 +1538,7 @@ namespace Openstack.Test.Storage
             };
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), headers, HttpStatusCode.NoContent);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var containerReq = new StorageContainer(containerName, new Dictionary<string, string>());
 
@@ -1063,7 +1559,7 @@ namespace Openstack.Test.Storage
             var containerReq = new StorageContainer(containerName, new Dictionary<string, string>());
             
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.Unauthorized);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             await client.CreateStorageContainer(containerReq);
@@ -1078,7 +1574,7 @@ namespace Openstack.Test.Storage
             var containerReq = new StorageContainer(containerName, new Dictionary<string, string>());
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.InternalServerError);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             await client.CreateStorageContainer(containerReq);
@@ -1094,7 +1590,7 @@ namespace Openstack.Test.Storage
             var containerName = "TestContainer";
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.NoContent);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             await client.DeleteStorageContainer(containerName);
@@ -1106,7 +1602,7 @@ namespace Openstack.Test.Storage
             var containerName = "TestContainer";
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.OK);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             await client.DeleteStorageContainer(containerName);
@@ -1119,7 +1615,7 @@ namespace Openstack.Test.Storage
             var containerName = "TestContainer";
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.Conflict);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             await client.DeleteStorageContainer(containerName);
@@ -1132,7 +1628,7 @@ namespace Openstack.Test.Storage
             var containerName = "TestContainer";
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.Unauthorized);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             await client.DeleteStorageContainer(containerName);
@@ -1145,7 +1641,7 @@ namespace Openstack.Test.Storage
             var containerName = "TestContainer";
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.InternalServerError);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             await client.DeleteStorageContainer(containerName);
@@ -1162,7 +1658,7 @@ namespace Openstack.Test.Storage
             var objectName = "TestObject";
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.NoContent);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             await client.DeleteStorageObject(containerName, objectName);
@@ -1175,7 +1671,7 @@ namespace Openstack.Test.Storage
             var objectName = "TestObject";
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.OK);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             await client.DeleteStorageObject(containerName, objectName);
@@ -1189,7 +1685,7 @@ namespace Openstack.Test.Storage
             var objectName = "TestObject";
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.Unauthorized);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             await client.DeleteStorageObject(containerName, objectName);
@@ -1203,7 +1699,7 @@ namespace Openstack.Test.Storage
             var objectName = "TestObject";
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.InternalServerError);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             await client.DeleteStorageObject(containerName, objectName);
@@ -1220,7 +1716,8 @@ namespace Openstack.Test.Storage
             var folderName = "a/b/c/";
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.NoContent);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             await client.DeleteStorageFolder(containerName, folderName);
@@ -1233,7 +1730,8 @@ namespace Openstack.Test.Storage
             var folderName = "a/b/c/";
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.OK);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             await client.DeleteStorageFolder(containerName, folderName);
@@ -1263,7 +1761,7 @@ namespace Openstack.Test.Storage
             var content = TestHelper.CreateStream(payload);
 
             var restResp = new HttpResponseAbstraction(content, headers, HttpStatusCode.OK);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             await client.DeleteStorageFolder(containerName, folderName);
@@ -1277,7 +1775,7 @@ namespace Openstack.Test.Storage
             var folderName = "a/b/c/";
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.Unauthorized);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             await client.DeleteStorageFolder(containerName, folderName);
@@ -1291,7 +1789,7 @@ namespace Openstack.Test.Storage
             var folderName = "a/b/c/";
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.InternalServerError);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             await client.DeleteStorageFolder(containerName, folderName);
@@ -1308,7 +1806,7 @@ namespace Openstack.Test.Storage
             var containerReq = new StorageContainer(containerName, new Dictionary<string, string>());
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.NoContent);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             await client.UpdateStorageContainer(containerReq);
@@ -1322,7 +1820,7 @@ namespace Openstack.Test.Storage
             var containerReq = new StorageContainer(containerName, new Dictionary<string, string>());
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.Unauthorized);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             await client.UpdateStorageContainer(containerReq);
@@ -1336,7 +1834,7 @@ namespace Openstack.Test.Storage
             var containerReq = new StorageContainer(containerName, new Dictionary<string, string>());
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.InternalServerError);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             await client.UpdateStorageContainer(containerReq);
@@ -1355,7 +1853,7 @@ namespace Openstack.Test.Storage
             var objectReq = new StorageObject(containerName, objectName);
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.Accepted);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             await client.UpdateStorageObject(objectReq);
@@ -1371,7 +1869,7 @@ namespace Openstack.Test.Storage
             var objectReq = new StorageObject(containerName, objectName);
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.Unauthorized);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             await client.UpdateStorageObject(objectReq);
@@ -1387,7 +1885,7 @@ namespace Openstack.Test.Storage
             var objectReq = new StorageObject(containerName, objectName);
 
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.InternalServerError);
-            this.StorageServiceRestClient.Response = restResp;
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new StorageServicePocoClient(GetValidContext());
             await client.UpdateStorageObject(objectReq);

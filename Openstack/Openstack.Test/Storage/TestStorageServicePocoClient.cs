@@ -25,6 +25,8 @@ namespace Openstack.Test.Storage
     {
         public Func<StorageObject, Stream, Task<StorageObject>> CreateStorageObjectDelegate { get; set; }
 
+        public Func<StorageManifest,Task<StorageManifest>> CreateStorageManifestDelegate { get; set; }
+
         public Func<StorageContainer, Task<StorageContainer>> CreateStorageContainerDelegate { get; set; }
 
         public Func<string, string, Task> CreateStorageFolderDelegate { get; set; }
@@ -34,6 +36,8 @@ namespace Openstack.Test.Storage
         public Func<Task<StorageAccount>> GetStorageAccountDelegate { get; set; }
 
         public Func<string, string, Task<StorageObject>> GetStorageObjectDelegate { get; set; }
+
+        public Func<string, string, Task<StorageManifest>> GetStorageManifestDelegate { get; set; }
 
         public Func<string, string, Task<StorageFolder>> GetStorageFolderDelegate { get; set; }
 
@@ -52,6 +56,11 @@ namespace Openstack.Test.Storage
         public async Task<StorageObject> CreateStorageObject(StorageObject obj, Stream content)
         {
             return await this.CreateStorageObjectDelegate(obj, content);
+        }
+
+        public async Task<StorageManifest> CreateStorageManifest(StorageManifest manifest)
+        {
+            return await this.CreateStorageManifestDelegate(manifest);
         }
 
         public async Task CreateStorageContainer(StorageContainer container)
@@ -74,14 +83,19 @@ namespace Openstack.Test.Storage
             return await this.GetStorageObjectDelegate(containerName, objectName);
         }
 
+        public async Task<StorageManifest> GetStorageManifest(string containerName, string manifestName)
+        {
+            return await this.GetStorageManifestDelegate(containerName, manifestName);
+        }
+
         public async Task<StorageObject> DownloadStorageObject(string containerName, string objectName, Stream outputStream)
         {
             return await this.DownloadStorageObjectDelegate(containerName, objectName, outputStream);
         }
 
-        public async Task DeleteStorageObject(string containerName, string objectName)
+        public async Task DeleteStorageObject(string containerName, string itemName)
         {
-            await this.DeleteStorageObjectDelegate(containerName, objectName);
+            await this.DeleteStorageObjectDelegate(containerName, itemName);
         }
 
         public async Task DeleteStorageContainer(string containerName)
@@ -94,9 +108,9 @@ namespace Openstack.Test.Storage
             await this.UpdateStorageContainerDelegate(container);
         }
 
-        public async Task UpdateStorageObject(StorageObject obj)
+        public async Task UpdateStorageObject(StorageObject item)
         {
-            await this.UpdateStorageObjectDelegate(obj);
+            await this.UpdateStorageObjectDelegate(item);
         }
 
         public async Task<StorageFolder> GetStorageFolder(string containerName, string folderName)

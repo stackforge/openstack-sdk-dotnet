@@ -34,6 +34,13 @@ namespace Openstack.Storage
         Task<StorageObject> CreateStorageObject(StorageObject obj, Stream content);
 
         /// <summary>
+        /// Creates a storage manifest on the remote Openstack instance.
+        /// </summary>
+        /// <param name="manifest">The storage manifest to create.</param>
+        /// <returns>A storage manifest.</returns>
+        Task<StorageManifest> CreateStorageManifest(StorageManifest manifest);
+
+        /// <summary>
         /// Creates a storage container on the remote Openstack instance.
         /// </summary>
         /// <param name="container">The storage container to create.</param>
@@ -62,6 +69,14 @@ namespace Openstack.Storage
         Task<StorageObject> GetStorageObject(string containerName, string objectName);
 
         /// <summary>
+        /// Gets a storage manifest from the remote Openstack instance.
+        /// </summary>
+        /// <param name="containerName">The name of the parent storage container.</param>
+        /// <param name="manifestName">The name of the storage manifest.</param>
+        /// <returns>The storage manifest.</returns>
+        Task<StorageManifest> GetStorageManifest(string containerName, string manifestName);
+
+        /// <summary>
         /// Downloads the content of a storage object from the remote Openstack instance.
         /// </summary>
         /// <param name="containerName">The name of the parent storage container.</param>
@@ -74,7 +89,7 @@ namespace Openstack.Storage
         /// Deletes a storage object from the remote Openstack instance.
         /// </summary>
         /// <param name="containerName">The name of the parent storage container.</param>
-        /// <param name="objectName">The name of the storage object.</param>
+        /// <param name="objectName">The name of the object to delete.</param>
         /// <returns>An async task.</returns>
         Task DeleteStorageObject(string containerName, string objectName);
 

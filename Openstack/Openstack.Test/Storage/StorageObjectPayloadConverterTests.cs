@@ -15,9 +15,12 @@
 // ============================================================================ */
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Openstack.Common.Http;
 using Openstack.Storage;
 
@@ -294,7 +297,7 @@ namespace Openstack.Test.Storage
         }
 
         [TestMethod]
-        public void CanParseFromHeaders()
+        public void CanParseObjectFromHeaders()
         {
             var containerName = "TestContainer";
             var objectName = "TestObject";
@@ -311,6 +314,7 @@ namespace Openstack.Test.Storage
             var obj = converter.Convert(containerName, objectName, headers);
 
             Assert.IsNotNull(obj);
+            Assert.IsInstanceOfType(obj, typeof(StorageObject));
             Assert.AreEqual(1234, obj.Length);
             Assert.AreEqual("d41d8cd98f00b204e9800998ecf8427e", obj.ETag);
             Assert.AreEqual("application/octet-stream", obj.ContentType);
@@ -320,7 +324,7 @@ namespace Openstack.Test.Storage
         }
 
         [TestMethod]
-        public void CanParseFromHeadersWithMetadata()
+        public void CanParseObjectFromHeadersWithMetadata()
         {
             var containerName = "TestContainer";
             var objectName = "TestObject";
@@ -338,6 +342,7 @@ namespace Openstack.Test.Storage
             var obj = converter.Convert(containerName, objectName, headers);
 
             Assert.IsNotNull(obj);
+            Assert.IsInstanceOfType(obj, typeof(StorageObject));
             Assert.AreEqual(1234, obj.Length);
             Assert.AreEqual("d41d8cd98f00b204e9800998ecf8427e", obj.ETag);
             Assert.AreEqual("application/octet-stream", obj.ContentType);
@@ -349,6 +354,200 @@ namespace Openstack.Test.Storage
             Assert.AreEqual("Test1", obj.Metadata["Test1"]);
         }
 
+        [TestMethod]
+        public void CanParseStaticManifestFromHeadersWithMetadata()
+        {
+            var containerName = "TestContainer";
+            var objectName = "TestObject";
+
+            var headers = new HttpHeadersAbstraction()
+            {
+                {"Content-Length", "1234"},
+                {"Content-Type", "application/octet-stream"},
+                {"Last-Modified", "Wed, 12 Mar 2014 23:42:23 GMT"},
+                {"ETag", "d41d8cd98f00b204e9800998ecf8427e"},
+                {"X-Object-Meta-Test1","Test1"},
+                {"X-Static-Large-Object","True"}
+            };
+
+            var converter = new StorageObjectPayloadConverter();
+            var obj = converter.Convert(containerName, objectName, headers);
+
+            Assert.IsNotNull(obj);
+            Assert.IsInstanceOfType(obj, typeof(StaticLargeObjectManifest));
+            Assert.AreEqual(1234, obj.Length);
+            Assert.AreEqual("d41d8cd98f00b204e9800998ecf8427e", obj.ETag);
+            Assert.AreEqual("application/octet-stream", obj.ContentType);
+            Assert.AreEqual(DateTime.Parse("Wed, 12 Mar 2014 23:42:23 GMT"), obj.LastModified);
+            Assert.AreEqual(objectName, obj.Name);
+            Assert.AreEqual(containerName, obj.ContainerName);
+            Assert.AreEqual(1, obj.Metadata.Count());
+            Assert.IsTrue(obj.Metadata.ContainsKey("Test1"));
+            Assert.AreEqual("Test1", obj.Metadata["Test1"]);
+        }
+
+        [TestMethod]
+        public void CanParseObjectFromHeadersWithStaticManifestFlagSetToNonTrue()
+        {
+            var containerName = "TestContainer";
+            var objectName = "TestObject";
+
+            var headers = new HttpHeadersAbstraction()
+            {
+                {"Content-Length", "1234"},
+                {"Content-Type", "application/octet-stream"},
+                {"Last-Modified", "Wed, 12 Mar 2014 23:42:23 GMT"},
+                {"ETag", "d41d8cd98f00b204e9800998ecf8427e"},
+                {"X-Object-Meta-Test1","Test1"},
+                {"X-Static-Large-Object","False"}
+            };
+
+            var converter = new StorageObjectPayloadConverter();
+            var obj = converter.Convert(containerName, objectName, headers);
+
+            Assert.IsNotNull(obj);
+            Assert.IsInstanceOfType(obj, typeof(StorageObject));
+            Assert.AreEqual(1234, obj.Length);
+            Assert.AreEqual("d41d8cd98f00b204e9800998ecf8427e", obj.ETag);
+            Assert.AreEqual("application/octet-stream", obj.ContentType);
+            Assert.AreEqual(DateTime.Parse("Wed, 12 Mar 2014 23:42:23 GMT"), obj.LastModified);
+            Assert.AreEqual(objectName, obj.Name);
+            Assert.AreEqual(containerName, obj.ContainerName);
+            Assert.AreEqual(1, obj.Metadata.Count());
+            Assert.IsTrue(obj.Metadata.ContainsKey("Test1"));
+            Assert.AreEqual("Test1", obj.Metadata["Test1"]);
+        }
+
+        [TestMethod]
+        public void CanParseObjectFromHeadersWithStaticManifestFlagSetToNull()
+        {
+            var containerName = "TestContainer";
+            var objectName = "TestObject";
+
+            var headers = new HttpHeadersAbstraction()
+            {
+                {"Content-Length", "1234"},
+                {"Content-Type", "application/octet-stream"},
+                {"Last-Modified", "Wed, 12 Mar 2014 23:42:23 GMT"},
+                {"ETag", "d41d8cd98f00b204e9800998ecf8427e"},
+                {"X-Object-Meta-Test1","Test1"},
+                {"X-Static-Large-Object", (string)null}
+            };
+
+            var converter = new StorageObjectPayloadConverter();
+            var obj = converter.Convert(containerName, objectName, headers);
+
+            Assert.IsNotNull(obj);
+            Assert.IsInstanceOfType(obj, typeof(StorageObject));
+            Assert.AreEqual(1234, obj.Length);
+            Assert.AreEqual("d41d8cd98f00b204e9800998ecf8427e", obj.ETag);
+            Assert.AreEqual("application/octet-stream", obj.ContentType);
+            Assert.AreEqual(DateTime.Parse("Wed, 12 Mar 2014 23:42:23 GMT"), obj.LastModified);
+            Assert.AreEqual(objectName, obj.Name);
+            Assert.AreEqual(containerName, obj.ContainerName);
+            Assert.AreEqual(1, obj.Metadata.Count());
+            Assert.IsTrue(obj.Metadata.ContainsKey("Test1"));
+            Assert.AreEqual("Test1", obj.Metadata["Test1"]);
+        }
+
+        [TestMethod]
+        public void CanParseObjectFromHeadersWithDynamicFlagSetToNull()
+        {
+            var containerName = "TestContainer";
+            var objectName = "TestObject";
+
+            var headers = new HttpHeadersAbstraction()
+            {
+                {"Content-Length", "1234"},
+                {"Content-Type", "application/octet-stream"},
+                {"Last-Modified", "Wed, 12 Mar 2014 23:42:23 GMT"},
+                {"ETag", "d41d8cd98f00b204e9800998ecf8427e"},
+                {"X-Object-Meta-Test1","Test1"},
+                {"X-Object-Manifest", (string)null}
+            };
+
+            var converter = new StorageObjectPayloadConverter();
+            var obj = converter.Convert(containerName, objectName, headers);
+
+            Assert.IsNotNull(obj);
+            Assert.IsInstanceOfType(obj, typeof(StorageObject));
+            Assert.AreEqual(1234, obj.Length);
+            Assert.AreEqual("d41d8cd98f00b204e9800998ecf8427e", obj.ETag);
+            Assert.AreEqual("application/octet-stream", obj.ContentType);
+            Assert.AreEqual(DateTime.Parse("Wed, 12 Mar 2014 23:42:23 GMT"), obj.LastModified);
+            Assert.AreEqual(objectName, obj.Name);
+            Assert.AreEqual(containerName, obj.ContainerName);
+            Assert.AreEqual(1, obj.Metadata.Count());
+            Assert.IsTrue(obj.Metadata.ContainsKey("Test1"));
+            Assert.AreEqual("Test1", obj.Metadata["Test1"]);
+        }
+
+        [TestMethod]
+        public void CanParseObjectFromHeadersWithDynamicFlagSetToEmpty()
+        {
+            var containerName = "TestContainer";
+            var objectName = "TestObject";
+
+            var headers = new HttpHeadersAbstraction()
+            {
+                {"Content-Length", "1234"},
+                {"Content-Type", "application/octet-stream"},
+                {"Last-Modified", "Wed, 12 Mar 2014 23:42:23 GMT"},
+                {"ETag", "d41d8cd98f00b204e9800998ecf8427e"},
+                {"X-Object-Meta-Test1","Test1"},
+                {"X-Object-Manifest", string.Empty}
+            };
+
+            var converter = new StorageObjectPayloadConverter();
+            var obj = converter.Convert(containerName, objectName, headers);
+
+            Assert.IsNotNull(obj);
+            Assert.IsInstanceOfType(obj, typeof(StorageObject));
+            Assert.AreEqual(1234, obj.Length);
+            Assert.AreEqual("d41d8cd98f00b204e9800998ecf8427e", obj.ETag);
+            Assert.AreEqual("application/octet-stream", obj.ContentType);
+            Assert.AreEqual(DateTime.Parse("Wed, 12 Mar 2014 23:42:23 GMT"), obj.LastModified);
+            Assert.AreEqual(objectName, obj.Name);
+            Assert.AreEqual(containerName, obj.ContainerName);
+            Assert.AreEqual(1, obj.Metadata.Count());
+            Assert.IsTrue(obj.Metadata.ContainsKey("Test1"));
+            Assert.AreEqual("Test1", obj.Metadata["Test1"]);
+        }
+
+        [TestMethod]
+        public void CanParseDynamicManifestFromHeadersWithMetadata()
+        {
+            var containerName = "TestContainer";
+            var objectName = "TestObject";
+
+            var headers = new HttpHeadersAbstraction()
+            {
+                {"Content-Length", "1234"},
+                {"Content-Type", "application/octet-stream"},
+                {"Last-Modified", "Wed, 12 Mar 2014 23:42:23 GMT"},
+                {"ETag", "d41d8cd98f00b204e9800998ecf8427e"},
+                {"X-Object-Meta-Test1","Test1"},
+                {"X-Object-Manifest","a/b"}
+            };
+
+            var converter = new StorageObjectPayloadConverter();
+            var obj = converter.Convert(containerName, objectName, headers);
+
+            Assert.IsNotNull(obj);
+            Assert.IsInstanceOfType(obj, typeof(DynamicLargeObjectManifest));
+            Assert.AreEqual(1234, obj.Length);
+            Assert.AreEqual("d41d8cd98f00b204e9800998ecf8427e", obj.ETag);
+            Assert.AreEqual("application/octet-stream", obj.ContentType);
+            Assert.AreEqual(DateTime.Parse("Wed, 12 Mar 2014 23:42:23 GMT"), obj.LastModified);
+            Assert.AreEqual(objectName, obj.Name);
+            Assert.AreEqual(containerName, obj.ContainerName);
+            Assert.AreEqual(1, obj.Metadata.Count());
+            Assert.IsTrue(obj.Metadata.ContainsKey("Test1"));
+            Assert.AreEqual("Test1", obj.Metadata["Test1"]);
+
+            var manifest = obj as DynamicLargeObjectManifest;
+            Assert.AreEqual("a/b", manifest.SegmentsPath);
+        }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
@@ -543,6 +742,67 @@ namespace Openstack.Test.Storage
 
             var converter = new StorageObjectPayloadConverter();
             converter.Convert(containerName, objectName, headers);
+        }
+
+        [TestMethod]
+        public void CanConvertSingleStorageObjectToJson()
+        {
+            var obj = new StorageObject("a/b/c", "TestContainer", DateTime.UtcNow, "12345", 54321, string.Empty,
+                new Dictionary<string, string>());
+
+            var converter = new StorageObjectPayloadConverter();
+            var payload = converter.Convert(new List<StorageObject>() { obj});
+
+            var result = JArray.Parse(payload);
+            Assert.AreEqual(1,result.Count);
+
+            var item = result[0];
+            Assert.AreEqual("TestContainer/a/b/c", item["path"]);
+            Assert.AreEqual(54321, item["size_bytes"]);
+            Assert.AreEqual("12345", item["etag"]);
+        }
+
+        [TestMethod]
+        public void CanConvertMultipleStorageObjectToJson()
+        {
+            var obj = new StorageObject("a/b/c", "TestContainer", DateTime.UtcNow, "12345", 54321, string.Empty,
+                new Dictionary<string, string>());
+
+            var obj2 = new StorageObject("a/b/d", "TestContainer", DateTime.UtcNow, "00000", 11111, string.Empty,
+                new Dictionary<string, string>());
+
+            var converter = new StorageObjectPayloadConverter();
+            var payload = converter.Convert(new List<StorageObject>() { obj, obj2 });
+
+            var result = JArray.Parse(payload);
+            Assert.AreEqual(2, result.Count);
+
+            var item = result[0];
+            Assert.AreEqual("TestContainer/a/b/c", item["path"]);
+            Assert.AreEqual(54321, item["size_bytes"]);
+            Assert.AreEqual("12345", item["etag"]);
+
+            var item2 = result[1];
+            Assert.AreEqual("TestContainer/a/b/d", item2["path"]);
+            Assert.AreEqual(11111, item2["size_bytes"]);
+            Assert.AreEqual("00000", item2["etag"]);
+        }
+
+        [TestMethod]
+        public void CanConvertEmptyStorageObjectsToJson()
+        {
+            var converter = new StorageObjectPayloadConverter();
+            var payload = converter.Convert(new List<StorageObject>());
+            var result = JArray.Parse(payload);
+            Assert.AreEqual(0, result.Count);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void CannotConvertNullStorageObjectsToJson()
+        {
+            var converter = new StorageObjectPayloadConverter();
+            converter.Convert(null);
         }
     }
 }

@@ -19,6 +19,7 @@ namespace Openstack.Storage
     using System.Linq;
     using Openstack.Common;
     using System.Collections.Generic;
+    using Openstack.Common.ServiceLocation;
 
     /// <summary>
     /// Represents a storage folder on a remote Openstack instance.
@@ -78,10 +79,8 @@ namespace Openstack.Storage
         /// <returns>The "friendly" name of the folder. (e.g. "b" if the folder path is "a/b/")</returns>
         internal static string ExtractFolderName(string fullFolderName)
         {
-            var fullName = fullFolderName.Trim('/');
-            var lastIndex = fullName.LastIndexOf('/');
-            lastIndex++;
-            return fullName.Substring(lastIndex, fullName.Length - lastIndex);
+            var extractor = ServiceLocator.Instance.Locate<IStorageItemNameExtractor>();
+            return extractor.ExtractName(fullFolderName);
         }
     }
 }

@@ -338,7 +338,7 @@ namespace Openstack.Test.Storage
             Assert.AreEqual("a", aNode.Name);
             Assert.AreEqual(2, aNode.Folders.Count);
             Assert.AreEqual(1, aNode.Objects.Count);
-            Assert.IsTrue(aNode.Objects.Any(f => f.Name == "a/object2"));
+            Assert.IsTrue(aNode.Objects.Any(f => f.FullName == "a/object2"));
 
             var xNode = aNode.Folders.First(f => f.Name == "x");
             Assert.AreEqual(0, xNode.Folders.Count);
@@ -348,13 +348,13 @@ namespace Openstack.Test.Storage
             Assert.AreEqual(1, bNode.Folders.Count);
             Assert.AreEqual(2, bNode.Objects.Count);
             Assert.IsTrue(bNode.Folders.Any(f => f.Name == "c"));
-            Assert.IsTrue(bNode.Objects.Any(f => f.Name == "a/b/c"));
-            Assert.IsTrue(bNode.Objects.Any(f => f.Name == "a/b/b"));
+            Assert.IsTrue(bNode.Objects.Any(f => f.FullName == "a/b/c"));
+            Assert.IsTrue(bNode.Objects.Any(f => f.FullName == "a/b/b"));
 
             var cNode = bNode.Folders.First(f => f.Name == "c");
             Assert.AreEqual(0, cNode.Folders.Count);
             Assert.AreEqual(1, cNode.Objects.Count);
-            Assert.IsTrue(cNode.Objects.Any(f => f.Name == "a/b/c/object3"));
+            Assert.IsTrue(cNode.Objects.Any(f => f.FullName == "a/b/c/object3"));
 
         }
 

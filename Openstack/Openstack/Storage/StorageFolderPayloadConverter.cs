@@ -44,13 +44,13 @@ namespace Openstack.Storage
             foreach (var obj in sortedObjectList)
             {
                 //if the name has any consecutive slashes in the name, skip it.
-                if (Regex.IsMatch(obj.Name, consecutiveSlashRegex))
+                if (Regex.IsMatch(obj.FullName, consecutiveSlashRegex))
                 {
                     continue;
                 }
 
                 //split the input using a forward slash as the folder delimiter, and separate the object name (if we have one) and the folder path.
-                var folderParts = obj.Name.TrimStart('/').Split('/');
+                var folderParts = obj.FullName.TrimStart('/').Split('/');
                 var objectName = folderParts.Last(); //this will be string.empty if the object name ends in a "/" indicating that it's a folder.
                 folderParts = folderParts.Take(folderParts.Length - 1).ToArray();
 
@@ -113,7 +113,7 @@ namespace Openstack.Storage
                 var objectConverter = ServiceLocator.Instance.Locate<IStorageObjectPayloadConverter>();
 
                 var objects = rawObjects.Select(t => objectConverter.ConvertSingle(t,containerName)).ToList();
-                objects.RemoveAll(o => string.Compare(o.Name, folderName, StringComparison.InvariantCulture) == 0);
+                objects.RemoveAll(o => string.Compare(o.FullName, folderName, StringComparison.InvariantCulture) == 0);
 
                 return new StorageFolder(folderName, subFolders.Select(ParseSubFolder), objects);
                 

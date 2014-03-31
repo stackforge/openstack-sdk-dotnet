@@ -19,6 +19,7 @@ namespace Openstack.Storage
     using System;
     using System.Collections.Generic;
     using Openstack.Common;
+    using Openstack.Common.ServiceLocation;
 
     /// <summary>
     /// Represents a storage object.
@@ -26,37 +27,42 @@ namespace Openstack.Storage
     public class StorageObject
     {
         /// <summary>
-        /// Gets the name of the storage object.
+        /// Gets the friendly name of the storage item.
         /// </summary>
         public string Name { get; private set; }
 
         /// <summary>
-        /// Gets the name of the parent storage container for the storage object.
+        /// Gets the full name of the storage item.
+        /// </summary>
+        public string FullName { get; private set; }
+
+        /// <summary>
+        /// Gets the name of the parent storage container for the storage item.
         /// </summary>
         public string ContainerName { get; private set; }
 
         /// <summary>
-        /// Gets the last modified data for the storage object.
+        /// Gets the last modified data for the storage item.
         /// </summary>
         public DateTime LastModified { get; private set; }
 
         /// <summary>
-        /// Gets the ETag for the storage object.
+        /// Gets the ETag for the storage item.
         /// </summary>
         public string ETag { get; private set; }
 
         /// <summary>
-        /// Gets the length/size of the storage object.
+        /// Gets the length/size of the storage item.
         /// </summary>
         public long Length { get; private set; }
 
         /// <summary>
-        /// Gets the content type of the storage object.
+        /// Gets the content type of the storage item.
         /// </summary>
         public string ContentType { get; private set; }
 
         /// <summary>
-        /// Gets the metadata associated with the storage object.
+        /// Gets the metadata associated with the storage item.
         /// </summary>
         public IDictionary<string, string> Metadata { get; private set; }
 
@@ -70,7 +76,6 @@ namespace Openstack.Storage
         public StorageObject(string name, string containerName, string contentType, IDictionary<string, string> metadata)
             : this(name, containerName, DateTime.UtcNow, string.Empty, 0, contentType, metadata)
         {
-            
         }
 
         /// <summary>
@@ -81,7 +86,17 @@ namespace Openstack.Storage
         public StorageObject(string name, string containerName)
             : this(name, containerName, DateTime.UtcNow, string.Empty, 0, string.Empty, new Dictionary<string, string>())
         {
+        }
 
+        /// <summary>
+        /// Creates a new instance of the StorageObject class.
+        /// </summary>
+        /// <param name="name">The name of the storage object.</param>
+        /// <param name="containerName">The name of the parent storage container for the storage object.</param>
+        /// <param name="metadata">The metadata associated with the storage object.</param>
+        public StorageObject(string name, string containerName, IDictionary<string, string> metadata )
+            : this(name, containerName, DateTime.UtcNow, string.Empty, 0, string.Empty, metadata)
+        {
         }
 
         /// <summary>
@@ -101,16 +116,16 @@ namespace Openstack.Storage
         /// <summary>
         /// Creates a new instance of the StorageObject class.
         /// </summary>
-        /// <param name="name">The name of the storage object.</param>
+        /// <param name="fullName">The full name of the storage object.</param>
         /// <param name="containerName">The name of the parent storage container for the storage object.</param>
         /// <param name="lastModified">The last modified data for the storage object.</param>
         /// <param name="eTag">The ETag for the storage object.</param>
         /// <param name="length">The length/size of the storage object.</param>
         /// <param name="contentType">The content type of the storage object.</param>
         /// <param name="metadata">The metadata associated with the storage object.</param>
-        internal StorageObject(string name, string containerName, DateTime lastModified, string eTag, long length, string contentType, IDictionary<string, string> metadata )
+        internal StorageObject(string fullName, string containerName, DateTime lastModified, string eTag, long length, string contentType, IDictionary<string, string> metadata)
         {
-            name.AssertIsNotNullOrEmpty("name");
+            fullName.AssertIsNotNullOrEmpty("fullName");
             containerName.AssertIsNotNullOrEmpty("containerName");
             lastModified.AssertIsNotNull("lastModified");
             eTag.AssertIsNotNull("eTag");
@@ -118,13 +133,25 @@ namespace Openstack.Storage
             contentType.AssertIsNotNull("contentType");
             metadata.AssertIsNotNull("metadata");
 
-            this.Name = name;
+            this.FullName = fullName;
+            this.Name = ExtractName(fullName);
             this.ContainerName = containerName;
             this.LastModified = lastModified;
             this.ETag = eTag;
             this.Length = length;
             this.ContentType = contentType;
             this.Metadata = metadata;
+        }
+
+        /// <summary>
+        /// Extracts the "friendly" name from the objects full name.
+        /// </summary>
+        /// <param name="fullItemName">The full name of the object.</param>
+        /// <returns>The "friendly" name of the object. (e.g. "b" if the item path is "a/b")</returns>
+        internal static string ExtractName(string fullItemName)
+        {
+            var extractor = ServiceLocator.Instance.Locate<IStorageItemNameExtractor>();
+            return extractor.ExtractName(fullItemName);
         }
     }
 }

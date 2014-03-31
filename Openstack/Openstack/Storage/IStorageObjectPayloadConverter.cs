@@ -43,6 +43,13 @@ namespace Openstack.Storage
         StorageObject Convert(string containerName, string objectName, IHttpHeadersAbstraction headers);
 
         /// <summary>
+        /// Converts a collection of StorageObjects into a Json payload.
+        /// </summary>
+        /// <param name="objects">A collection of StorageObjects to convert.</param>
+        /// <returns>The Json payload.</returns>
+        string Convert(IEnumerable<StorageObject> objects);
+
+        /// <summary>
         /// Converts a Json token into a storage object.
         /// </summary>
         /// <param name="obj">The token.</param>

@@ -60,6 +60,46 @@ namespace Openstack.Storage
         }
 
         /// <inheritdoc/>
+        public async Task<IHttpResponseAbstraction> CreateDynamicManifest(string containerName, string manifestName, IDictionary<string, string> metadata, string segmentsPath)
+        {
+            AssertContainerNameIsValid(containerName);
+            manifestName.AssertIsNotNullOrEmpty("manifestName","Cannot create a storage manifest with a null or empty name.");
+            segmentsPath.AssertIsNotNullOrEmpty("segmentsPath","Cannot create a dynamic large object manifest with a null or empty segments path.");
+            metadata.AssertIsNotNull("metadata","Cannot create a storage manifest with null metadata.");
+
+            var client = this.GetHttpClient(this.context);
+
+            client.Uri = CreateRequestUri(GetServiceEndpoint(this.context), containerName, manifestName);
+            client.Method = HttpMethod.Put;
+            client.Content = new MemoryStream();
+
+            client.Headers.Add("X-Object-Manifest", segmentsPath);
+            this.AddItemMetadata(metadata, client);
+
+            return await client.SendAsync();
+        }
+
+        /// <inheritdoc/>
+        public async Task<IHttpResponseAbstraction> CreateStaticManifest(string containerName, string manifestName, IDictionary<string, string> metadata, Stream content)
+        {
+            AssertContainerNameIsValid(containerName);
+            manifestName.AssertIsNotNullOrEmpty("manifestName", "Cannot create a storage manifest with a null or empty name.");
+            metadata.AssertIsNotNull("metadata", "Cannot create a storage manifest with null metadata.");
+            content.AssertIsNotNull("content","Cannot create a static large object manifest with null content.");
+
+            var client = this.GetHttpClient(this.context);
+
+            var baseUri = CreateRequestUri(GetServiceEndpoint(this.context), containerName);
+            client.Uri = new Uri(string.Format("{0}/{1}?multipart-manifest=put", baseUri, manifestName));
+            client.Method = HttpMethod.Put;
+            client.Content = content;
+
+            this.AddItemMetadata(metadata, client);
+
+            return await client.SendAsync();
+        }
+
+        /// <inheritdoc/>
         public async Task<IHttpResponseAbstraction> CreateContainer(string containerName, IDictionary<string, string> metadata)
         {
             AssertContainerNameIsValid(containerName);
@@ -192,6 +232,21 @@ namespace Openstack.Storage
 
             client.Uri = CreateRequestUri(GetServiceEndpoint(this.context), containerName, objectName);
             client.Method = HttpMethod.Head;
+
+            return await client.SendAsync();
+        }
+
+        /// <inheritdoc/>
+        public async Task<IHttpResponseAbstraction> GetManifestMetadata(string containerName, string manifestName)
+        {
+            AssertContainerNameIsValid(containerName);
+            manifestName.AssertIsNotNullOrEmpty("manifestName", "Cannot get a manifest with a null or empty folder name.");
+
+            var client = this.GetHttpClient(this.context);
+
+            var baseUri = CreateRequestUri(GetServiceEndpoint(this.context), containerName);
+            client.Uri = new Uri(string.Format("{0}/{1}?multipart-manifest=get", baseUri, manifestName));
+            client.Method = HttpMethod.Get;
 
             return await client.SendAsync();
         }
