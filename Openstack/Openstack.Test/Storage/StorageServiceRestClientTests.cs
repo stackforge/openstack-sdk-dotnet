@@ -1389,7 +1389,22 @@ namespace Openstack.Test.Storage
 
             await client.GetFolder(containerName, folderName);
 
-            Assert.AreEqual(string.Format("{0}/{1}?prefix={2}&delimiter=/", endpoint, containerName, folderName), this.simulator.Uri.ToString());
+            Assert.AreEqual(string.Format("{0}/{1}?delimiter=/&prefix={2}", endpoint, containerName, folderName), this.simulator.Uri.ToString());
+            Assert.AreEqual(HttpMethod.Get, this.simulator.Method);
+        }
+
+        [TestMethod]
+        public async Task GetRootStorageFolderFormsCorrectUrlAndMethod()
+        {
+            var containerName = "newContainer";
+            var folderName = "/";
+
+            var client =
+                new StorageServiceRestClient(GetValidContext());
+
+            await client.GetFolder(containerName, folderName);
+
+            Assert.AreEqual(string.Format("{0}/{1}?delimiter=/", endpoint, containerName), this.simulator.Uri.ToString());
             Assert.AreEqual(HttpMethod.Get, this.simulator.Method);
         }
 

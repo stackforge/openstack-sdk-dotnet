@@ -103,6 +103,7 @@
     <Compile Include="Storage\StaticLargeObjectManifest.cs" />
     <Compile Include="Storage\StorageFolder.cs" />
     <Compile Include="Storage\StorageFolderPayloadConverter.cs" />
+    <Compile Include="Storage\StorageItem.cs" />
     <Compile Include="Storage\StorageItemNameExtractor.cs" />
     <Compile Include="Storage\StorageManifest.cs" />
     <Compile Include="Storage\StorageServiceClient.cs" />

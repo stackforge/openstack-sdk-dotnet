@@ -823,7 +823,7 @@ namespace Openstack.Test.Storage
             var result = await client.GetStorageFolder(containerName, folderName);
 
             Assert.IsNotNull(result);
-            Assert.AreEqual("a/b/c", result.FullName);
+            Assert.AreEqual("a/b/c/", result.FullName);
             Assert.AreEqual("c", result.Name);
             Assert.IsNotNull(result.Objects);
             Assert.AreEqual(1, result.Objects.Count());
@@ -849,7 +849,7 @@ namespace Openstack.Test.Storage
             var result = await client.GetStorageFolder(containerName, folderName);
 
             Assert.IsNotNull(result);
-            Assert.AreEqual("a/b/c", result.FullName);
+            Assert.AreEqual("a/b/c/", result.FullName);
             Assert.AreEqual("c", result.Name);
             Assert.IsNotNull(result.Objects);
             Assert.AreEqual(0, result.Objects.Count());
@@ -900,15 +900,15 @@ namespace Openstack.Test.Storage
             var resp = await client.GetStorageFolder(containerName, folderName);
 
             Assert.AreEqual("c", resp.Name);
-            Assert.AreEqual("a/b/c", resp.FullName);
+            Assert.AreEqual("a/b/c/", resp.FullName);
             Assert.AreEqual(1, resp.Objects.Count);
             Assert.AreEqual(2, resp.Folders.Count);
 
             var obj = resp.Objects.First();
             Assert.AreEqual("a/b/c/BLAH", obj.FullName);
 
-            var dNode = resp.Folders.First(f => f.FullName == "a/b/c/d");
-            var xNode = resp.Folders.First(f => f.FullName == "a/b/c/x");
+            var dNode = resp.Folders.First(f => f.FullName == "a/b/c/d/");
+            var xNode = resp.Folders.First(f => f.FullName == "a/b/c/x/");
 
             Assert.AreEqual("d", dNode.Name);
             Assert.AreEqual(0, dNode.Folders.Count);

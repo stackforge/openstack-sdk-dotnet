@@ -283,7 +283,7 @@ namespace Openstack.Test.Storage
 
             Assert.AreEqual(1, resp.Objects.Count);
             Assert.AreEqual(0, resp.Folders.Count);
-            Assert.AreEqual("a/b/c", resp.FullName);
+            Assert.AreEqual("a/b/c/", resp.FullName);
             Assert.AreEqual("c", resp.Name);
 
             var obj = resp.Objects.First();
@@ -328,7 +328,7 @@ namespace Openstack.Test.Storage
 
             Assert.AreEqual(1, resp.Objects.Count);
             Assert.AreEqual(0, resp.Folders.Count);
-            Assert.AreEqual("a/b/c", resp.FullName);
+            Assert.AreEqual("a/b/c/", resp.FullName);
             Assert.AreEqual("c", resp.Name);
 
             var obj = resp.Objects.First();
@@ -360,14 +360,14 @@ namespace Openstack.Test.Storage
 
             Assert.AreEqual(1, resp.Objects.Count);
             Assert.AreEqual(2, resp.Folders.Count);
-            Assert.AreEqual("a/b/c", resp.FullName);
+            Assert.AreEqual("a/b/c/", resp.FullName);
             Assert.AreEqual("c", resp.Name);
 
             var obj = resp.Objects.First();
             Assert.AreEqual("a/b/c/BLAH", obj.FullName);
 
-            var dNode = resp.Folders.First(f => f.FullName == "a/b/c/d");
-            var xNode = resp.Folders.First(f => f.FullName == "a/b/c/x");
+            var dNode = resp.Folders.First(f => f.FullName == "a/b/c/d/");
+            var xNode = resp.Folders.First(f => f.FullName == "a/b/c/x/");
 
             Assert.AreEqual("d", dNode.Name);
             Assert.AreEqual(0, dNode.Folders.Count);
@@ -410,15 +410,15 @@ namespace Openstack.Test.Storage
             var resp = converter.Convert(containerName, folderName, payload);
 
             Assert.AreEqual("c", resp.Name);
-            Assert.AreEqual("a/b/c", resp.FullName);
+            Assert.AreEqual("a/b/c/", resp.FullName);
             Assert.AreEqual(1, resp.Objects.Count);
             Assert.AreEqual(2, resp.Folders.Count);
 
             var obj = resp.Objects.First();
             Assert.AreEqual("a/b/c/BLAH", obj.FullName);
 
-            var dNode = resp.Folders.First(f => f.FullName == "a/b/c/d");
-            var xNode = resp.Folders.First(f => f.FullName == "a/b/c/x");
+            var dNode = resp.Folders.First(f => f.FullName == "a/b/c/d/");
+            var xNode = resp.Folders.First(f => f.FullName == "a/b/c/x/");
 
             Assert.AreEqual("d", dNode.Name);
             Assert.AreEqual(0, dNode.Folders.Count);

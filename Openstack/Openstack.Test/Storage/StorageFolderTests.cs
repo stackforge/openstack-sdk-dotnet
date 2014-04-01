@@ -38,9 +38,10 @@ namespace Openstack.Test.Storage
         [TestMethod]
         public void CanCreateFolderWithLeadingSlashes()
         {
+            var expectedFullFolderName = "//MyFolder";
             var expectedFolderName = "MyFolder";
             var folder = new StorageFolder("//MyFolder", new List<StorageFolder>());
-            Assert.AreEqual(expectedFolderName, folder.FullName);
+            Assert.AreEqual(expectedFullFolderName, folder.FullName);
             Assert.AreEqual(expectedFolderName, folder.Name);
             Assert.AreEqual(0, folder.Folders.Count());
         }
@@ -48,9 +49,10 @@ namespace Openstack.Test.Storage
         [TestMethod]
         public void CanCreateFolderWithTrailingSlashes()
         {
+            var expectedFullFolderName = "MyFolder//";
             var expectedFolderName = "MyFolder";
             var folder = new StorageFolder("MyFolder//", new List<StorageFolder>());
-            Assert.AreEqual(expectedFolderName, folder.FullName);
+            Assert.AreEqual(expectedFullFolderName, folder.FullName);
             Assert.AreEqual(expectedFolderName, folder.Name);
             Assert.AreEqual(0, folder.Folders.Count());
         }
@@ -60,89 +62,9 @@ namespace Openstack.Test.Storage
         {
             var expectedFolderName = "MyFolder";
             var folder = new StorageFolder("//Some/Folder/MyFolder", new List<StorageFolder>());
-            Assert.AreEqual("Some/Folder/MyFolder", folder.FullName);
+            Assert.AreEqual("//Some/Folder/MyFolder", folder.FullName);
             Assert.AreEqual(expectedFolderName, folder.Name);
             Assert.AreEqual(0, folder.Folders.Count());
-        }
-
-        [TestMethod]
-        public void CanExtractFolderNameWithNoSlashes()
-        {
-            var expectedFolderName = "myFolder";
-            var folderName = StorageFolder.ExtractFolderName("myFolder");
-            Assert.AreEqual(expectedFolderName, folderName);
-        }
-
-        [TestMethod]
-        public void CanExtractFolderNameWithLeadingSlash()
-        {
-            var expectedFolderName = "myFolder";
-            var folderName = StorageFolder.ExtractFolderName("/myFolder");
-            Assert.AreEqual(expectedFolderName, folderName);
-        }
-
-        [TestMethod]
-        public void CanExtractFolderNameWithTrailingSlash()
-        {
-            var expectedFolderName = "myFolder";
-            var folderName = StorageFolder.ExtractFolderName("myFolder/");
-            Assert.AreEqual(expectedFolderName, folderName);
-        }
-
-        [TestMethod]
-        public void CanExtractFolderNameWithTrailingAndLeadingSlash()
-        {
-            var expectedFolderName = "myFolder";
-            var folderName = StorageFolder.ExtractFolderName("/myFolder/");
-            Assert.AreEqual(expectedFolderName, folderName);
-        }
-
-        [TestMethod]
-        public void CanExtractFolderNameWithJustSlash()
-        {
-            var expectedFolderName = string.Empty;
-            var folderName = StorageFolder.ExtractFolderName("/");
-            Assert.AreEqual(expectedFolderName, folderName);
-        }
-
-        [TestMethod]
-        public void CanExtractFolderNameWithDoubleLeadingSlash()
-        {
-            var expectedFolderName = "MyFolder";
-            var folderName = StorageFolder.ExtractFolderName("//MyFolder");
-            Assert.AreEqual(expectedFolderName, folderName);
-        }
-
-        [TestMethod]
-        public void CanExtractFolderNameWithDoubleTrailingSlash()
-        {
-            var expectedFolderName = "MyFolder";
-            var folderName = StorageFolder.ExtractFolderName("MyFolder//");
-            Assert.AreEqual(expectedFolderName, folderName);
-        }
-
-        [TestMethod]
-        public void CanExtractFolderNameWithDoubleTrailingAndLeadingSlashes()
-        {
-            var expectedFolderName = "MyFolder";
-            var folderName = StorageFolder.ExtractFolderName("//MyFolder//");
-            Assert.AreEqual(expectedFolderName, folderName);
-        }
-
-        [TestMethod]
-        public void CanExtractFolderNameWithMultipleFolders()
-        {
-            var expectedFolderName = "MyFolder";
-            var folderName = StorageFolder.ExtractFolderName("Folder1/Folder2/Folder3/MyFolder");
-            Assert.AreEqual(expectedFolderName, folderName);
-        }
-
-        [TestMethod]
-        public void CanExtractFolderNameWithMultipleFoldersAndSlashes()
-        {
-            var expectedFolderName = "MyFolder";
-            var folderName = StorageFolder.ExtractFolderName("Folder1//Folder2/Folder3//MyFolder/");
-            Assert.AreEqual(expectedFolderName, folderName);
         }
     }
 }

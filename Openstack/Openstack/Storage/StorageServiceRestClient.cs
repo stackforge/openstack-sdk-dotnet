@@ -137,7 +137,11 @@ namespace Openstack.Storage
             var client = this.GetHttpClient(this.context);
 
             var baseUri = CreateRequestUri(GetServiceEndpoint(this.context), containerName);
-            client.Uri = new Uri(string.Format("{0}?prefix={1}&delimiter=/", baseUri, folderName));
+            var prefix = string.Compare("/", folderName, StringComparison.InvariantCulture) == 0
+                ? string.Empty
+                : string.Format("&prefix={0}", folderName);
+            
+            client.Uri = new Uri(string.Format("{0}?delimiter=/{1}", baseUri, prefix));
             client.Method = HttpMethod.Get;
 
             return await client.SendAsync();
