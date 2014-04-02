@@ -219,6 +219,68 @@ namespace Openstack.Test.Storage
         }
 
         [TestMethod]
+        public async Task CanGetStorageManifest()
+        {
+            var containerName = "TestContainer";
+            var manifestName = "TestManifest";
+
+            var obj = new StaticLargeObjectManifest(manifestName, containerName, DateTime.UtcNow, "12345", 12345,
+                "application/octet-stream", new Dictionary<string, string>());
+
+            this.ServicePocoClient.GetStorageManifestDelegate = (s, s1) =>
+            {
+                Assert.AreEqual(s, obj.ContainerName);
+                Assert.AreEqual(s1, obj.FullName);
+                return Task.Factory.StartNew(() => (StorageManifest)obj);
+            };
+
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var resp = await client.GetStorageManifest(containerName, manifestName);
+
+            Assert.AreEqual(obj, resp);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task GettingStorageManifestWithNullContainerNameThrows()
+        {
+            var manifestName = "TestManifest";
+
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            await client.GetStorageManifest(null, manifestName);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task GettingStorageManifestWithEmptyContainerNameThrows()
+        {
+            var manifestName = "TestManifest";
+
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            await client.GetStorageObject(string.Empty, manifestName);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task GettingStorageManifestWithNullObjectNameThrows()
+        {
+            var containerName = "TestContainer";
+
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            await client.GetStorageManifest(containerName, null);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task GettingStorageManifestWithEmptyObjectNameThrows()
+        {
+            var containerName = "TestContainer";
+
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            await client.GetStorageManifest(containerName, string.Empty);
+        }
+
+        [TestMethod]
         public async Task CanGetStorageFolder()
         {
             var containerName = "TestContainer";

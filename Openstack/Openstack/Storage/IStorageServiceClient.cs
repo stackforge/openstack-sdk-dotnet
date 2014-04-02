@@ -143,6 +143,14 @@ namespace Openstack.Storage
         Task<StorageManifest> CreateStorageManifest(string containerName, string manifestName, IDictionary<string, string> metadata, string segmentsPath);
 
         /// <summary>
+        /// Gets a storage manifest from the remote Openstack instance.
+        /// </summary>
+        /// <param name="containerName">The name of the parent container.</param>
+        /// <param name="objectName">The name of the manifest.</param>
+        /// <returns>The storage manifest.</returns>
+        Task<StorageManifest> GetStorageManifest(string containerName, string objectName);
+
+        /// <summary>
         /// Gets a storage folder from the remote Openstack instance. The returned folder is a shallow object graph representation.
         /// </summary>
         /// <param name="containerName">The name of the parent container.</param>

@@ -169,12 +169,6 @@ namespace Openstack.Storage
             var converter = ServiceLocator.Instance.Locate<IStorageObjectPayloadConverter>();
             var obj = converter.Convert(containerName, objectName, resp.Headers);
 
-            //If the request object is actually a manifest object, then make sure we go back out and get the details of the manifest.
-            if (obj is StorageManifest)
-            {
-                return await GetStorageManifest(containerName, objectName);
-            }
-
             return obj;
         }
 

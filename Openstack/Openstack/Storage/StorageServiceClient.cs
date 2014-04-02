@@ -151,6 +151,16 @@ namespace Openstack.Storage
         }
 
         /// <inheritdoc/>
+        public async Task<StorageManifest> GetStorageManifest(string containerName, string manifestName)
+        {
+            containerName.AssertIsNotNullOrEmpty("containerName", "Cannot get a storage manifest with a container name that is null or empty.");
+            manifestName.AssertIsNotNullOrEmpty("manifestName", "Cannot get a storage manifest with a name that is null or empty.");
+
+            var client = this.GetPocoClient();
+            return await client.GetStorageManifest(containerName, manifestName);
+        }
+
+        /// <inheritdoc/>
         public async Task<StorageFolder> GetStorageFolder(string containerName, string folderName)
         {
             containerName.AssertIsNotNullOrEmpty("containerName", "Cannot get a storage folder with a container name that is null or empty.");

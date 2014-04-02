@@ -438,7 +438,7 @@ namespace Openstack.Test.Storage
                                 {
                                     ""hash"": ""d41d8cd98f00b204e9800998ecf8427e"",
                                     ""last_modified"": ""2014-03-07T21:31:31.588170"",
-                                    ""bytes"": 0,
+                                    ""bytes"": 54321,
                                     ""name"": ""a/b/c/BLAH"",
                                     ""content_type"": ""application/octet-stream""
                                 }]";
@@ -460,11 +460,6 @@ namespace Openstack.Test.Storage
             Assert.AreEqual("application/octet-stream", result.ContentType);
             Assert.AreEqual("d41d8cd98f00b204e9800998ecf8427e", result.ETag);
             Assert.AreEqual(DateTime.Parse("Wed, 12 Mar 2014 23:42:23 GMT"), result.LastModified);
-
-            var manifest = result as StaticLargeObjectManifest;
-            Assert.IsNotNull(manifest.Objects);
-            Assert.AreEqual(1, manifest.Objects.Count());
-            Assert.AreEqual("a/b/c/BLAH", manifest.Objects.First().FullName);
         }
 
         [TestMethod]
