@@ -85,6 +85,9 @@
     <Compile Include="Storage\StorageServicePocoClientTests.cs" />
     <Compile Include="Storage\StorageServiceRestClientTests.cs" />
     <Compile Include="Storage\StorageRestSimulator.cs" />
+    <Compile Include="Storage\TestLargeStorageObjectCreator.cs" />
+    <Compile Include="Storage\TestStorageManifest.cs" />
+    <Compile Include="Storage\TestStorageServiceClient.cs" />
     <Compile Include="Storage\TestStorageServicePocoClient.cs" />
     <Compile Include="Storage\TestStorageServiceRestClient.cs" />
     <Compile Include="Storage\StorageServiceClientTests.cs" />
@@ -95,6 +98,7 @@
     <Compile Include="Storage\StorageFolderTests.cs" />
     <Compile Include="Storage\StorageFolderPayloadConverterTests.cs" />
     <Compile Include="Storage\StorageItemTests.cs" />
+    <Compile Include="Storage\LargeStorageObjectProviderTests.cs" />
     <Compile Include="TestOpenstackRegionResolver.cs" />
     <Compile Include="TestOpenstackServiceEndpointResolver.cs" />
     <Compile Include="ObjectExtentionsTests.cs" />

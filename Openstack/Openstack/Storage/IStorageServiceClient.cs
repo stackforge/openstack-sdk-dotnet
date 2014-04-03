@@ -27,6 +27,22 @@ namespace Openstack.Storage
     public interface IStorageServiceClient : IOpenstackServiceClient
     {
         /// <summary>
+        /// Gets the threshold, in bytes, of what is considered a large object. 
+        /// The threshold is used when determining when to split up a object into segments, and use a storage manifest to represent the segments of the object.
+        /// </summary>
+        long LargeObjectThreshold { get; set; }
+
+        /// <summary>
+        /// Gets the number of segments that will be created when a large object needs to be segmented and uploaded with a manifest. 
+        /// </summary>
+        int LargeObjectSegments { get; set; }
+
+        /// <summary>
+        /// The name of the container that will be used to hold the segments of large objects.
+        /// </summary>
+        string LargeObjectSegmentContainer { get; set; }
+
+        /// <summary>
         /// Gets the current public endpoint that this client is using.
         /// </summary>
         /// <returns>The public Uri.</returns>
@@ -89,6 +105,17 @@ namespace Openstack.Storage
         /// <param name="content">The objects content.</param>
         /// <returns>A storage object. </returns>
         Task<StorageObject> CreateStorageObject(string containerName, string objectName, IDictionary<string, string> metadata, Stream content);
+
+        /// <summary>
+        /// Creates a storage object on the remote Openstack instance.
+        /// </summary>
+        /// <param name="containerName">The name of the parent container.</param>
+        /// <param name="objectName">The name of the object.</param>
+        /// <param name="metadata">Metadata for the object.</param>
+        /// <param name="content">The objects content.</param>
+        /// <param name="numberOfsegments">The number of segments to use.</param>
+        /// <returns>A storage object. </returns>
+        Task<StorageObject> CreateLargeStorageObject(string containerName, string objectName, IDictionary<string, string> metadata, Stream content, int numberOfsegments);
 
         /// <summary>
         /// Gets a storage object from the remote Openstack instance.

@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -33,6 +34,7 @@ namespace Openstack.Test.Storage
     {
         internal TestStorageServicePocoClient ServicePocoClient;
         internal TestOpenstackServiceEndpointResolver resovler;
+        internal TestLargeStorageObjectCreator loCreator;
         
         internal string authId = "12345";
         internal string endpoint = "http://teststorageendpoint.com/v1/1234567890";
@@ -42,11 +44,13 @@ namespace Openstack.Test.Storage
         {
             this.ServicePocoClient = new TestStorageServicePocoClient();
             this.resovler = new TestOpenstackServiceEndpointResolver();
+            this.loCreator = new TestLargeStorageObjectCreator();
 
             ServiceLocator.Reset();
             var manager = ServiceLocator.Instance.Locate<IServiceLocationOverrideManager>();
-            manager.RegisterServiceInstance(typeof(IStorageServicePocoClientFactory), new TestStorageServicePocoClientFactory(ServicePocoClient));
+            manager.RegisterServiceInstance(typeof(IStorageServicePocoClientFactory), new TestStorageServicePocoClientFactory(this.ServicePocoClient));
             manager.RegisterServiceInstance(typeof(IOpenstackServiceEndpointResolver), resovler);
+            manager.RegisterServiceInstance(typeof(ILargeStorageObjectCreatorFactory), new TestLargeStorageObjectCreatorFactory(this.loCreator));
         }
 
         [TestCleanup]
@@ -54,6 +58,7 @@ namespace Openstack.Test.Storage
         {
             this.resovler = new TestOpenstackServiceEndpointResolver();
             this.ServicePocoClient = new TestStorageServicePocoClient();
+            this.loCreator = new TestLargeStorageObjectCreator();
             ServiceLocator.Reset();
         }
 
@@ -101,6 +106,31 @@ namespace Openstack.Test.Storage
             await client.ListStorageObjects(containerName);
 
             Assert.AreEqual(1,numberObjCalls);
+        }
+
+        [TestMethod]
+        public async Task CanListStorageObjectsWith404()
+        {
+            var containerName = "TestContainer";
+            var obj = new StorageObject("TestObj", containerName, DateTime.UtcNow, "12345", 12345,
+                "application/octet-stream", new Dictionary<string, string>());
+
+            var container = new StorageContainer(containerName, 100, 1, new Dictionary<string, string>(),
+                new List<StorageObject>() { obj });
+            this.ServicePocoClient.GetStorageContainerDelegate = s =>
+            {
+                Assert.AreEqual(container.Name, s);
+                return Task.Factory.StartNew(() => container);
+            };
+            this.ServicePocoClient.GetStorageObjectDelegate = (s, s1) =>
+            {
+                throw new InvalidOperationException("Cannot get storage object. '" +HttpStatusCode.NotFound +"'");
+            };
+
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var resp = await client.ListStorageObjects(containerName);
+
+            Assert.AreEqual(0, resp.Count());
         }
 
         [TestMethod]
@@ -384,6 +414,172 @@ namespace Openstack.Test.Storage
             var resp = await client.CreateStorageObject(containerName, objectName, new Dictionary<string,string>(), content);
 
             Assert.AreEqual(obj, resp);
+        }
+
+        [TestMethod]
+        public async Task CreatingAnObjectLargerThanTheThresholdCreatesObjectWithSegments()
+        {
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+
+            var containerName = "TestContainer";
+            var objectName = "TestObject";
+            var content = "This is a lot of text that is bigger then the threshold that I set.".ConvertToStream();
+            var metadata = new Dictionary<string, string>();
+
+            var obj = new StorageObject(objectName, containerName, DateTime.UtcNow, "12345", 12345,
+                "application/octet-stream", new Dictionary<string, string>());
+
+            this.loCreator.CreateDelegate = async (c, o, m, s, n, sc) =>
+            {
+                Assert.AreEqual(containerName, c);
+                Assert.AreEqual(objectName, o);
+                Assert.AreEqual(metadata, m);
+                Assert.AreEqual(s, content);
+                Assert.AreEqual(client.LargeObjectSegments, n);
+                Assert.AreEqual(client.LargeObjectSegmentContainer, sc);
+                return await Task.Run(() => obj);
+            };
+
+            
+            client.LargeObjectThreshold = 10;
+
+            var resp = await client.CreateStorageObject(containerName, objectName, metadata, content);
+
+            Assert.AreEqual(obj, resp);
+        }
+
+        [TestMethod]
+        public async Task CanCreateLargeObject()
+        {
+            var segmentsContainer = "LargeObjectSegments";
+            var containerName = "TestContainer";
+            var objectName = "TestObject";
+            var metadata = new Dictionary<string, string>();
+            var content = "THIS IS A LOT OF CONTENT THAT WILL AND CAN BE CHOPPED UP";
+            var contentStream = content.ConvertToStream();
+
+
+            this.loCreator.CreateDelegate = async (c, o, m, s, n, sc) =>
+            {
+                Assert.AreEqual(containerName, c);
+                Assert.AreEqual(objectName, o);
+                Assert.AreEqual(metadata, m);
+                Assert.AreEqual(s, contentStream);
+                Assert.AreEqual(3, n);
+                Assert.AreEqual(segmentsContainer, sc);
+                return await Task.Run(() => new StorageObject(o,c));
+            };
+
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var res = await client.CreateLargeStorageObject(containerName, objectName, metadata, contentStream, 3);
+
+            Assert.AreEqual(containerName, res.ContainerName);
+            Assert.AreEqual(objectName, res.FullName);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task CannotCreateLargeObjectWithNullContainerName()
+        {
+            var objectName = "TestObject";
+            var metadata = new Dictionary<string, string>();
+            var content = "THIS IS A LOT OF CONTENT THAT WILL AND CAN BE CHOPPED UP";
+            var contentStream = content.ConvertToStream();
+
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var res = await client.CreateLargeStorageObject(null, objectName, metadata, contentStream, 3);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task CannotCreateLargeObjectWithEmptyContainerName()
+        {
+            var objectName = "TestObject";
+            var metadata = new Dictionary<string, string>();
+            var content = "THIS IS A LOT OF CONTENT THAT WILL AND CAN BE CHOPPED UP";
+            var contentStream = content.ConvertToStream();
+
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var res = await client.CreateLargeStorageObject(string.Empty, objectName, metadata, contentStream, 3);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task CannotCreateLargeObjectWithNullObjectName()
+        {
+            var containerName = "TestContainer";
+            var metadata = new Dictionary<string, string>();
+            var content = "THIS IS A LOT OF CONTENT THAT WILL AND CAN BE CHOPPED UP";
+            var contentStream = content.ConvertToStream();
+
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var res = await client.CreateLargeStorageObject(containerName, null, metadata, contentStream, 3);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task CannotCreateLargeObjectWithEmptyObjectName()
+        {
+            var containerName = "TestContainer";
+            var metadata = new Dictionary<string, string>();
+            var content = "THIS IS A LOT OF CONTENT THAT WILL AND CAN BE CHOPPED UP";
+            var contentStream = content.ConvertToStream();
+
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var res = await client.CreateLargeStorageObject(containerName, string.Empty, metadata, contentStream, 3);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task CannotCreateLargeObjectWithNullMetadata()
+        {
+            var containerName = "TestContainer";
+            var objectName = "TestObject";
+            var content = "THIS IS A LOT OF CONTENT THAT WILL AND CAN BE CHOPPED UP";
+            var contentStream = content.ConvertToStream();
+
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var res = await client.CreateLargeStorageObject(containerName, objectName, null, contentStream, 3);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task CannotCreateLargeObjectWithNullContent()
+        {
+            var containerName = "TestContainer";
+            var objectName = "TestObject";
+            var metadata = new Dictionary<string, string>();
+
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var res = await client.CreateLargeStorageObject(containerName, objectName, metadata, null, 3);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task CannotCreateLargeObjectWithNegativeSegmentCount()
+        {
+            var containerName = "TestContainer";
+            var objectName = "TestObject";
+            var metadata = new Dictionary<string, string>();
+            var content = "THIS IS A LOT OF CONTENT THAT WILL AND CAN BE CHOPPED UP";
+            var contentStream = content.ConvertToStream();
+
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var res = await client.CreateLargeStorageObject(containerName, objectName, metadata, contentStream, -3);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task CannotCreateLargeObjectWithZeroSegmentCount()
+        {
+            var containerName = "TestContainer";
+            var objectName = "TestObject";
+            var metadata = new Dictionary<string, string>();
+            var content = "THIS IS A LOT OF CONTENT THAT WILL AND CAN BE CHOPPED UP";
+            var contentStream = content.ConvertToStream();
+
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var res = await client.CreateLargeStorageObject(containerName, objectName, metadata, contentStream, 0);
         }
 
         [TestMethod]
@@ -1092,7 +1288,7 @@ namespace Openstack.Test.Storage
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
+        [ExpectedException(typeof (ArgumentNullException))]
         public async Task DownloadingStorageObjectsWithNullStreamThrows()
         {
             var containerName = "TestContainer";

@@ -28,32 +28,32 @@ namespace Openstack.Storage
         /// <summary>
         /// Gets the name of the storage container.
         /// </summary>
-        public string Name { get; private set; }
+        public string Name { get; internal set; }
 
         /// <summary>
         /// Gets the total number of bytes used in the container.
         /// </summary>
-        public long TotalBytesUsed { get; private set; }
+        public long TotalBytesUsed { get; internal set; }
 
         /// <summary>
         /// Gets the total number of objects in the container.
         /// </summary>
-        public int TotalObjectCount { get; private set; }
+        public int TotalObjectCount { get; internal set; }
 
         /// <summary>
         /// Gets a list of storage objects that are in the container.
         /// </summary>
-        public IEnumerable<StorageObject> Objects { get; private set; }
+        public IEnumerable<StorageObject> Objects { get; internal set; }
 
         /// <summary>
         /// Gets a list of storage folders that are in the container.
         /// </summary>
-        public IEnumerable<StorageFolder> Folders { get; private set; }
+        public IEnumerable<StorageFolder> Folders { get; internal set; }
 
         /// <summary>
         /// Gets the metadata associated with the storage container.
         /// </summary>
-        public IDictionary<string, string> Metadata { get; private set; }
+        public IDictionary<string, string> Metadata { get; internal set; }
 
         /// <summary>
         /// Creates a new instance of the StorageContainer class.

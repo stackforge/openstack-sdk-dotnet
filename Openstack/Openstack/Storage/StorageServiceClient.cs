@@ -25,12 +25,22 @@ namespace Openstack.Storage
     using Openstack.Common;
     using Openstack.Common.ServiceLocation;
     using Openstack.Identity;
+    using System.Net;
 
     /// <inheritdoc/>
     internal class StorageServiceClient : IStorageServiceClient
     {
         internal StorageServiceClientContext Context;
         internal const string StorageServiceName = "Object Storage";
+
+        /// <inheritdoc/>
+        public long LargeObjectThreshold { get; set; }
+
+        /// <inheritdoc/>
+        public int LargeObjectSegments { get; set; }
+
+        /// <inheritdoc/>
+        public string LargeObjectSegmentContainer { get; set; }
 
         public Uri GetPublicEndpoint()
         {
@@ -48,6 +58,10 @@ namespace Openstack.Storage
         /// <param name="token">The cancellation token to be used by this client.</param>
         public StorageServiceClient(IOpenstackCredential credentials, CancellationToken token)
         {
+            this.LargeObjectThreshold = 524288000; //Set the default large file threshold to 500MB.
+            this.LargeObjectSegments = 10; //set the default number of segments for large objects to 10.
+            this.LargeObjectSegmentContainer = "LargeObjectSegments"; //set the default name of the container that will hold segments to 'LargeObjectSegments';
+
             this.Context = new StorageServiceClientContext(credentials, token, StorageServiceName);
         }
 
@@ -64,6 +78,11 @@ namespace Openstack.Storage
             containerName.AssertIsNotNullOrEmpty("containerName", "Cannot create a storage object with a container name that is null or empty.");
             objectName.AssertIsNotNullOrEmpty("objectName", "Cannot create a storage object with a name that is null or empty.");
             content.AssertIsNotNull("content", "Cannot create a storage object with null content");
+
+            if (content.Length > this.LargeObjectThreshold)
+            {
+                return await this.CreateLargeStorageObject(containerName, objectName, metadata, content, this.LargeObjectSegments);
+            }
 
             //TODO: handle the content type better... 
             var requestObject = new StorageObject(objectName, containerName, "application/octet-stream", metadata);
@@ -239,7 +258,20 @@ namespace Openstack.Storage
             var container = await client.GetStorageContainer(containerName);
             foreach (var storageObject in container.Objects)
             {
-                objects.Add(await client.GetStorageObject(containerName, storageObject.FullName));
+                try
+                {
+                    var obj = await client.GetStorageObject(containerName, storageObject.FullName);
+                    objects.Add(obj);
+                }
+                catch (InvalidOperationException ex)
+                {
+                    //TODO: think about a better way to bubble up non-fatal errors like a 404.
+                    if (!ex.Message.Contains(HttpStatusCode.NotFound.ToString()))
+                    {
+                        throw;
+                    }
+                }
+                
             }
 
             return objects;
@@ -258,6 +290,24 @@ namespace Openstack.Storage
             }
 
             return contianers;
+        }
+
+        /// <inheritdoc/>
+        public async Task<StorageObject> CreateLargeStorageObject(string containerName, string objectName, IDictionary<string, string> metadata, Stream content, int numberOfSegments)
+        {
+            containerName.AssertIsNotNullOrEmpty("containerName", "Cannot create a large storage object with a null or empty container name.");
+            objectName.AssertIsNotNullOrEmpty("objectName", "Cannot create a large storage object with a null or empty name.");
+            metadata.AssertIsNotNull("metadata", "Cannot create a large storage object with null metadata.");
+            content.AssertIsNotNull("content", "Cannot create a large storage object with null content.");
+
+            if (numberOfSegments <= 0)
+            {
+                throw new ArgumentException("Cannot create a large object with zero or less segments.", "numberOfSegments");
+            }
+
+            var factory = ServiceLocator.Instance.Locate<ILargeStorageObjectCreatorFactory>();
+            var creator = factory.Create(this);
+            return await creator.Create(containerName, objectName, metadata, content, numberOfSegments, this.LargeObjectSegmentContainer);
         }
 
         /// <summary>

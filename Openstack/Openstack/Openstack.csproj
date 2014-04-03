@@ -91,6 +91,8 @@
     <Compile Include="Storage\DynamicLargeObjectManifest.cs" />
     <Compile Include="Storage\FolderNameValidator.cs" />
     <Compile Include="Storage\ContainerNameValidator.cs" />
+    <Compile Include="Storage\ILargeStorageObjectCreator.cs" />
+    <Compile Include="Storage\ILargeStorageObjectCreatorFactory.cs" />
     <Compile Include="Storage\IStorageAccountPayloadConverter.cs" />
     <Compile Include="Storage\IStorageFolderPayloadConverter.cs" />
     <Compile Include="Storage\IStorageServiceClient.cs" />
@@ -100,6 +102,8 @@
     <Compile Include="Storage\IStorageServicePocoClientFactory.cs" />
     <Compile Include="Storage\IStorageServiceRestClient.cs" />
     <Compile Include="Storage\IStorageServiceRestClientFactory.cs" />
+    <Compile Include="Storage\LargeStorageObjectCreator.cs" />
+    <Compile Include="Storage\LargeStorageObjectCreatorFactory.cs" />
     <Compile Include="Storage\StaticLargeObjectManifest.cs" />
     <Compile Include="Storage\StorageFolder.cs" />
     <Compile Include="Storage\StorageFolderPayloadConverter.cs" />

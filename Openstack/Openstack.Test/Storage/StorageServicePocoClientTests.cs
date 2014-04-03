@@ -1114,19 +1114,7 @@ namespace Openstack.Test.Storage
             Assert.AreEqual(segPath, ((DynamicLargeObjectManifest)result).SegmentsPath);
         }
 
-        internal class TestManifest : StorageManifest
-        {
-            public new string ContainerName { get; set; }
-
-            public new string FullName { get; set; }
-
-            public TestManifest(string container, string name)
-                : base(container, name)
-            {
-                this.ContainerName = container;
-                this.FullName = name;
-            }
-        }
+       
 
         [TestMethod]
         [ExpectedException(typeof(InvalidOperationException))]
@@ -1137,7 +1125,7 @@ namespace Openstack.Test.Storage
 
             var client = new StorageServicePocoClientFactory().Create(GetValidContext()) as StorageServicePocoClient;
 
-            var manifest = new TestManifest(containerName, manifestName);
+            var manifest = new TestStorageManifest(containerName, manifestName);
 
             await client.CreateStorageManifest(manifest);
         }
@@ -1150,7 +1138,7 @@ namespace Openstack.Test.Storage
 
             var client = new StorageServicePocoClientFactory().Create(GetValidContext()) as StorageServicePocoClient;
 
-            var manifest = new TestManifest(null, manifestName);
+            var manifest = new TestStorageManifest(null, manifestName);
 
             await client.CreateStorageManifest(manifest);
         }
@@ -1163,7 +1151,7 @@ namespace Openstack.Test.Storage
 
             var client = new StorageServicePocoClientFactory().Create(GetValidContext()) as StorageServicePocoClient;
 
-            var manifest = new TestManifest(string.Empty, manifestName);
+            var manifest = new TestStorageManifest(string.Empty, manifestName);
 
             await client.CreateStorageManifest(manifest);
         }
@@ -1176,7 +1164,7 @@ namespace Openstack.Test.Storage
 
             var client = new StorageServicePocoClientFactory().Create(GetValidContext()) as StorageServicePocoClient;
 
-            var manifest = new TestManifest(containerName, null);
+            var manifest = new TestStorageManifest(containerName, null);
 
             await client.CreateStorageManifest(manifest);
         }
@@ -1189,7 +1177,7 @@ namespace Openstack.Test.Storage
 
             var client = new StorageServicePocoClientFactory().Create(GetValidContext()) as StorageServicePocoClient;
 
-            var manifest = new TestManifest(containerName, string.Empty);
+            var manifest = new TestStorageManifest(containerName, string.Empty);
 
             await client.CreateStorageManifest(manifest);
         }
