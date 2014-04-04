@@ -1,0 +1,9 @@
+Verified+2: Jenkins
+Approved+1: Travis Plummer <travis.plummer@hp.com>
+Code-Review+2: Travis Plummer <travis.plummer@hp.com>
+Code-Review+1: Wayne Foley <wayne.foley@hp.com>
+Submitted-by: Jenkins
+Submitted-at: Fri, 04 Apr 2014 18:30:09 +0000
+Reviewed-on: https://review.openstack.org/85201
+Project: stackforge/openstack-sdk-dotnet
+Branch: refs/heads/master
