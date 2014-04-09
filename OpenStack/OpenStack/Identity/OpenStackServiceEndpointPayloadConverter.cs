@@ -15,7 +15,6 @@
 // ============================================================================ */
 
 using System;
-using System.Web;
 using Newtonsoft.Json.Linq;
 using OpenStack.Common;
 
@@ -42,7 +41,7 @@ namespace OpenStack.Identity
             }
             catch (Exception ex)
             {
-                throw new HttpParseException(string.Format("Service endpoint payload could not be parsed. Payload: '{0}'", payload), ex);
+                throw new FormatException(string.Format("Service endpoint payload could not be parsed. Payload: '{0}'", payload), ex);
             }
         }
     }

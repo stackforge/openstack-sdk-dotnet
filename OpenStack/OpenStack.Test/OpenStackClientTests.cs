@@ -93,7 +93,7 @@ namespace OpenStack.Test
         {
             var client =
                 new OpenStackClient(
-                    new OpenStackCredential(new Uri("http://someplace.org"), "someuser", new SecureString(),
+                    new OpenStackCredential(new Uri("http://someplace.org"), "someuser", "password",
                         "sometenant"), CancellationToken.None);
             await client.Connect();
             Assert.AreEqual("12345", client.Credential.AccessTokenId);
@@ -103,8 +103,8 @@ namespace OpenStack.Test
         public void CanSetRegion()
         {
             var expectedRegion = "newregion";
-            var client = new OpenStackClient( 
-                    new OpenStackCredential(new Uri("http://someplace.org"), "someuser", new SecureString(),
+            var client = new OpenStackClient(
+                    new OpenStackCredential(new Uri("http://someplace.org"), "someuser", "password",
                         "sometenant","oldregion"), CancellationToken.None);
             client.SetRegion(expectedRegion);
 
@@ -116,7 +116,7 @@ namespace OpenStack.Test
         public void CannotSetRegionWithNull()
         {
             var client = new OpenStackClient(
-                    new OpenStackCredential(new Uri("http://someplace.org"), "someuser", new SecureString(),
+                    new OpenStackCredential(new Uri("http://someplace.org"), "someuser", "password",
                         "sometenant", "oldregion"), CancellationToken.None);
             client.SetRegion(null);
         }
@@ -126,7 +126,7 @@ namespace OpenStack.Test
         public void CannotSetRegionWithEmptyString()
         {
             var client = new OpenStackClient(
-                    new OpenStackCredential(new Uri("http://someplace.org"), "someuser", new SecureString(),
+                    new OpenStackCredential(new Uri("http://someplace.org"), "someuser", "password",
                         "sometenant", "oldregion"), CancellationToken.None);
             client.SetRegion(string.Empty);
         }
@@ -142,7 +142,7 @@ namespace OpenStack.Test
         [TestMethod]
         public void CanSupportOpenStackCredential()
         {
-            var cred = new OpenStackCredential(new Uri("http://someplace.org"), "someuser", new SecureString(), "sometenant");
+            var cred = new OpenStackCredential(new Uri("http://someplace.org"), "someuser", "password", "sometenant");
             var client = new OpenStackClient();
             Assert.IsTrue(client.IsSupported(cred,string.Empty));
         }
@@ -157,7 +157,7 @@ namespace OpenStack.Test
         [TestMethod]
         public void CanSupportNullVersion()
         {
-            var cred = new OpenStackCredential(new Uri("http://someplace.org"), "someuser", new SecureString(), "sometenant");
+            var cred = new OpenStackCredential(new Uri("http://someplace.org"), "someuser", "password", "sometenant");
             var client = new OpenStackClient();
             Assert.IsTrue(client.IsSupported(cred, null));
         }

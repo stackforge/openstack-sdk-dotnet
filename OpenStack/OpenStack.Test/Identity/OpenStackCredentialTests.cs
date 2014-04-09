@@ -29,7 +29,7 @@ namespace OpenStack.Test.Identity
         {
             var endpoint = new Uri("https://auth.someplace.com/authme");
             var userName = "TestUser";
-            var password = "RandomPassword".ConvertToSecureString();
+            var password = "RandomPassword";
             var tenantId = "12345";
 
             var cred = new OpenStackCredential(endpoint, userName, password, tenantId);
@@ -46,7 +46,7 @@ namespace OpenStack.Test.Identity
         {
             var endpoint = new Uri("https://auth.someplace.com/authme");
             var userName = "TestUser";
-            var password = "RandomPassword".ConvertToSecureString();
+            var password = "RandomPassword";
             var tenantId = "12345";
             var token = "someToken";
 
@@ -62,7 +62,7 @@ namespace OpenStack.Test.Identity
         {
             var endpoint = new Uri("https://auth.someplace.com/authme");
             var userName = "TestUser";
-            var password = "RandomPassword".ConvertToSecureString();
+            var password = "RandomPassword";
             var tenantId = "12345";
 
             var cred = new OpenStackCredential(endpoint, userName, password, tenantId);
@@ -74,7 +74,7 @@ namespace OpenStack.Test.Identity
         {
             var endpoint = new Uri("https://auth.someplace.com/authme");
             var userName = "TestUser";
-            var password = "RandomPassword".ConvertToSecureString();
+            var password = "RandomPassword";
             var tenantId = "12345";
 
             var catalog = new OpenStackServiceCatalog();
@@ -91,7 +91,7 @@ namespace OpenStack.Test.Identity
         {
             var endpoint = new Uri("https://auth.someplace.com/authme");
             var userName = "TestUser";
-            var password = "RandomPassword".ConvertToSecureString();
+            var password = "RandomPassword";
             var tenantId = "12345";
 
             var cred = new OpenStackCredential(endpoint, userName, password, tenantId);
@@ -104,7 +104,7 @@ namespace OpenStack.Test.Identity
         {
             var endpoint = new Uri("https://auth.someplace.com/authme");
             var userName = "TestUser";
-            var password = "RandomPassword".ConvertToSecureString();
+            var password = "RandomPassword";
             var tenantId = "12345";
 
             var cred = new OpenStackCredential(endpoint, userName, password, tenantId);
@@ -116,7 +116,7 @@ namespace OpenStack.Test.Identity
         public void CannotCreateAnOpenStackCredentialWithNullEndpoint()
         {
             var userName = "TestUser";
-            var password = "RandomPassword".ConvertToSecureString();
+            var password = "RandomPassword";
             var tenantId = "12345";
 
             var cred = new OpenStackCredential(null, userName, password, tenantId);
@@ -127,7 +127,7 @@ namespace OpenStack.Test.Identity
         public void CannotCreateAnOpenStackCredentialWithNullUserName()
         {
             var endpoint = new Uri("https://auth.someplace.com/authme");
-            var password = "RandomPassword".ConvertToSecureString();
+            var password = "RandomPassword";
             var tenantId = "12345";
 
             var cred = new OpenStackCredential(endpoint, null, password, tenantId);
@@ -138,7 +138,7 @@ namespace OpenStack.Test.Identity
         public void CannotCreateAnOpenStackCredentialWithEmptyUserName()
         {
             var endpoint = new Uri("https://auth.someplace.com/authme");
-            var password = "RandomPassword".ConvertToSecureString();
+            var password = "RandomPassword";
             var tenantId = "12345";
 
             var cred = new OpenStackCredential(endpoint, string.Empty, password, tenantId);
@@ -161,7 +161,7 @@ namespace OpenStack.Test.Identity
         {
             var endpoint = new Uri("https://auth.someplace.com/authme");
             var userName = "TestUser";
-            var password = "RandomPassword".ConvertToSecureString();
+            var password = "RandomPassword";
 
             var cred = new OpenStackCredential(endpoint, userName, password, null);
         }
@@ -172,7 +172,7 @@ namespace OpenStack.Test.Identity
         {
             var endpoint = new Uri("https://auth.someplace.com/authme");
             var userName = "TestUser";
-            var password = "RandomPassword".ConvertToSecureString();
+            var password = "RandomPassword";
 
             var cred = new OpenStackCredential(endpoint, userName, password, string.Empty);
         }

@@ -16,15 +16,9 @@
 namespace OpenStack.Common.ServiceLocation
 {
     /// <summary>
-    /// Represents an object that can locate services.
+    /// Represents an object that can manage overriding service location registrations.
     /// </summary>
-    public interface IServiceLocator
+    internal interface IServiceLocationOverrideManager : IServiceLocationManager
     {
-        /// <summary>
-        /// Locates an instance of the requested service.
-        /// </summary>
-        /// <typeparam name="T">The type of the service to locate.</typeparam>
-        /// <returns>An instance of the service.</returns>
-        T Locate<T>();
     }
 }

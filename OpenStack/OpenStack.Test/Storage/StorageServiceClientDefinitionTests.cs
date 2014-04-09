@@ -16,7 +16,7 @@ namespace OpenStack.Test.Storage
             var authId = "12345";
             var endpoint = "http://teststorageendpoint.com/v1/1234567890";
 
-            var creds = new OpenStackCredential(new Uri(endpoint), "SomeUser", "Password".ConvertToSecureString(), "SomeTenant");
+            var creds = new OpenStackCredential(new Uri(endpoint), "SomeUser", "Password", "SomeTenant");
             creds.SetAccessTokenId(authId);
             return creds;
         }

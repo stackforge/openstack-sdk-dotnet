@@ -56,7 +56,7 @@ namespace OpenStack.Test.Identity
         {
             var endpoint = new Uri("https://auth.someplace.com/authme");
             var userName = "TestUser";
-            var password = "RandomPassword".ConvertToSecureString();
+            var password = "RandomPassword";
             var tenantId = "12345";
 
             return new OpenStackCredential(endpoint, userName, password, tenantId);
@@ -117,7 +117,7 @@ namespace OpenStack.Test.Identity
 
             Assert.IsNotNull(result);
             Assert.AreEqual(creds.UserName, result.UserName);
-            Assert.AreEqual(creds.Password.ConvertToUnsecureString(), result.Password.ConvertToUnsecureString());
+            Assert.AreEqual(creds.Password, result.Password);
             Assert.AreEqual(creds.TenantId, result.TenantId);
             Assert.AreEqual(expectedToken, result.AccessTokenId);
             Assert.AreEqual(1,result.ServiceCatalog.Count());
@@ -175,7 +175,7 @@ namespace OpenStack.Test.Identity
 
             Assert.IsNotNull(result);
             Assert.AreEqual(creds.UserName, result.UserName);
-            Assert.AreEqual(creds.Password.ConvertToUnsecureString(), result.Password.ConvertToUnsecureString());
+            Assert.AreEqual(creds.Password, result.Password);
             Assert.AreEqual(creds.TenantId, result.TenantId);
             Assert.AreEqual(expectedToken, result.AccessTokenId);
             Assert.AreEqual(1, result.ServiceCatalog.Count());

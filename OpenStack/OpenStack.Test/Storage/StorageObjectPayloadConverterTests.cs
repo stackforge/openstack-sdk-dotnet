@@ -133,7 +133,7 @@ namespace OpenStack.Test.Storage
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
+        [ExpectedException(typeof(FormatException))]
         public void CannotParseInvalidJsonPayload()
         {
             var converter = new StorageObjectPayloadConverter();
@@ -141,7 +141,7 @@ namespace OpenStack.Test.Storage
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
+        [ExpectedException(typeof(FormatException))]
         public void CannotParseInvalidPayload()
         {
             var converter = new StorageObjectPayloadConverter();
@@ -149,7 +149,7 @@ namespace OpenStack.Test.Storage
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
+        [ExpectedException(typeof(FormatException))]
         public void CannotParseJsonPayloadWithMissingBytesProperty()
         {
             string InvalidJsonWithoutBytes = @"[
@@ -166,7 +166,7 @@ namespace OpenStack.Test.Storage
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
+        [ExpectedException(typeof(FormatException))]
         public void CannotParseJsonPayloadWithMissingHashProperty()
         {
             string InvalidJsonWithoutHash = @"[
@@ -182,7 +182,7 @@ namespace OpenStack.Test.Storage
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
+        [ExpectedException(typeof(FormatException))]
         public void CannotParseJsonPayloadWithMissingModifiedProperty()
         {
             string InvalidJsonWithoutLastModified = @"[
@@ -215,7 +215,7 @@ namespace OpenStack.Test.Storage
                 converter.Convert("TestContainer", InvalidJsonWithoutName);
                 Assert.Fail("Parsing did not fail as expected.");
             }
-            catch (HttpParseException ex)
+            catch (FormatException ex)
             {
                 Assert.IsTrue(ex.Message.StartsWith("Storage Object payload could not be parsed."));
             }
@@ -238,7 +238,7 @@ namespace OpenStack.Test.Storage
                 converter.Convert("TestContainer", InvalidJsonWithoutHash);
                 Assert.Fail("Parsing did not fail as expected.");
             }
-            catch (HttpParseException ex)
+            catch (FormatException ex)
             {
                 Assert.IsTrue(ex.Message.StartsWith("Storage Object 'BLAH'"));
             }
@@ -246,7 +246,7 @@ namespace OpenStack.Test.Storage
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
+        [ExpectedException(typeof(FormatException))]
         public void CannotParseJsonPayloadWithMissingContentTypeProperty()
         {
             string InvalidJsonWithoutContentType = @"[
@@ -262,7 +262,7 @@ namespace OpenStack.Test.Storage
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
+        [ExpectedException(typeof(FormatException))]
         public void CannotParseJsonPayloadWithBadModifiedDate()
         {
             string InvalidJsonWithBadDateType = @"[
@@ -279,7 +279,7 @@ namespace OpenStack.Test.Storage
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
+        [ExpectedException(typeof(FormatException))]
         public void CannotParseJsonPayloadWithBadBytesValue()
         {
             string InvalidJsonWithBadBytesValue = @"[
@@ -634,7 +634,7 @@ namespace OpenStack.Test.Storage
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
+        [ExpectedException(typeof(FormatException))]
         public void CannotParseWithMissingContentLengthHeader()
         {
             var containerName = "TestContainer";
@@ -652,7 +652,7 @@ namespace OpenStack.Test.Storage
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
+        [ExpectedException(typeof(FormatException))]
         public void CannotParseWithMissingETagHeader()
         {
             var containerName = "TestContainer";
@@ -670,7 +670,7 @@ namespace OpenStack.Test.Storage
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
+        [ExpectedException(typeof(FormatException))]
         public void CannotParseWithMissingModifiedHeader()
         {
             var containerName = "TestContainer";
@@ -688,7 +688,7 @@ namespace OpenStack.Test.Storage
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
+        [ExpectedException(typeof(FormatException))]
         public void CannotParseWithMissingContentTypeHeader()
         {
             var containerName = "TestContainer";
@@ -706,7 +706,7 @@ namespace OpenStack.Test.Storage
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
+        [ExpectedException(typeof(FormatException))]
         public void CannotParseWithBadModifiedDateHeader()
         {
             var containerName = "TestContainer";
@@ -725,7 +725,7 @@ namespace OpenStack.Test.Storage
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
+        [ExpectedException(typeof(FormatException))]
         public void CannotParseWithBadBytesHeader()
         {
             var containerName = "TestContainer";

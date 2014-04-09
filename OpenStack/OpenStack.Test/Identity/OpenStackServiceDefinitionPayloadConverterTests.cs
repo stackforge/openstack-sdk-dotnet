@@ -64,7 +64,7 @@ namespace OpenStack.Test.Identity
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
+        [ExpectedException(typeof(FormatException))]
         public void CannotConvertJsonPayloadWithMissingName()
         {
             var serviceDefPayload = @"{
@@ -94,7 +94,7 @@ namespace OpenStack.Test.Identity
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
+        [ExpectedException(typeof(FormatException))]
         public void CannotConvertJsonPayloadWithMissingType()
         {
             var serviceDefPayload = @"{
@@ -124,7 +124,7 @@ namespace OpenStack.Test.Identity
         }
 
         [TestMethod]
-        [ExpectedException(typeof (HttpParseException))]
+        [ExpectedException(typeof (FormatException))]
         public void CannotConvertJsonPayloadWithMissingEndpoints()
         {
             var serviceDefPayload = @"{
@@ -137,7 +137,7 @@ namespace OpenStack.Test.Identity
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
+        [ExpectedException(typeof(FormatException))]
         public void CannotConvertJsonPayloadWithEmptyObject()
         {
             var serviceDefPayload = @" { }";
@@ -155,7 +155,7 @@ namespace OpenStack.Test.Identity
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
+        [ExpectedException(typeof(FormatException))]
         public void CannotConvertInvalidJsonPayload()
         {
             var serviceDefPayload = @" { NOT JSON";
@@ -165,7 +165,7 @@ namespace OpenStack.Test.Identity
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
+        [ExpectedException(typeof(FormatException))]
         public void CannotConvertNonObjectJsonPayload()
         {
             var serviceDefPayload = @"[]";

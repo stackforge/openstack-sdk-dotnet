@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Web.Management;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OpenStack.Common.ServiceLocation;
 
@@ -56,44 +57,133 @@ namespace OpenStack.Test.ServiceLocation
         }
 
         [TestMethod]
-        public void HasNewAssembliesWithNewAssemblies()
+        public void CanAddNewAssembly()
         {
             var sweeper = new ServiceLocationAssemblyScanner();
             var assemblies = AppDomain.CurrentDomain.GetAssemblies().ToList();
             var temp = assemblies.First();
-            assemblies.Remove(temp);
             
-            sweeper.GetAllAssemblies = () => assemblies;
+            Assert.IsFalse(sweeper.HasNewAssemblies);
             
-            Assert.IsTrue(sweeper.HasNewAssemblies());
-            Assert.IsFalse(sweeper.HasNewAssemblies());
-            assemblies.Add(temp);
+            sweeper.AddAssembly(temp);
             
-            Assert.IsTrue(sweeper.HasNewAssemblies());
-            Assert.IsFalse(sweeper.HasNewAssemblies());
+            Assert.IsTrue(sweeper.HasNewAssemblies);
+            Assert.AreEqual(1,sweeper._assemblies.Count);
         }
 
         [TestMethod]
-        public void CanGetOnlyRegistrarTypes()
-        {
-            var sweeper = new ServiceLocationAssemblyScanner();
-            var assemblies = new List<Assembly>() {this.GetType().Assembly};
-
-            sweeper.GetAllAssemblies = () => assemblies;
-            var types = sweeper.GetRegistrarTypes();
-            Assert.AreEqual(3, types.Count());
-        }
-
-        [TestMethod]
-        public void OnlyRegistrarTypesAreReturned()
+        public void CanAddExistingAssembly()
         {
             var sweeper = new ServiceLocationAssemblyScanner();
             var assemblies = AppDomain.CurrentDomain.GetAssemblies().ToList();
-            assemblies.Remove(this.GetType().Assembly);
+            var temp = assemblies.First();
 
-            sweeper.GetAllAssemblies = () => assemblies;
-            var types = sweeper.GetRegistrarTypes();
+            Assert.IsFalse(sweeper.HasNewAssemblies);
+            sweeper.AddAssembly(temp);
+            Assert.IsTrue(sweeper.HasNewAssemblies);
+            
+            sweeper.AddAssembly(temp);
+           
+            Assert.IsTrue(sweeper.HasNewAssemblies);
+            Assert.AreEqual(1, sweeper._assemblies.Count);
+        }
+
+        [TestMethod]
+        public void CanGetRegistrarTypes()
+        {
+            var sweeper = new ServiceLocationAssemblyScanner();
+            Assert.IsFalse(sweeper.HasNewAssemblies);
+            
+            sweeper.AddAssembly(this.GetType().Assembly);
+            Assert.IsTrue(sweeper.HasNewAssemblies);
+            
+            var types = sweeper.GetRegistrarTypes().ToList();
+            Assert.IsTrue(sweeper.HasNewAssemblies);
             Assert.AreEqual(2, types.Count());
+            Assert.IsTrue(types.Contains(typeof(TestRegistrar)));
+            Assert.IsTrue(types.Contains(typeof(OtherTestRegistrar)));
+        }
+
+        [TestMethod]
+        public void CanGetRegistrarTypesWithAssemblyThatHasNoRegistrars()
+        {
+            var sweeper = new ServiceLocationAssemblyScanner();
+            Assert.IsFalse(sweeper.HasNewAssemblies);
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies().ToList();
+            var temp = assemblies.First();
+
+            sweeper.AddAssembly(temp);
+            Assert.IsTrue(sweeper.HasNewAssemblies);
+
+            var types = sweeper.GetRegistrarTypes().ToList();
+            Assert.IsTrue(sweeper.HasNewAssemblies);
+
+            Assert.AreEqual(0, types.Count());
+        }
+
+        [TestMethod]
+        public void CanGetRegistrarTypesWithEmptyAssembliesCollection()
+        {
+            var sweeper = new ServiceLocationAssemblyScanner();
+            Assert.IsFalse(sweeper.HasNewAssemblies);
+
+            var types = sweeper.GetRegistrarTypes().ToList();
+            Assert.IsFalse(sweeper.HasNewAssemblies);
+
+            Assert.AreEqual(0, types.Count());
+        }
+
+        [TestMethod]
+        public void NoNewRegistrarsIfNoNewAssemblies()
+        {
+            bool getRegistrarsCalled = false;
+            var sweeper = new ServiceLocationAssemblyScanner();
+            sweeper.GetRegistrarTypes = () => { getRegistrarsCalled = false;
+                                                  return new List<Type>();
+            };
+
+            var regs = sweeper.GetRegistrars();
+            Assert.IsFalse(getRegistrarsCalled);
+            Assert.AreEqual(0, regs.Count());
+        }
+
+        [TestMethod]
+        public void NewRegistrarsIfNewAssembliesPresent()
+        {
+            bool getRegistrarsCalled = false;
+            var sweeper = new ServiceLocationAssemblyScanner();
+            sweeper.HasNewAssemblies = true;
+            sweeper.GetRegistrarTypes = () =>
+            {
+                getRegistrarsCalled = true;
+                return new List<Type>() { typeof(TestRegistrar)};
+            };
+
+            var regs = sweeper.GetRegistrars().ToList();
+            Assert.IsTrue(getRegistrarsCalled);
+            Assert.AreEqual(1, regs.Count());
+            Assert.IsTrue(regs.First() is TestRegistrar);
+        }
+
+        [TestMethod]
+        public void ExistingRegistrarIsOverwritenWhenNewAssemblyFoundThatContainsIt()
+        {
+            bool getRegistrarsCalled = false;
+            var sweeper = new ServiceLocationAssemblyScanner();
+            sweeper._registrars.Add(typeof(TestRegistrar));
+            sweeper.HasNewAssemblies = true;
+            sweeper.GetRegistrarTypes = () =>
+            {
+                getRegistrarsCalled = true;
+                return new List<Type>() { typeof(TestRegistrar) };
+            };
+
+            var regs = sweeper.GetRegistrars().ToList();
+            Assert.IsTrue(getRegistrarsCalled);
+            Assert.AreEqual(1, regs.Count());
+            Assert.IsTrue(regs.First() is TestRegistrar);
+            Assert.AreEqual(1, sweeper._registrars.Count);
+            Assert.AreEqual(typeof(TestRegistrar), sweeper._registrars.First());
         }
 
         [TestMethod] 
@@ -102,10 +192,12 @@ namespace OpenStack.Test.ServiceLocation
             var sweeper = new ServiceLocationAssemblyScanner();
             var assemblies = AppDomain.CurrentDomain.GetAssemblies().ToList();
             assemblies.Remove(this.GetType().Assembly);
+            assemblies.ForEach(sweeper.AddAssembly);
+            Assert.IsTrue(sweeper.HasNewAssemblies);
 
-            sweeper.GetAllAssemblies = () => assemblies;
             var registrars = sweeper.GetRegistrars();
-            Assert.AreEqual(2, registrars.Count());
+            Assert.IsFalse(sweeper.HasNewAssemblies);
+            Assert.AreEqual(1, registrars.Count());
         }
 
         [TestMethod]
@@ -113,30 +205,18 @@ namespace OpenStack.Test.ServiceLocation
         {
             var sweeper = new ServiceLocationAssemblyScanner();
             var assemblies = AppDomain.CurrentDomain.GetAssemblies().ToList();
-            assemblies.RemoveAll( a => true);
-
-            sweeper.GetAllAssemblies = () => assemblies;
+            Assert.IsFalse(sweeper.HasNewAssemblies);
 
             var registrars = sweeper.GetRegistrars();
+            Assert.IsFalse(sweeper.HasNewAssemblies);
             Assert.AreEqual(0, registrars.Count());
 
-            assemblies = new List<Assembly>() { this.GetType().Assembly };
+           sweeper.AddAssembly( this.GetType().Assembly );
+           Assert.IsTrue(sweeper.HasNewAssemblies);
             
             registrars = sweeper.GetRegistrars();
-            Assert.AreEqual(3, registrars.Count());
-
-        }
-
-
-        [TestMethod]
-        public void CanGetOnlyRegistrar()
-        {
-            var sweeper = new ServiceLocationAssemblyScanner();
-            var assemblies = new List<Assembly>() { this.GetType().Assembly };
-
-            sweeper.GetAllAssemblies = () => assemblies;
-            var registrars = sweeper.GetRegistrars();
-            Assert.AreEqual(3, registrars.Count());
+            Assert.IsFalse(sweeper.HasNewAssemblies);
+            Assert.AreEqual(2, registrars.Count());
         }
     }
 }

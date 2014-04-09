@@ -16,6 +16,7 @@
 
 using System;
 using System.Globalization;
+using System.Reflection;
 
 namespace OpenStack.Common.ServiceLocation
 {
@@ -96,11 +97,14 @@ namespace OpenStack.Common.ServiceLocation
             {
                 var msg = string.Format(
                     CultureInfo.InvariantCulture,
-                    "Service location services cannot be registered or overriden: '{0}'",
+                    "Service location services cannot be registered or overridden: '{0}'",
                     type.FullName);
                 throw new InvalidOperationException(msg);
             }
-            if (!type.IsInterface)
+
+            var typeInfo = type.GetTypeInfo();
+            
+            if (!typeInfo.IsInterface)
             {
                 var msg = string.Format(
                     CultureInfo.InvariantCulture,
@@ -108,11 +112,13 @@ namespace OpenStack.Common.ServiceLocation
                     type.FullName);
                 throw new InvalidOperationException(msg);
             }
-            if (!type.IsAssignableFrom(implementation))
+
+            var implementationInfo = implementation.GetTypeInfo();
+            if (!typeInfo.IsAssignableFrom(implementationInfo))
             {
                 var msg = string.Format(
                     CultureInfo.InvariantCulture,
-                    "Cannot register or ovverride the service '{0}' for the type '{1}' which is not derived from the service",
+                    "Cannot register or override the service '{0}' for the type '{1}' which is not derived from the service",
                     implementation.FullName,
                     type.FullName);
                 throw new InvalidOperationException(msg);

@@ -137,7 +137,7 @@ namespace OpenStack.Storage
             var client = this.GetHttpClient(this.context);
 
             var baseUri = CreateRequestUri(GetServiceEndpoint(this.context), containerName);
-            var prefix = string.Compare("/", folderName, StringComparison.InvariantCulture) == 0
+            var prefix = string.Compare("/", folderName, StringComparison.Ordinal) == 0
                 ? string.Empty
                 : string.Format("&prefix={0}", folderName);
             
@@ -315,7 +315,11 @@ namespace OpenStack.Storage
         /// <param name="client">The http client.</param>
         internal void AddItemMetadata( IDictionary<string, string> metadata, IHttpAbstractionClient client)
         {
-             metadata.Keys.ToList().ForEach((k) => client.Headers.Add(string.Format("X-Object-Meta-{0}", k), metadata[k]));
+             var metaHeaders = metadata.Keys.ToList();
+            foreach (var header in metaHeaders)
+            {
+                client.Headers.Add(string.Format("X-Object-Meta-{0}", header), metadata[header]);
+            }
         }
 
         /// <summary>

@@ -50,7 +50,7 @@ namespace OpenStack.Test.Identity
         {
             var endpoint = new Uri("https://someidentityendpoint:35357/v2.0/tokens");
             var userName = "TestUser";
-            var password = "RandomPassword".ConvertToSecureString();
+            var password = "RandomPassword";
             var tenantId = "12345";
 
             return new OpenStackCredential(endpoint, userName, password, tenantId);

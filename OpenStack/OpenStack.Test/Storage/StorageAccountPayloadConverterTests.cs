@@ -56,7 +56,7 @@ namespace OpenStack.Test.Storage
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
+        [ExpectedException(typeof(FormatException))]
         public void CannotParseAccountWithMissingBytesUsedHeader()
         {
             var accountName = "1234567890";
@@ -78,7 +78,7 @@ namespace OpenStack.Test.Storage
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
+        [ExpectedException(typeof(FormatException))]
         public void CannotParseAccountWithMissingObjectCountHeader()
         {
             var accountName = "1234567890";
@@ -100,7 +100,7 @@ namespace OpenStack.Test.Storage
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
+        [ExpectedException(typeof(FormatException))]
         public void CannotParseAccountWithMissingContainerCountHeader()
         {
             var accountName = "1234567890";
@@ -122,7 +122,7 @@ namespace OpenStack.Test.Storage
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
+        [ExpectedException(typeof(FormatException))]
         public void CannotParseAccountWithBadBytesUsedHeader()
         {
             var accountName = "1234567890";
@@ -145,7 +145,7 @@ namespace OpenStack.Test.Storage
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
+        [ExpectedException(typeof(FormatException))]
         public void CannotParseAccountWithBadObjectCountHeader()
         {
             var accountName = "1234567890";
@@ -168,7 +168,7 @@ namespace OpenStack.Test.Storage
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
+        [ExpectedException(typeof(FormatException))]
         public void CannotParseAccountWithBadContainerCountHeader()
         {
             var accountName = "1234567890";
@@ -191,7 +191,7 @@ namespace OpenStack.Test.Storage
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
+        [ExpectedException(typeof(FormatException))]
         public void CannotParseAccountWithBadPayload()
         {
             var accountName = "1234567890";

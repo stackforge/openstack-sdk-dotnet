@@ -16,9 +16,9 @@
 namespace OpenStack.Common.ServiceLocation
 {
     /// <summary>
-    /// Represents an object that can manage overriding service location registrations.
+    /// Represents an object that can manage service location registrations at runtime.
     /// </summary>
-    interface IServiceLocationOverrideManager : IServiceLocationManager
+    internal interface IServiceLocationRuntimeManager : IServiceLocationManager
     {
     }
 }

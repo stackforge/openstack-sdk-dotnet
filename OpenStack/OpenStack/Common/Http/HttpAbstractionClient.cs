@@ -19,7 +19,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Net.Http;
-using System.Net.Http.Handlers;
+//using System.Net.Http.Handlers;
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
@@ -29,14 +29,14 @@ namespace OpenStack.Common.Http
     public class HttpAbstractionClient : DisposableClass, IHttpAbstractionClient
     {
         private readonly HttpClient _client;
-        private readonly ProgressMessageHandler _handler;
+        //private readonly ProgressMessageHandler _handler;
         private CancellationToken _cancellationToken = CancellationToken.None;
         private static readonly TimeSpan _defaultTimeout = new TimeSpan(0, 5, 0);
 
         internal HttpAbstractionClient(TimeSpan timeout, CancellationToken cancellationToken)
         {
-            this._handler = new ProgressMessageHandler(new HttpClientHandler());
-            this._client = new HttpClient(_handler) { Timeout = timeout };
+            //this._handler = new ProgressMessageHandler(new HttpClientHandler());
+            this._client = new HttpClient(new HttpClientHandler()) { Timeout = timeout };
 
             this._cancellationToken = cancellationToken;
             this.Method = HttpMethod.Get;

@@ -17,7 +17,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using Newtonsoft.Json.Linq;
 using OpenStack.Common;
 using OpenStack.Common.ServiceLocation;
@@ -45,7 +44,7 @@ namespace OpenStack.Identity
             }
             catch (Exception ex)
             {
-                throw new HttpParseException(string.Format("Service definition payload could not be parsed. Payload: '{0}'", payload), ex);
+                throw new FormatException(string.Format("Service definition payload could not be parsed. Payload: '{0}'", payload), ex);
             }
         }
 

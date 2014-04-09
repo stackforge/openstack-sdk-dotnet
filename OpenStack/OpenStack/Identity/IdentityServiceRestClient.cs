@@ -69,7 +69,7 @@ namespace OpenStack.Identity
             authPayload.Append("{\"auth\":{\"passwordCredentials\":{\"username\":\"");
             authPayload.Append(creds.UserName);
             authPayload.Append("\",\"password\":\"");
-            authPayload.Append(creds.Password.ConvertToUnsecureString());
+            authPayload.Append(creds.Password);
             authPayload.Append("\"},\"tenantName\":\"");
             authPayload.Append(creds.TenantId);
             authPayload.Append("\"}}");

@@ -16,6 +16,7 @@
 
 using System;
 using System.Linq;
+using System.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OpenStack.Common.ServiceLocation;
 
@@ -49,6 +50,11 @@ namespace OpenStack.Test.ServiceLocation
         internal class TestServiceLocator : IServiceLocator
         {
             public T Locate<T>()
+            {
+                throw new NotImplementedException();
+            }
+
+            public void EnsureAssemblyRegistration(Assembly target)
             {
                 throw new NotImplementedException();
             }

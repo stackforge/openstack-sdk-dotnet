@@ -63,7 +63,7 @@ namespace OpenStack.Test.Identity
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
+        [ExpectedException(typeof(FormatException))]
         public void CannotConvertJsonPayloadWithMissingPublicUri()
         {
             var endpointPayload = @" {
@@ -80,7 +80,7 @@ namespace OpenStack.Test.Identity
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
+        [ExpectedException(typeof(FormatException))]
         public void CannotConvertJsonPayloadWithMissingRegion()
         {
             var endpointPayload = @" {
@@ -97,7 +97,7 @@ namespace OpenStack.Test.Identity
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
+        [ExpectedException(typeof(FormatException))]
         public void CannotConvertJsonPayloadWithMissingVersion()
         {
             var endpointPayload = @" {
@@ -114,7 +114,7 @@ namespace OpenStack.Test.Identity
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
+        [ExpectedException(typeof(FormatException))]
         public void CannotConvertJsonPayloadWithMissingVersionInfoUri()
         {
             var endpointPayload = @" {
@@ -131,7 +131,7 @@ namespace OpenStack.Test.Identity
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
+        [ExpectedException(typeof(FormatException))]
         public void CannotConvertJsonPayloadWithMissingVersionListUri()
         {
             var endpointPayload = @" {
@@ -233,7 +233,7 @@ namespace OpenStack.Test.Identity
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
+        [ExpectedException(typeof(FormatException))]
         public void CannotConvertInvalidJsonPayload()
         {
             var endpointPayload = @" { NOT JSON";
@@ -243,7 +243,7 @@ namespace OpenStack.Test.Identity
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
+        [ExpectedException(typeof(FormatException))]
         public void CannotConvertNonObjectJsonPayload()
         {
             var endpointPayload = @" [] ";

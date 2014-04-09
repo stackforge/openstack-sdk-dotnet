@@ -29,7 +29,7 @@ namespace OpenStack.Identity
         /// <summary>
         /// Gets the password to use for the current instance of OpenStack 
         /// </summary>
-        SecureString Password { get; }
+        string Password { get; }
 
         /// <summary>
         /// Gets the Id of the tenant to use for the current instance of OpenStack 

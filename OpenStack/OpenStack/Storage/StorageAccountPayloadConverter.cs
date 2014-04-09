@@ -16,7 +16,6 @@
 
 using System;
 using System.Linq;
-using System.Web;
 using OpenStack.Common;
 using OpenStack.Common.Http;
 using OpenStack.Common.ServiceLocation;
@@ -47,7 +46,7 @@ namespace OpenStack.Storage
             }
             catch (Exception ex)
             {
-                throw new HttpParseException(string.Format("Storage Account '{0}' payload could not be parsed.", name), ex);
+                throw new FormatException(string.Format("Storage Account '{0}' payload could not be parsed.", name), ex);
             }
         }
     }

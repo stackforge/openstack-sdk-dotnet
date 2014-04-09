@@ -64,7 +64,7 @@ namespace OpenStack.Test.Storage
 
         IOpenStackCredential GetValidCreds()
         {
-            var creds = new OpenStackCredential(new Uri(this.endpoint), "SomeUser", "Password".ConvertToSecureString(), "SomeTenant");
+            var creds = new OpenStackCredential(new Uri(this.endpoint), "SomeUser", "Password", "SomeTenant");
             creds.SetAccessTokenId(this.authId);
             return creds;
         }

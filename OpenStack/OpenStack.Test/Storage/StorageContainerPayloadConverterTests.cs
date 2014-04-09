@@ -116,7 +116,7 @@ namespace OpenStack.Test.Storage
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
+        [ExpectedException(typeof(FormatException))]
         public void CannotParseInvalidJsonPayload()
         {
             var converter = new StorageContainerPayloadConverter();
@@ -124,7 +124,7 @@ namespace OpenStack.Test.Storage
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
+        [ExpectedException(typeof(FormatException))]
         public void CannotParseInvalidPayload()
         {
             var converter = new StorageContainerPayloadConverter();
@@ -132,7 +132,7 @@ namespace OpenStack.Test.Storage
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
+        [ExpectedException(typeof(FormatException))]
         public void CannotParseJsonPayloadWithMissingBytesProperty()
         {
             var InvalidJsonWithoutBytes = @"[
@@ -146,7 +146,7 @@ namespace OpenStack.Test.Storage
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
+        [ExpectedException(typeof(FormatException))]
         public void CannotParseJsonPayloadWithMissingCountProperty()
         {
             string InvalidJsonWithoutCount = @"[
@@ -160,7 +160,7 @@ namespace OpenStack.Test.Storage
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
+        [ExpectedException(typeof(FormatException))]
         public void CannotParseJsonPayloadWithMissingNameProperty()
         {
             string InvalidJsonWithoutName = @"[
@@ -188,7 +188,7 @@ namespace OpenStack.Test.Storage
                 converter.Convert(InvalidJsonWithoutBytes);
                 Assert.Fail("Parsing did not fail as expected.");
             }
-            catch (HttpParseException ex)
+            catch (FormatException ex)
             {
                 Assert.IsTrue(ex.Message.StartsWith("Storage Container 'TestContainer'"));
             }
@@ -196,7 +196,7 @@ namespace OpenStack.Test.Storage
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
+        [ExpectedException(typeof(FormatException))]
         public void CannotParseJsonPayloadWithBadBytesValue()
         {
             string InvalidJsonWithBadBytesValue = @"[
@@ -211,7 +211,7 @@ namespace OpenStack.Test.Storage
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
+        [ExpectedException(typeof(FormatException))]
         public void CannotParseJsonPayloadWithBadCountValue()
         {
             string InvalidJsonWithBadCountValue = @"[
@@ -359,7 +359,7 @@ namespace OpenStack.Test.Storage
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
+        [ExpectedException(typeof(FormatException))]
         public void CannotParseContainerWithMissingBytesUsedHeader()
         {
             var containerName = "TestContainer";
@@ -382,7 +382,7 @@ namespace OpenStack.Test.Storage
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
+        [ExpectedException(typeof(FormatException))]
         public void CannotParseContainerWithMissingObjectCountHeader()
         {
             var containerName = "TestContainer";
@@ -405,7 +405,7 @@ namespace OpenStack.Test.Storage
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
+        [ExpectedException(typeof(FormatException))]
         public void CannotParseContainerWithBadBytesUsedHeader()
         {
             var containerName = "TestContainer";
@@ -429,7 +429,7 @@ namespace OpenStack.Test.Storage
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
+        [ExpectedException(typeof(FormatException))]
         public void CannotParseContainerWithBadObjectCountHeader()
         {
             var containerName = "TestContainer";
@@ -453,7 +453,7 @@ namespace OpenStack.Test.Storage
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
+        [ExpectedException(typeof(FormatException))]
         public void CannotParseContainerWithBadPayload()
         {
             var containerName = "TestContainer";

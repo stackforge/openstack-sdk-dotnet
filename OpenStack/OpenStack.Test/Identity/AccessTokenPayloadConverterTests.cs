@@ -14,6 +14,7 @@
 // limitations under the License.
 // ============================================================================ */
 
+using System;
 using System.Web;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OpenStack.Identity;
@@ -47,7 +48,7 @@ namespace OpenStack.Test.Identity
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
+        [ExpectedException(typeof(FormatException))]
         public void CannotConvertJsonPayloadMissingTokenId()
         {
             var missingTokenIdFixture = @"{
@@ -67,7 +68,7 @@ namespace OpenStack.Test.Identity
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
+        [ExpectedException(typeof(FormatException))]
         public void CannotConvertJsonPayloadMissingToken()
         {
             var missingTokenFixture = @"{
@@ -79,7 +80,7 @@ namespace OpenStack.Test.Identity
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
+        [ExpectedException(typeof(FormatException))]
         public void CannotConvertJsonPayloadEmptyObject()
         {
             var emptyObjectFixture = @"{ }";
@@ -89,7 +90,7 @@ namespace OpenStack.Test.Identity
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
+        [ExpectedException(typeof(FormatException))]
         public void CannotConvertInvalidJson()
         {
             var badJsonFixture = @"{ NOT JSON";
@@ -99,7 +100,7 @@ namespace OpenStack.Test.Identity
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpParseException))]
+        [ExpectedException(typeof(FormatException))]
         public void CannotConvertNonObjectJson()
         {
             var nonObjectJson = @"[]";

@@ -17,7 +17,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using Newtonsoft.Json.Linq;
 using OpenStack.Common;
 using OpenStack.Common.Http;
@@ -44,13 +43,13 @@ namespace OpenStack.Storage
                 var array = JArray.Parse(payload);
                 objects.AddRange(array.Select(t => ConvertSingle(t, containerName)));
             }
-            catch (HttpParseException)
+            catch (FormatException)
             {
                 throw;
             }
             catch (Exception ex)
             {
-                throw new HttpParseException(string.Format("Storage Object payload could not be parsed. Payload: '{0}'", payload), ex);
+                throw new FormatException(string.Format("Storage Object payload could not be parsed. Payload: '{0}'", payload), ex);
             }
 
             return objects;
@@ -101,7 +100,7 @@ namespace OpenStack.Storage
                     msg = string.Format("Storage Object payload could not be parsed. Payload: '{0}'", obj);
                 }
 
-                throw new HttpParseException(msg, ex);
+                throw new FormatException(msg, ex);
             }
         }
 
@@ -124,7 +123,7 @@ namespace OpenStack.Storage
             }
             catch (Exception ex)
             {
-                throw new HttpParseException(string.Format("Storage object '{0}' could not be parsed.", objectName), ex);
+                throw new FormatException(string.Format("Storage object '{0}' could not be parsed.", objectName), ex);
             }
         }
 
@@ -145,7 +144,7 @@ namespace OpenStack.Storage
             IEnumerable<string> values;
             if (headers.TryGetValue("X-Static-Large-Object", out values))
             {
-                if (values.Any(v => string.Compare(v, "true", StringComparison.InvariantCultureIgnoreCase) == 0))
+                if (values.Any(v => string.Compare(v, "true", StringComparison.OrdinalIgnoreCase) == 0))
                 {
                     return new StaticLargeObjectManifest(objectName, containerName, lastModified, eTag, length, contentType, metadata);
                 }

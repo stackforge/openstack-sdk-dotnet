@@ -14,22 +14,27 @@
 // limitations under the License.
 // ============================================================================ */
 
-using OpenStack.Common.Http;
-using OpenStack.Common.ServiceLocation;
+using System;
+using System.Reflection;
 
-namespace OpenStack.Common
+namespace OpenStack.Common.ServiceLocation
 {
-    /// <inheritdoc/>
-    public class ServiceRegistrar : IServiceLocationRegistrar
+    /// <summary>
+    /// Represents an object that can locate services.
+    /// </summary>
+    public interface IServiceLocator
     {
         /// <summary>
-        /// Registers relevant services for the OpenStack.Common namespace.
+        /// Locates an instance of the requested service.
         /// </summary>
-        /// <param name="manager">The service manager to use when registering the services.</param>
-        /// <param name="locator">A reference to the service locator.</param>
-        public void Register(IServiceLocationManager manager, IServiceLocator locator)
-        {
-            manager.RegisterServiceInstance(typeof(IHttpAbstractionClientFactory), new HttpAbstractionClientFactory());
-        }
+        /// <typeparam name="T">The type of the service to locate.</typeparam>
+        /// <returns>An instance of the service.</returns>
+        T Locate<T>();
+
+        /// <summary>
+        /// Ensures that the given assembly has been registered with the ServiceLocator for service location.
+        /// </summary>
+        /// <param name="target">The target assembly.</param>
+        void EnsureAssemblyRegistration(Assembly target);
     }
 }

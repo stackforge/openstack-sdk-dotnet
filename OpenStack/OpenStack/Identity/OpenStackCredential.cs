@@ -15,7 +15,6 @@
 // ============================================================================ */
 
 using System;
-using System.Security;
 using OpenStack.Common;
 
 namespace OpenStack.Identity
@@ -33,7 +32,7 @@ namespace OpenStack.Identity
         public string UserName { get; private set; }
 
         /// <inheritdoc/>
-        public SecureString Password { get; private set; }
+        public string Password { get; private set; }
 
         /// <inheritdoc/>
         public string TenantId { get; private set; }
@@ -52,7 +51,7 @@ namespace OpenStack.Identity
         /// <param name="password">The password to be used for authentication.</param>
         /// <param name="tenantId">The tenant id to be used for the authentication.</param>
         /// <param name="region">The region to be used for the authentication.</param>
-        public OpenStackCredential(Uri endpoint, string userName, SecureString password, string tenantId)
+        public OpenStackCredential(Uri endpoint, string userName, string password, string tenantId)
         {
             endpoint.AssertIsNotNull("endpoint", "An OpenStack credential cannot be created with a null endpoint.");
             userName.AssertIsNotNullOrEmpty("userName", "An OpenStack credential cannot be created with a null or empty user name.");
@@ -70,7 +69,7 @@ namespace OpenStack.Identity
         /// <param name="password">The password to be used for authentication.</param>
         /// <param name="tenantId">The tenant id to be used for the authentication.</param>
         /// <param name="region">The region to be used for the authentication.</param>
-        public OpenStackCredential(Uri endpoint, string userName, SecureString password, string tenantId, string region)
+        public OpenStackCredential(Uri endpoint, string userName, string password, string tenantId, string region)
         {
             endpoint.AssertIsNotNull("endpoint","An OpenStack credential cannot be created with a null endpoint.");
             userName.AssertIsNotNullOrEmpty("userName", "An OpenStack credential cannot be created with a null or empty user name.");
@@ -81,7 +80,7 @@ namespace OpenStack.Identity
             this.Init(endpoint, userName, password, tenantId, region);
         }
 
-        internal void Init(Uri endpoint, string userName, SecureString password, string tenantId, string region)
+        internal void Init(Uri endpoint, string userName, string password, string tenantId, string region)
         {
             this.AuthenticationEndpoint = endpoint;
             this.UserName = userName;

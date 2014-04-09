@@ -60,7 +60,7 @@ namespace OpenStack.Test.Storage
 
         StorageServiceClientContext GetValidContext()
         {
-            var creds = new OpenStackCredential(this.endpoint, "SomeUser", "Password".ConvertToSecureString(), "SomeTenant", "region-a.geo-1");
+            var creds = new OpenStackCredential(this.endpoint, "SomeUser", "Password", "SomeTenant", "region-a.geo-1");
             creds.SetAccessTokenId(this.authId);
 
             return new StorageServiceClientContext(creds, CancellationToken.None, "Object Storage");

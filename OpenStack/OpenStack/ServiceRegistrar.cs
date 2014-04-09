@@ -14,6 +14,7 @@
 // limitations under the License.
 // ============================================================================ */
 
+using OpenStack.Common.Http;
 using OpenStack.Common.ServiceLocation;
 using OpenStack.Identity;
 using OpenStack.Storage;
@@ -26,6 +27,9 @@ namespace OpenStack
         /// <inheritdoc/>
         public void Register(IServiceLocationManager manager, IServiceLocator locator)
         {
+            //Common
+            manager.RegisterServiceInstance(typeof(IHttpAbstractionClientFactory), new HttpAbstractionClientFactory());
+
             //Storage related clients/services
             manager.RegisterServiceInstance(typeof(IStorageServicePocoClientFactory), new StorageServicePocoClientFactory());
             manager.RegisterServiceInstance(typeof(IStorageServiceRestClientFactory), new StorageServiceRestClientFactory());

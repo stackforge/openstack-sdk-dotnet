@@ -35,9 +35,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Newtonsoft.Json.4.5.7\lib\net40\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\packages\Newtonsoft.Json.6.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Net.Http" />
@@ -101,16 +101,11 @@
     <Compile Include="Storage\LargeStorageObjectProviderTests.cs" />
     <Compile Include="TestOpenStackRegionResolver.cs" />
     <Compile Include="TestOpenStackServiceEndpointResolver.cs" />
-    <Compile Include="ObjectExtentionsTests.cs" />
     <Compile Include="OpenStackClientTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\OpenStack.Common\OpenStack.Common.csproj">
-      <Project>{c53d669c-cdf1-4157-aec1-bd167f655b2b}</Project>
-      <Name>OpenStack.Common</Name>
-    </ProjectReference>
     <ProjectReference Include="..\OpenStack\OpenStack.csproj">
-      <Project>{b2c92371-b62b-45a2-adeb-edebefa3a75c}</Project>
+      <Project>{5660f8aa-14d5-4b3b-ada0-f79a286ef483}</Project>
       <Name>OpenStack</Name>
     </ProjectReference>
   </ItemGroup>

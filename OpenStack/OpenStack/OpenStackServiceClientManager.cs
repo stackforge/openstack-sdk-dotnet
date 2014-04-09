@@ -17,8 +17,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using OpenStack.Common;
+using OpenStack.Common.ServiceLocation;
 using OpenStack.Identity;
 
 namespace OpenStack
@@ -43,7 +45,11 @@ namespace OpenStack
             cancellationToken.AssertIsNotNull("cancellationToken", "Cannot create an OpenStack service with a null cancellationToken.");
             credential.ServiceCatalog.AssertIsNotNull("credential.ServiceCatalog", "Cannot create an OpenStack service with a null service catalog.");
 
-            foreach (var serviceClientDef in this.serviceClientDefinitions.Where(s =>typeof(T).IsAssignableFrom(s.Key)))
+            //Ensure that the assembly that contains this credential has had a chance to be service located.
+            //This is, at least for now, the entry point for third-parties can extend the API/SDK.
+            ServiceLocator.Instance.EnsureAssemblyRegistration(credential.GetType().GetTypeInfo().Assembly);
+
+            foreach (var serviceClientDef in this.serviceClientDefinitions.Where(s =>typeof(T).GetTypeInfo().IsAssignableFrom(s.Key.GetTypeInfo())))
             {
                 if (serviceClientDef.Value != null && serviceClientDef.Value.IsSupported(credential))
                 {

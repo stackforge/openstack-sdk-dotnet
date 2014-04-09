@@ -17,7 +17,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using Newtonsoft.Json.Linq;
 using OpenStack.Common;
 using OpenStack.Common.Http;
@@ -45,13 +44,13 @@ namespace OpenStack.Storage
                 var array = JArray.Parse(payload);
                 containers.AddRange(array.Select(ConvertSingle));
             }
-            catch (HttpParseException)
+            catch (FormatException)
             {
                 throw;
             }
             catch (Exception ex)
             {
-                throw new HttpParseException(string.Format("Storage Container payload could not be parsed. Payload: '{0}'", payload), ex);
+                throw new FormatException(string.Format("Storage Container payload could not be parsed. Payload: '{0}'", payload), ex);
             }
 
             return containers;
@@ -85,7 +84,7 @@ namespace OpenStack.Storage
                     msg = string.Format("Storage Container payload could not be parsed. Payload: '{0}'", container);
                 }
 
-                throw new HttpParseException(msg, ex);
+                throw new FormatException(msg, ex);
             }
         }
 
@@ -111,7 +110,7 @@ namespace OpenStack.Storage
             }
             catch (Exception ex)
             {
-                throw new HttpParseException(string.Format("Storage Container '{0}' payload could not be parsed.", name), ex);
+                throw new FormatException(string.Format("Storage Container '{0}' payload could not be parsed.", name), ex);
             }
         }
     }

@@ -53,7 +53,7 @@ namespace OpenStack.Test.Identity
         {
             var endpoint = new Uri("https://auth.someplace.com/authme");
             var userName = "TestUser";
-            var password = "RandomPassword".ConvertToSecureString();
+            var password = "RandomPassword";
             var tenantId = "12345";
 
             return new OpenStackCredential(endpoint, userName, password, tenantId);
@@ -110,7 +110,7 @@ namespace OpenStack.Test.Identity
             var tenantId = obj["auth"]["tenantName"];
 
             Assert.AreEqual(creds.UserName, userName);
-            Assert.AreEqual(creds.Password.ConvertToUnsecureString(), password);
+            Assert.AreEqual(creds.Password, password);
             Assert.AreEqual(creds.TenantId, tenantId);
         }
     

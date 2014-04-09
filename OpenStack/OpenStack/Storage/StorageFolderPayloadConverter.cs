@@ -19,7 +19,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Web;
 using Newtonsoft.Json.Linq;
 using OpenStack.Common;
 using OpenStack.Common.ServiceLocation;
@@ -59,7 +58,7 @@ namespace OpenStack.Storage
                     continue;
                 }
 
-                var currentRoot = folders.FirstOrDefault(f => string.Compare(f.Name, folderParts[0], StringComparison.InvariantCulture) == 0);
+                var currentRoot = folders.FirstOrDefault(f => string.Compare(f.Name, folderParts[0], StringComparison.Ordinal) == 0);
                 if (currentRoot == null)
                 {
                     //if the root folder does not exist, create it.
@@ -72,7 +71,7 @@ namespace OpenStack.Storage
                 foreach (var part in folderParts.Skip(1))
                 {
                     currentPath += "/" + part;
-                    var newRoot = currentRoot.Folders.FirstOrDefault(f => string.Compare(f.Name, part, StringComparison.InvariantCulture) == 0);
+                    var newRoot = currentRoot.Folders.FirstOrDefault(f => string.Compare(f.Name, part, StringComparison.Ordinal) == 0);
                     if (newRoot == null)
                     {
                         newRoot = new StorageFolder(currentPath, new List<StorageFolder>());
@@ -112,12 +111,12 @@ namespace OpenStack.Storage
                 var objectConverter = ServiceLocator.Instance.Locate<IStorageObjectPayloadConverter>();
 
                 var objects = rawObjects.Select(t => objectConverter.ConvertSingle(t,containerName)).ToList();
-                objects.RemoveAll(o => string.Compare(o.FullName, folderName, StringComparison.InvariantCulture) == 0);
+                objects.RemoveAll(o => string.Compare(o.FullName, folderName, StringComparison.Ordinal) == 0);
 
                 return new StorageFolder(folderName, subFolders.Select(ParseSubFolder), objects);
                 
             }
-            catch (HttpParseException)
+            catch (FormatException)
             {
                 throw;
             }
@@ -127,7 +126,7 @@ namespace OpenStack.Storage
             }
             catch (Exception ex)
             {
-                throw new HttpParseException(string.Format("Storage Container payload could not be parsed. Payload: '{0}'", payload), ex);
+                throw new FormatException(string.Format("Storage Container payload could not be parsed. Payload: '{0}'", payload), ex);
             }
         }
 
@@ -145,7 +144,7 @@ namespace OpenStack.Storage
             }
             catch (Exception ex)
             {
-                throw new HttpParseException(string.Format("Storage Folder payload could not be parsed. Payload: '{0}'", token), ex);
+                throw new FormatException(string.Format("Storage Folder payload could not be parsed. Payload: '{0}'", token), ex);
             }
         }
     }

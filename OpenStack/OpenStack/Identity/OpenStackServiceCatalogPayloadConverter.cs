@@ -16,7 +16,6 @@
 
 using System;
 using System.Linq;
-using System.Web;
 using Newtonsoft.Json.Linq;
 using OpenStack.Common;
 using OpenStack.Common.ServiceLocation;
@@ -44,13 +43,13 @@ namespace OpenStack.Identity
                 var defArray = obj["access"]["serviceCatalog"];
                 catalog.AddRange(defArray.Select(ConvertServiceDefinition));
             }
-            catch (HttpParseException)
+            catch (FormatException)
             {
                 throw;
             }
             catch (Exception ex)
             {
-                throw new HttpParseException(string.Format("Service catalog payload could not be parsed. Payload: '{0}'", payload), ex);
+                throw new FormatException(string.Format("Service catalog payload could not be parsed. Payload: '{0}'", payload), ex);
             }
 
             return catalog;

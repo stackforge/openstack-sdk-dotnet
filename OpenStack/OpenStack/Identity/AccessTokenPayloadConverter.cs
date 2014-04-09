@@ -15,7 +15,6 @@
 // ============================================================================ */
 
 using System;
-using System.Web;
 using Newtonsoft.Json.Linq;
 using OpenStack.Common;
 
@@ -41,14 +40,14 @@ namespace OpenStack.Identity
 
                 if (token == null)
                 {
-                    throw new HttpParseException(string.Format("Access token payload could not be parsed. Token is null. Payload: '{0}'", payload));
+                    throw new FormatException(string.Format("Access token payload could not be parsed. Token is null. Payload: '{0}'", payload));
                 }
 
                 return token;
             }
             catch (Exception ex)
             {
-                throw new HttpParseException(string.Format("Access token payload could not be parsed. Payload: '{0}'", payload), ex);
+                throw new FormatException(string.Format("Access token payload could not be parsed. Payload: '{0}'", payload), ex);
             }
         }
     }

@@ -102,7 +102,7 @@ namespace OpenStack.Common
         /// <returns>A stream that includes the given string.</returns>
         public static Stream ConvertToStream(this string content)
         {
-            var byteArray = Encoding.ASCII.GetBytes(content);
+            var byteArray = Encoding.UTF8.GetBytes(content);
             return new MemoryStream(byteArray);
         }
 
@@ -111,41 +111,41 @@ namespace OpenStack.Common
         /// </summary>
         /// <param name="password">The string to convert.</param>
         /// <returns>The converted SecureString object.</returns>
-        public static SecureString ConvertToSecureString(this string password)
-        {
-            if (password == null)
-            {
-                throw new ArgumentNullException("password");
-            }
+        //public static SecureString ConvertToSecureString(this string password)
+        //{
+        //    if (password == null)
+        //    {
+        //        throw new ArgumentNullException("password");
+        //    }
 
-            var securePassword = new SecureString();
-            password.ToCharArray().ToList().ForEach(securePassword.AppendChar);
-            securePassword.MakeReadOnly();
-            return securePassword;
-        }
+        //    var securePassword = new SecureString();
+        //    password.ToCharArray().ToList().ForEach(securePassword.AppendChar);
+        //    securePassword.MakeReadOnly();
+        //    return securePassword;
+        //}
 
         /// <summary>
         /// Converts a SecureString object to a plain-text string.
         /// </summary>
         /// <param name="securePassword">The SecureString object.</param>
         /// <returns>The plain-text version of the given SecureString.</returns>
-        public static string ConvertToUnsecureString(this SecureString securePassword)
-        {
-            if (securePassword == null)
-            {
-                throw new ArgumentNullException("securePassword");
-            }
+        //public static string ConvertToUnsecureString(this SecureString securePassword)
+        //{
+        //    if (securePassword == null)
+        //    {
+        //        throw new ArgumentNullException("securePassword");
+        //    }
 
-            var unmanagedString = IntPtr.Zero;
-            try
-            {
-                unmanagedString = Marshal.SecureStringToGlobalAllocUnicode(securePassword);
-                return Marshal.PtrToStringUni(unmanagedString);
-            }
-            finally
-            {
-                Marshal.ZeroFreeGlobalAllocUnicode(unmanagedString);
-            }
-        }
+        //    var unmanagedString = IntPtr.Zero;
+        //    try
+        //    {
+        //        unmanagedString = Marshal.SecureStringToGlobalAllocUnicode(securePassword);
+        //        return Marshal.PtrToStringUni(unmanagedString);
+        //    }
+        //    finally
+        //    {
+        //        Marshal.ZeroFreeGlobalAllocUnicode(unmanagedString);
+        //    }
+        //}
     }
 }

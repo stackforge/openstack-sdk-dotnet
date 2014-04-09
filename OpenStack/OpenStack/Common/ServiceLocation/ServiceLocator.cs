@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 
 namespace OpenStack.Common.ServiceLocation
 {
@@ -46,22 +47,35 @@ namespace OpenStack.Common.ServiceLocation
             this._runtimeManager = new ServiceLocationRuntimeManager(this);
             this._services.Add(typeof(IServiceLocationRuntimeManager), this._runtimeManager);
             this._services.Add(typeof(IServiceLocationOverrideManager), new ServiceLocationOverrideManager(this));
+            this._scanner.AddAssembly(this.GetType().GetTypeInfo().Assembly);
             this.RegisterServices();
         }
 
-        private void RegisterServices()
+        internal void RegisterServices(IEnumerable<IServiceLocationRegistrar> registrars)
         {
-            var registrars = this._scanner.GetRegistrars().ToList();
-            foreach (var serviceLocationRegistrar in registrars)
+           foreach (var serviceLocationRegistrar in registrars)
             {
                 serviceLocationRegistrar.Register(this._runtimeManager, this);
             }
+        }
+
+        internal void RegisterServices()
+        {
+            var registrars = this._scanner.GetRegistrars().ToList();
+            this.RegisterServices(registrars);
         }
 
         /// <inheritdoc/>
         public T Locate<T>()
         {
             return (T)this.Locate(typeof(T));
+        }
+
+        public void EnsureAssemblyRegistration(Assembly target)
+        {
+            this._scanner.AddAssembly(target);
+            var registrars = this._scanner.GetNewRegistrars();
+            this.RegisterServices(registrars);
         }
 
         /// <summary>
@@ -77,7 +91,7 @@ namespace OpenStack.Common.ServiceLocation
                 return retval;
             }
 
-            if (this._scanner.HasNewAssemblies())
+            if (this._scanner.HasNewAssemblies)
             {
                 this.RegisterServices();
                 retval = this.InternalLocate(type);

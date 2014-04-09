@@ -2,21 +2,24 @@
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
+    <MinimumVisualStudioVersion>11.0</MinimumVisualStudioVersion>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{B2C92371-B62B-45A2-ADEB-EDEBEFA3A75C}</ProjectGuid>
+    <ProjectGuid>{5660F8AA-14D5-4B3B-ADA0-F79A286EF483}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>OpenStack</RootNamespace>
     <AssemblyName>OpenStack</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Profile78</TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\bin\Debug\</OutputPath>
+    <OutputPath>..\Bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -24,44 +27,43 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\bin\Release\</OutputPath>
+    <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\packages\Newtonsoft.Json.4.5.7\lib\net40\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Net.Http.Formatting, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
-    <Reference Include="System.Web" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
+    <!-- A reference to the entire .NET Framework is automatically included -->
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\AssemblyVersionInfo.cs">
-      <Link>Properties\AssemblyVersionInfo.cs</Link>
-    </Compile>
-    <Compile Include="Identity\IdentityServiceClientDefinition.cs" />
-    <Compile Include="Identity\IOpenStackRegionResolver.cs" />
-    <Compile Include="Identity\OpenStackRegionResolver.cs" />
-    <Compile Include="IOpenStackServiceClientDefinition.cs" />
-    <Compile Include="OpenStackClient.cs" />
-    <Compile Include="OpenStackClientManager.cs" />
-    <Compile Include="OpenStackServiceClientManager.cs" />
+    <Compile Include="Common\Http\DisposableClass.cs" />
+    <Compile Include="Common\Http\HttpAbstractionClient.cs" />
+    <Compile Include="Common\Http\HttpAbstractionClientFactory.cs" />
+    <Compile Include="Common\Http\HttpHeadersAbstraction.cs" />
+    <Compile Include="Common\Http\HttpResponseAbstraction.cs" />
+    <Compile Include="Common\Http\IHttpAbstractionClient.cs" />
+    <Compile Include="Common\Http\IHttpAbstractionClientFactory.cs" />
+    <Compile Include="Common\Http\IHttpHeadersAbstraction.cs" />
+    <Compile Include="Common\Http\IHttpResponseAbstraction.cs" />
+    <Compile Include="Common\ObjectExtentions.cs" />
+    <Compile Include="Common\ServiceLocation\IServiceLocationAssemblyScanner.cs" />
+    <Compile Include="Common\ServiceLocation\IServiceLocationManager.cs" />
+    <Compile Include="Common\ServiceLocation\IServiceLocationOverrideManager.cs" />
+    <Compile Include="Common\ServiceLocation\IServiceLocationRegistrar.cs" />
+    <Compile Include="Common\ServiceLocation\IServiceLocationRegistrarFactory.cs" />
+    <Compile Include="Common\ServiceLocation\IServiceLocationRuntimeManager.cs" />
+    <Compile Include="Common\ServiceLocation\IServiceLocator.cs" />
+    <Compile Include="Common\ServiceLocation\RuntimeRegistrationManager.cs" />
+    <Compile Include="Common\ServiceLocation\ServiceLocationAssemblyScanner.cs" />
+    <Compile Include="Common\ServiceLocation\ServiceLocationManager.cs" />
+    <Compile Include="Common\ServiceLocation\ServiceLocationRegistrarFactory.cs" />
+    <Compile Include="Common\ServiceLocation\ServiceLocator.cs" />
     <Compile Include="Identity\AccessTokenPayloadConverter.cs" />
     <Compile Include="Identity\IAccessTokenPayloadConverter.cs" />
     <Compile Include="Identity\ICredential.cs" />
-    <Compile Include="IOpenStackClient.cs" />
-    <Compile Include="IOpenStackClientManager.cs" />
     <Compile Include="Identity\IdentityServiceClient.cs" />
+    <Compile Include="Identity\IdentityServiceClientDefinition.cs" />
     <Compile Include="Identity\IdentityServicePocoClient.cs" />
     <Compile Include="Identity\IdentityServicePocoClientFactory.cs" />
     <Compile Include="Identity\IdentityServiceRestClient.cs" />
@@ -72,32 +74,41 @@
     <Compile Include="Identity\IIdentityServiceRestClient.cs" />
     <Compile Include="Identity\IIdentityServiceRestClientFactory.cs" />
     <Compile Include="Identity\IOpenStackCredential.cs" />
-    <Compile Include="IOpenStackServiceClient.cs" />
-    <Compile Include="IOpenStackServiceClientManager.cs" />
+    <Compile Include="Identity\IOpenStackRegionResolver.cs" />
     <Compile Include="Identity\IOpenStackServiceCatalog.cs" />
     <Compile Include="Identity\IOpenStackServiceCatalogPayloadConverter.cs" />
     <Compile Include="Identity\IOpenStackServiceDefinitionPayloadConverter.cs" />
     <Compile Include="Identity\IOpenStackServiceEndpointPayloadConverter.cs" />
     <Compile Include="Identity\IOpenStackServiceEndpointResolver.cs" />
     <Compile Include="Identity\OpenStackCredential.cs" />
+    <Compile Include="Identity\OpenStackRegionResolver.cs" />
     <Compile Include="Identity\OpenStackServiceCatalog.cs" />
     <Compile Include="Identity\OpenStackServiceCatalogPayloadConverter.cs" />
+    <Compile Include="Identity\OpenStackServiceDefinition.cs" />
     <Compile Include="Identity\OpenStackServiceDefinitionPayloadConverter.cs" />
     <Compile Include="Identity\OpenStackServiceEndpoint.cs" />
-    <Compile Include="Identity\OpenStackServiceDefinition.cs" />
     <Compile Include="Identity\OpenStackServiceEndpointPayloadConverter.cs" />
     <Compile Include="Identity\OpenStackServiceEndpointResolver.cs" />
+    <Compile Include="IOpenStackClient.cs" />
+    <Compile Include="IOpenStackClientManager.cs" />
+    <Compile Include="IOpenStackServiceClient.cs" />
+    <Compile Include="IOpenStackServiceClientDefinition.cs" />
+    <Compile Include="IOpenStackServiceClientManager.cs" />
+    <Compile Include="OpenStackClient.cs" />
+    <Compile Include="OpenStackClientManager.cs" />
+    <Compile Include="OpenStackServiceClientManager.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ServiceRegistrar.cs" />
+    <Compile Include="Storage\ContainerNameValidator.cs" />
     <Compile Include="Storage\DynamicLargeObjectManifest.cs" />
     <Compile Include="Storage\FolderNameValidator.cs" />
-    <Compile Include="Storage\ContainerNameValidator.cs" />
     <Compile Include="Storage\ILargeStorageObjectCreator.cs" />
     <Compile Include="Storage\ILargeStorageObjectCreatorFactory.cs" />
     <Compile Include="Storage\IStorageAccountPayloadConverter.cs" />
-    <Compile Include="Storage\IStorageFolderPayloadConverter.cs" />
-    <Compile Include="Storage\IStorageServiceClient.cs" />
     <Compile Include="Storage\IStorageContainerPayloadConverter.cs" />
+    <Compile Include="Storage\IStorageFolderPayloadConverter.cs" />
     <Compile Include="Storage\IStorageObjectPayloadConverter.cs" />
+    <Compile Include="Storage\IStorageServiceClient.cs" />
     <Compile Include="Storage\IStorageServicePocoClient.cs" />
     <Compile Include="Storage\IStorageServicePocoClientFactory.cs" />
     <Compile Include="Storage\IStorageServiceRestClient.cs" />
@@ -105,36 +116,45 @@
     <Compile Include="Storage\LargeStorageObjectCreator.cs" />
     <Compile Include="Storage\LargeStorageObjectCreatorFactory.cs" />
     <Compile Include="Storage\StaticLargeObjectManifest.cs" />
+    <Compile Include="Storage\StorageAccount.cs" />
+    <Compile Include="Storage\StorageAccountPayloadConverter.cs" />
+    <Compile Include="Storage\StorageContainer.cs" />
+    <Compile Include="Storage\StorageContainerPayloadConverter.cs" />
     <Compile Include="Storage\StorageFolder.cs" />
     <Compile Include="Storage\StorageFolderPayloadConverter.cs" />
     <Compile Include="Storage\StorageItem.cs" />
     <Compile Include="Storage\StorageItemNameExtractor.cs" />
     <Compile Include="Storage\StorageManifest.cs" />
+    <Compile Include="Storage\StorageObject.cs" />
+    <Compile Include="Storage\StorageObjectPayloadConverter.cs" />
     <Compile Include="Storage\StorageServiceClient.cs" />
     <Compile Include="Storage\StorageServiceClientContext.cs" />
     <Compile Include="Storage\StorageServiceClientDefinition.cs" />
-    <Compile Include="Storage\StorageAccount.cs" />
-    <Compile Include="Storage\StorageAccountPayloadConverter.cs" />
-    <Compile Include="Storage\StorageContainerPayloadConverter.cs" />
-    <Compile Include="Storage\StorageContainer.cs" />
-    <Compile Include="Storage\StorageObjectPayloadConverter.cs" />
-    <Compile Include="Storage\StorageObject.cs" />
     <Compile Include="Storage\StorageServicePocoClient.cs" />
     <Compile Include="Storage\StorageServicePocoClientFactory.cs" />
     <Compile Include="Storage\StorageServiceRestClient.cs" />
     <Compile Include="Storage\StorageServiceRestClientFactory.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\Newtonsoft.Json.6.0.2\lib\portable-net45+wp80+win8+wpa81\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http">
+      <HintPath>..\packages\Microsoft.Net.Http.2.2.19\lib\portable-net40+sl4+win8+wp71+wpa81\System.Net.Http.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http.Extensions">
+      <HintPath>..\packages\Microsoft.Net.Http.2.2.19\lib\portable-net40+sl4+win8+wp71+wpa81\System.Net.Http.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http.Primitives">
+      <HintPath>..\packages\Microsoft.Net.Http.2.2.19\lib\portable-net40+sl4+win8+wp71+wpa81\System.Net.Http.Primitives.dll</HintPath>
+    </Reference>
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\OpenStack.Common\OpenStack.Common.csproj">
-      <Project>{c53d669c-cdf1-4157-aec1-bd167f655b2b}</Project>
-      <Name>OpenStack.Common</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
+  <Import Project="..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" />
+  <Target Name="EnsureBclBuildImported" BeforeTargets="BeforeBuild" Condition="'$(BclBuildImported)' == ''">
+    <Error Condition="!Exists('..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" Text="This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=317567." HelpKeyword="BCLBUILD2001" />
+    <Error Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" Text="The build restored NuGet packages. Build the project again to include these packages in the build. For more information, see http://go.microsoft.com/fwlink/?LinkID=317568." HelpKeyword="BCLBUILD2002" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
