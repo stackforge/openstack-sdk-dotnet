@@ -31,19 +31,19 @@ namespace OpenStack.Identity
             serviceName.AssertIsNotNullOrEmpty("serviceName", "Cannot resolve the public endpoint of a service with a null or empty service name.");
             serviceName.AssertIsNotNullOrEmpty("region", "Cannot resolve the public endpoint of a service with a null or empty region.");
 
-            if (catalog.All(s => string.Compare(s.Name, serviceName, StringComparison.OrdinalIgnoreCase) != 0))
+            if (catalog.All(s => !string.Equals(s.Name, serviceName, StringComparison.OrdinalIgnoreCase)))
             {
                 throw new InvalidOperationException(string.Format("Service catalog does not contain an entry for the '{0}' service. The request could not be completed.", serviceName));
             }
 
-            var service = catalog.First(s => string.Compare(s.Name, serviceName, StringComparison.OrdinalIgnoreCase) == 0);
+            var service = catalog.First(s => string.Equals(s.Name, serviceName, StringComparison.OrdinalIgnoreCase));
 
-            if (service.Endpoints.All(e => string.Compare(e.Region, region, StringComparison.OrdinalIgnoreCase) != 0))
+            if (service.Endpoints.All(e => !string.Equals(e.Region, region, StringComparison.OrdinalIgnoreCase)))
             {
                 throw new InvalidOperationException(string.Format("Service catalog does not contain an endpoint for the '{0}' service in the requested region. Region: '{1}'", serviceName, region));
             }
 
-            var endpoint = service.Endpoints.First(e => string.Compare(e.Region, region, StringComparison.OrdinalIgnoreCase) == 0);
+            var endpoint = service.Endpoints.First(e => string.Equals(e.Region, region, StringComparison.OrdinalIgnoreCase));
             
             return endpoint.PublicUri;
         }

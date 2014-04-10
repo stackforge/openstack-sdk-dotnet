@@ -31,7 +31,7 @@ namespace OpenStack.Identity
 
             var ret = string.Empty;
 
-            var identService = catalog.FirstOrDefault(s => string.Compare(s.Name, serviceName, StringComparison.OrdinalIgnoreCase) == 0);
+            var identService = catalog.FirstOrDefault(s => string.Equals(s.Name, serviceName, StringComparison.OrdinalIgnoreCase));
             
             if (identService == null)
             {

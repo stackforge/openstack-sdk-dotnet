@@ -47,9 +47,9 @@ namespace OpenStack.Test.Storage
 
             Assert.AreEqual(2, containers.Count());
             var obj1 =
-                containers.First(o => string.Compare(o.Name, "TestContainer", StringComparison.InvariantCultureIgnoreCase) == 0);
+                containers.First(o => string.Equals(o.Name, "TestContainer", StringComparison.InvariantCultureIgnoreCase));
             var obj2 =
-                containers.First(o => string.Compare(o.Name, "OtherTestContainer", StringComparison.InvariantCultureIgnoreCase) == 0);
+                containers.First(o => string.Equals(o.Name, "OtherTestContainer", StringComparison.InvariantCultureIgnoreCase));
             Assert.IsNotNull(obj1);
             Assert.IsNotNull(obj2);
 
@@ -77,7 +77,7 @@ namespace OpenStack.Test.Storage
 
             Assert.AreEqual(1, containers.Count());
             var obj1 =
-                containers.First(o => string.Compare(o.Name, "TestContainer", StringComparison.InvariantCultureIgnoreCase) == 0);
+                containers.First(o => string.Equals(o.Name, "TestContainer", StringComparison.InvariantCultureIgnoreCase));
             Assert.IsNotNull(obj1);
 
             Assert.AreEqual(7, obj1.TotalBytesUsed);

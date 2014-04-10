@@ -191,7 +191,7 @@ namespace OpenStack.Storage
 
             var segmentFolder =
                 container.Folders.FirstOrDefault(
-                    f => string.Compare(f.FullName, objectName, StringComparison.Ordinal) == 0);
+                    f => string.Equals(f.FullName, objectName, StringComparison.Ordinal));
 
             if (segmentFolder == null)
             {

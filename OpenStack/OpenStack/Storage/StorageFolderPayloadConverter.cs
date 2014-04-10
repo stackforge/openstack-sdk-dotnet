@@ -58,7 +58,7 @@ namespace OpenStack.Storage
                     continue;
                 }
 
-                var currentRoot = folders.FirstOrDefault(f => string.Compare(f.Name, folderParts[0], StringComparison.Ordinal) == 0);
+                var currentRoot = folders.FirstOrDefault(f => string.Equals(f.Name, folderParts[0], StringComparison.Ordinal));
                 if (currentRoot == null)
                 {
                     //if the root folder does not exist, create it.
@@ -71,7 +71,7 @@ namespace OpenStack.Storage
                 foreach (var part in folderParts.Skip(1))
                 {
                     currentPath += "/" + part;
-                    var newRoot = currentRoot.Folders.FirstOrDefault(f => string.Compare(f.Name, part, StringComparison.Ordinal) == 0);
+                    var newRoot = currentRoot.Folders.FirstOrDefault(f => string.Equals(f.Name, part, StringComparison.Ordinal));
                     if (newRoot == null)
                     {
                         newRoot = new StorageFolder(currentPath, new List<StorageFolder>());
@@ -111,7 +111,7 @@ namespace OpenStack.Storage
                 var objectConverter = ServiceLocator.Instance.Locate<IStorageObjectPayloadConverter>();
 
                 var objects = rawObjects.Select(t => objectConverter.ConvertSingle(t,containerName)).ToList();
-                objects.RemoveAll(o => string.Compare(o.FullName, folderName, StringComparison.Ordinal) == 0);
+                objects.RemoveAll(o => string.Equals(o.FullName, folderName, StringComparison.Ordinal));
 
                 return new StorageFolder(folderName, subFolders.Select(ParseSubFolder), objects);
                 

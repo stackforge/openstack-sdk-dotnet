@@ -54,7 +54,7 @@ namespace OpenStack.Identity
             {
                 //https://someidentityendpoint:35357/v2.0/tokens
                 var endpointSegs = credential.AuthenticationEndpoint.Segments;
-                if (endpointSegs.Count() == 3 && string.Compare(endpointSegs[1].Trim('/'), "v2.0", StringComparison.Ordinal) == 0)
+                if (endpointSegs.Count() == 3 && string.Equals(endpointSegs[1].Trim('/'), "v2.0", StringComparison.Ordinal))
                 {
                     return true;
                 }

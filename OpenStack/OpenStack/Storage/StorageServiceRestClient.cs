@@ -137,7 +137,7 @@ namespace OpenStack.Storage
             var client = this.GetHttpClient(this.context);
 
             var baseUri = CreateRequestUri(GetServiceEndpoint(this.context), containerName);
-            var prefix = string.Compare("/", folderName, StringComparison.Ordinal) == 0
+            var prefix = string.Equals("/", folderName, StringComparison.Ordinal)
                 ? string.Empty
                 : string.Format("&prefix={0}", folderName);
             

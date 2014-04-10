@@ -53,9 +53,9 @@ namespace OpenStack.Test.Storage
 
             Assert.AreEqual(2,objects.Count());
             var obj1 =
-                objects.First(o => string.Compare(o.Name, "BLAH", StringComparison.InvariantCultureIgnoreCase) == 0);
+                objects.First(o => string.Equals(o.Name, "BLAH", StringComparison.InvariantCultureIgnoreCase));
             var obj2 =
-                objects.First(o => string.Compare(o.Name, "LargeFile.bin", StringComparison.InvariantCultureIgnoreCase) == 0);
+                objects.First(o => string.Equals(o.Name, "LargeFile.bin", StringComparison.InvariantCultureIgnoreCase));
             Assert.IsNotNull(obj1);
             Assert.IsNotNull(obj2);
 
@@ -91,7 +91,7 @@ namespace OpenStack.Test.Storage
 
             Assert.AreEqual(1, objects.Count());
             var obj1 =
-                objects.First(o => string.Compare(o.Name, "BLAH", StringComparison.InvariantCultureIgnoreCase) == 0);
+                objects.First(o => string.Equals(o.Name, "BLAH", StringComparison.InvariantCultureIgnoreCase));
             Assert.IsNotNull(obj1);
 
             Assert.AreEqual(0, obj1.Length);

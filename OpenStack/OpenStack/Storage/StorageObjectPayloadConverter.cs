@@ -144,7 +144,7 @@ namespace OpenStack.Storage
             IEnumerable<string> values;
             if (headers.TryGetValue("X-Static-Large-Object", out values))
             {
-                if (values.Any(v => string.Compare(v, "true", StringComparison.OrdinalIgnoreCase) == 0))
+                if (values.Any(v => string.Equals(v, "true", StringComparison.OrdinalIgnoreCase)))
                 {
                     return new StaticLargeObjectManifest(objectName, containerName, lastModified, eTag, length, contentType, metadata);
                 }
