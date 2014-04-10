@@ -57,7 +57,7 @@ namespace OpenStack.Storage
                 return
                     catalog.Any(
                         s =>
-                            string.Compare(s.Name, StorageServiceClient.StorageServiceName, StringComparison.Ordinal) == 0 &&
+                            string.Compare(s.Name, StorageServiceClient.StorageServiceName, StringComparison.OrdinalIgnoreCase) == 0 &&
                             s.Endpoints.Any(e => this.ListSupportedVersions().Contains(e.Version)));
             }
             return false;

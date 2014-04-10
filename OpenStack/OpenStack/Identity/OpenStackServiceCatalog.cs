@@ -34,7 +34,7 @@ namespace OpenStack.Identity
         /// <inheritdoc/>
         public bool Exists(string serviceName)
         {
-            return this.Any(s => string.Compare(s.Name, serviceName, StringComparison.Ordinal) == 0);
+            return this.Any(s => string.Compare(s.Name, serviceName, StringComparison.OrdinalIgnoreCase) == 0);
         }
 
         /// <inheritdoc/>

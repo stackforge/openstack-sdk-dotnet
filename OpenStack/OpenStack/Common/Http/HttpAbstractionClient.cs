@@ -19,7 +19,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Net.Http;
-//using System.Net.Http.Handlers;
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
@@ -29,13 +28,11 @@ namespace OpenStack.Common.Http
     public class HttpAbstractionClient : DisposableClass, IHttpAbstractionClient
     {
         private readonly HttpClient _client;
-        //private readonly ProgressMessageHandler _handler;
         private CancellationToken _cancellationToken = CancellationToken.None;
         private static readonly TimeSpan _defaultTimeout = new TimeSpan(0, 5, 0);
 
         internal HttpAbstractionClient(TimeSpan timeout, CancellationToken cancellationToken)
         {
-            //this._handler = new ProgressMessageHandler(new HttpClientHandler());
             this._client = new HttpClient(new HttpClientHandler()) { Timeout = timeout };
 
             this._cancellationToken = cancellationToken;
@@ -63,18 +60,6 @@ namespace OpenStack.Common.Http
         {
             return new HttpAbstractionClient(timeout, cancellationToken);
         }
-
-        //public event EventHandler<HttpProgressEventArgs> HttpReceiveProgress
-        //{
-        //    add { this._handler.HttpReceiveProgress += value; }
-        //    remove { this._handler.HttpReceiveProgress -= value; }
-        //}
-
-        //public event EventHandler<HttpProgressEventArgs> HttpSendProgress
-        //{
-        //    add { this._handler.HttpSendProgress += value; }
-        //    remove { this._handler.HttpSendProgress -= value; }
-        //}
 
         public HttpMethod Method { get; set; }
 

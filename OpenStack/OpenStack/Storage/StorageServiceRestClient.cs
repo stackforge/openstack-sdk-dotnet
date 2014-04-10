@@ -315,10 +315,9 @@ namespace OpenStack.Storage
         /// <param name="client">The http client.</param>
         internal void AddItemMetadata( IDictionary<string, string> metadata, IHttpAbstractionClient client)
         {
-             var metaHeaders = metadata.Keys.ToList();
-            foreach (var header in metaHeaders)
+            foreach (var header in metadata)
             {
-                client.Headers.Add(string.Format("X-Object-Meta-{0}", header), metadata[header]);
+                client.Headers.Add(string.Format("X-Object-Meta-{0}", header.Key), header.Value);
             }
         }
 
