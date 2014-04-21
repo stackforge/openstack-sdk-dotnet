@@ -8,6 +8,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{863F820F-2B49-44FF-A825-A858BFBBD69E}"
 	ProjectSection(SolutionItems) = preProject
 		AssemblyVersionInfo.cs = AssemblyVersionInfo.cs
+		..\README.rst = ..\README.rst
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenStack", "OpenStack\OpenStack.csproj", "{5660F8AA-14D5-4B3B-ADA0-F79A286EF483}"
