@@ -38,16 +38,18 @@ namespace OpenStack.Test.Storage
         
         internal string authId = "12345";
         internal string endpoint = "http://teststorageendpoint.com/v1/1234567890";
+        internal ServiceLocator ServiceLocator;
 
         [TestInitialize]
         public void TestSetup()
         {
             this.ServicePocoClient = new TestStorageServicePocoClient();
             this.resovler = new TestOpenStackServiceEndpointResolver();
+            this.resovler.Endpoint = new Uri(endpoint);
             this.loCreator = new TestLargeStorageObjectCreator();
-
-            ServiceLocator.Reset();
-            var manager = ServiceLocator.Instance.Locate<IServiceLocationOverrideManager>();
+            this.ServiceLocator = new ServiceLocator();
+            
+            var manager = this.ServiceLocator.Locate<IServiceLocationOverrideManager>();
             manager.RegisterServiceInstance(typeof(IStorageServicePocoClientFactory), new TestStorageServicePocoClientFactory(this.ServicePocoClient));
             manager.RegisterServiceInstance(typeof(IOpenStackServiceEndpointResolver), resovler);
             manager.RegisterServiceInstance(typeof(ILargeStorageObjectCreatorFactory), new TestLargeStorageObjectCreatorFactory(this.loCreator));
@@ -59,7 +61,7 @@ namespace OpenStack.Test.Storage
             this.resovler = new TestOpenStackServiceEndpointResolver();
             this.ServicePocoClient = new TestStorageServicePocoClient();
             this.loCreator = new TestLargeStorageObjectCreator();
-            ServiceLocator.Reset();
+            this.ServiceLocator = new ServiceLocator();
         }
 
         IOpenStackCredential GetValidCreds()
@@ -75,7 +77,7 @@ namespace OpenStack.Test.Storage
             var expectedUri = new Uri(endpoint);
             this.resovler.Endpoint = expectedUri;
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             Assert.AreEqual(expectedUri, client.GetPublicEndpoint());
         }
 
@@ -102,7 +104,7 @@ namespace OpenStack.Test.Storage
                 return Task.Factory.StartNew(() => obj);
             };
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.ListStorageObjects(containerName);
 
             Assert.AreEqual(1,numberObjCalls);
@@ -127,7 +129,7 @@ namespace OpenStack.Test.Storage
                 throw new InvalidOperationException("Cannot get storage object. '" +HttpStatusCode.NotFound +"'");
             };
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             var resp = await client.ListStorageObjects(containerName);
 
             Assert.AreEqual(0, resp.Count());
@@ -137,7 +139,7 @@ namespace OpenStack.Test.Storage
         [ExpectedException(typeof(ArgumentNullException))]
         public async Task ListingStorageObjectsWithNullContainerNameThrows()
         {
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.ListStorageObjects(null);
         }
 
@@ -161,7 +163,7 @@ namespace OpenStack.Test.Storage
 
             this.ServicePocoClient.GetStorageAccountDelegate = () => Task.Factory.StartNew(() => account);
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             var resp = await client.ListStorageContainers();
             var containers = resp.ToList();
 
@@ -180,7 +182,7 @@ namespace OpenStack.Test.Storage
                 return Task.Factory.StartNew(() => account);
             };
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             var resp = await client.GetStorageAccount();
 
             Assert.AreEqual(account, resp);
@@ -202,7 +204,7 @@ namespace OpenStack.Test.Storage
                 return Task.Factory.StartNew(() => obj);
             };
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             var resp = await client.GetStorageObject(containerName, objectName);
 
             Assert.AreEqual(obj, resp);
@@ -214,7 +216,7 @@ namespace OpenStack.Test.Storage
         {
             var objectName = "TestObject";
 
-           var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+           var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
            await client.GetStorageObject(null, objectName);
         }
 
@@ -224,7 +226,7 @@ namespace OpenStack.Test.Storage
         {
             var objectName = "TestObject";
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.GetStorageObject(string.Empty, objectName);
         }
 
@@ -234,7 +236,7 @@ namespace OpenStack.Test.Storage
         {
             var containerName = "TestContainer";
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.GetStorageObject(containerName, null);
         }
 
@@ -244,7 +246,7 @@ namespace OpenStack.Test.Storage
         {
             var containerName = "TestContainer";
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
            await client.GetStorageObject(containerName, string.Empty);
         }
 
@@ -264,7 +266,7 @@ namespace OpenStack.Test.Storage
                 return Task.Factory.StartNew(() => (StorageManifest)obj);
             };
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             var resp = await client.GetStorageManifest(containerName, manifestName);
 
             Assert.AreEqual(obj, resp);
@@ -276,7 +278,7 @@ namespace OpenStack.Test.Storage
         {
             var manifestName = "TestManifest";
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.GetStorageManifest(null, manifestName);
         }
 
@@ -286,7 +288,7 @@ namespace OpenStack.Test.Storage
         {
             var manifestName = "TestManifest";
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.GetStorageObject(string.Empty, manifestName);
         }
 
@@ -296,7 +298,7 @@ namespace OpenStack.Test.Storage
         {
             var containerName = "TestContainer";
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.GetStorageManifest(containerName, null);
         }
 
@@ -306,7 +308,7 @@ namespace OpenStack.Test.Storage
         {
             var containerName = "TestContainer";
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.GetStorageManifest(containerName, string.Empty);
         }
 
@@ -325,7 +327,7 @@ namespace OpenStack.Test.Storage
                 return Task.Factory.StartNew(() => obj);
             };
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             var resp = await client.GetStorageFolder(containerName, folderName);
 
             Assert.AreEqual(obj, resp);
@@ -346,7 +348,7 @@ namespace OpenStack.Test.Storage
                 return Task.Factory.StartNew(() => obj);
             };
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             var resp = await client.GetStorageFolder(containerName, folderName);
 
             Assert.AreEqual(obj, resp);
@@ -358,7 +360,7 @@ namespace OpenStack.Test.Storage
         {
             var folderName = "TestFolder";
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.GetStorageFolder(null, folderName);
         }
 
@@ -368,7 +370,7 @@ namespace OpenStack.Test.Storage
         {
             var folderName = "TestFolder";
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.GetStorageFolder(string.Empty, folderName);
         }
 
@@ -378,7 +380,7 @@ namespace OpenStack.Test.Storage
         {
             var containerName = "TestContainer";
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.GetStorageFolder(containerName, null);
         }
 
@@ -388,7 +390,7 @@ namespace OpenStack.Test.Storage
         {
             var containerName = "TestContainer";
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.GetStorageFolder(containerName, string.Empty);
         }
 
@@ -410,7 +412,7 @@ namespace OpenStack.Test.Storage
                 return await Task.Run(()=>obj);
             };
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             var resp = await client.CreateStorageObject(containerName, objectName, new Dictionary<string,string>(), content);
 
             Assert.AreEqual(obj, resp);
@@ -419,7 +421,7 @@ namespace OpenStack.Test.Storage
         [TestMethod]
         public async Task CreatingAnObjectLargerThanTheThresholdCreatesObjectWithSegments()
         {
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
 
             var containerName = "TestContainer";
             var objectName = "TestObject";
@@ -470,7 +472,7 @@ namespace OpenStack.Test.Storage
                 return await Task.Run(() => new StorageObject(o,c));
             };
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             var res = await client.CreateLargeStorageObject(containerName, objectName, metadata, contentStream, 3);
 
             Assert.AreEqual(containerName, res.ContainerName);
@@ -486,7 +488,7 @@ namespace OpenStack.Test.Storage
             var content = "THIS IS A LOT OF CONTENT THAT WILL AND CAN BE CHOPPED UP";
             var contentStream = content.ConvertToStream();
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             var res = await client.CreateLargeStorageObject(null, objectName, metadata, contentStream, 3);
         }
 
@@ -499,7 +501,7 @@ namespace OpenStack.Test.Storage
             var content = "THIS IS A LOT OF CONTENT THAT WILL AND CAN BE CHOPPED UP";
             var contentStream = content.ConvertToStream();
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             var res = await client.CreateLargeStorageObject(string.Empty, objectName, metadata, contentStream, 3);
         }
 
@@ -512,7 +514,7 @@ namespace OpenStack.Test.Storage
             var content = "THIS IS A LOT OF CONTENT THAT WILL AND CAN BE CHOPPED UP";
             var contentStream = content.ConvertToStream();
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             var res = await client.CreateLargeStorageObject(containerName, null, metadata, contentStream, 3);
         }
 
@@ -525,7 +527,7 @@ namespace OpenStack.Test.Storage
             var content = "THIS IS A LOT OF CONTENT THAT WILL AND CAN BE CHOPPED UP";
             var contentStream = content.ConvertToStream();
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             var res = await client.CreateLargeStorageObject(containerName, string.Empty, metadata, contentStream, 3);
         }
 
@@ -538,7 +540,7 @@ namespace OpenStack.Test.Storage
             var content = "THIS IS A LOT OF CONTENT THAT WILL AND CAN BE CHOPPED UP";
             var contentStream = content.ConvertToStream();
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             var res = await client.CreateLargeStorageObject(containerName, objectName, null, contentStream, 3);
         }
 
@@ -550,7 +552,7 @@ namespace OpenStack.Test.Storage
             var objectName = "TestObject";
             var metadata = new Dictionary<string, string>();
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             var res = await client.CreateLargeStorageObject(containerName, objectName, metadata, null, 3);
         }
 
@@ -564,7 +566,7 @@ namespace OpenStack.Test.Storage
             var content = "THIS IS A LOT OF CONTENT THAT WILL AND CAN BE CHOPPED UP";
             var contentStream = content.ConvertToStream();
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             var res = await client.CreateLargeStorageObject(containerName, objectName, metadata, contentStream, -3);
         }
 
@@ -578,7 +580,7 @@ namespace OpenStack.Test.Storage
             var content = "THIS IS A LOT OF CONTENT THAT WILL AND CAN BE CHOPPED UP";
             var contentStream = content.ConvertToStream();
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             var res = await client.CreateLargeStorageObject(containerName, objectName, metadata, contentStream, 0);
         }
 
@@ -588,7 +590,7 @@ namespace OpenStack.Test.Storage
         {
             var objectName = "TestObject";
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.CreateStorageObject(null, objectName, new Dictionary<string, string>(), new MemoryStream());
         }
 
@@ -598,7 +600,7 @@ namespace OpenStack.Test.Storage
         {
             var objectName = "TestObject";
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.CreateStorageObject(string.Empty, objectName, new Dictionary<string, string>(), new MemoryStream());
         }
 
@@ -608,7 +610,7 @@ namespace OpenStack.Test.Storage
         {
             var containerName = "TestContainer";
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.CreateStorageObject(containerName, null, new Dictionary<string, string>(), new MemoryStream());
         }
 
@@ -618,7 +620,7 @@ namespace OpenStack.Test.Storage
         {
             var containerName = "TestContainer";
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.CreateStorageObject(containerName, string.Empty, new Dictionary<string, string>(), new MemoryStream());
         }
 
@@ -629,7 +631,7 @@ namespace OpenStack.Test.Storage
             var containerName = "TestContainer";
             var objectName = "TestObject";
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.CreateStorageObject(containerName, objectName, new Dictionary<string, string>(), null);
         }
 
@@ -640,7 +642,7 @@ namespace OpenStack.Test.Storage
             var containerName = "TestContainer";
             var objectName = "TestObject";
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.CreateStorageObject(containerName, objectName, null, new MemoryStream());
         }
 
@@ -659,7 +661,7 @@ namespace OpenStack.Test.Storage
                 return await Task.Run(() => m);
             };
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.CreateStorageManifest(containerName, objectName, new Dictionary<string, string>(), new List<StorageObject>() { obj });
         }
 
@@ -675,7 +677,7 @@ namespace OpenStack.Test.Storage
                 return await Task.Run(() => m);
             };
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.CreateStorageManifest(containerName, objectName, new Dictionary<string, string>(), "segments");
         }
 
@@ -686,7 +688,7 @@ namespace OpenStack.Test.Storage
             var manifestName = "TestManifest";
             var segmentPath = "segments";
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.CreateStorageManifest(null, manifestName, new Dictionary<string, string>(), segmentPath);
         }
 
@@ -697,7 +699,7 @@ namespace OpenStack.Test.Storage
             var manifestName = "TestManifest";
             var segmentPath = "segments";
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.CreateStorageManifest(string.Empty, manifestName, new Dictionary<string, string>(), segmentPath);
         }
 
@@ -708,7 +710,7 @@ namespace OpenStack.Test.Storage
             var containerName = "TestContainer";
             var segmentPath = "segments";
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.CreateStorageManifest(containerName, null, new Dictionary<string, string>(), segmentPath);
         }
 
@@ -719,7 +721,7 @@ namespace OpenStack.Test.Storage
             var containerName = "TestContainer";
             var segmentPath = "segments";
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.CreateStorageManifest(containerName, string.Empty, new Dictionary<string, string>(), segmentPath);
         }
 
@@ -730,7 +732,7 @@ namespace OpenStack.Test.Storage
             var containerName = "TestContainer";
             var manifestName = "TestManifest";
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.CreateStorageManifest(containerName, manifestName, new Dictionary<string, string>(), (string)null);
         }
 
@@ -741,7 +743,7 @@ namespace OpenStack.Test.Storage
             var containerName = "TestContainer";
             var manifestName = "TestManifest";
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.CreateStorageManifest(containerName, manifestName, new Dictionary<string, string>(), string.Empty);
         }
 
@@ -753,7 +755,7 @@ namespace OpenStack.Test.Storage
             var manifestName = "TestManifest";
             var segmentPath = "segments";
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.CreateStorageManifest(containerName, manifestName, null, segmentPath);
         }
 
@@ -767,7 +769,7 @@ namespace OpenStack.Test.Storage
             var obj = new StorageObject(objectName, containerName, DateTime.UtcNow, "12345", 12345,
                 "application/octet-stream", new Dictionary<string, string>());
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.CreateStorageManifest(null, objectName, new Dictionary<string, string>(), new List<StorageObject>() { obj });
         }
 
@@ -781,7 +783,7 @@ namespace OpenStack.Test.Storage
             var obj = new StorageObject(objectName, containerName, DateTime.UtcNow, "12345", 12345,
                 "application/octet-stream", new Dictionary<string, string>());
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.CreateStorageManifest(string.Empty, objectName, new Dictionary<string, string>(), new List<StorageObject>() { obj });
         }
 
@@ -795,7 +797,7 @@ namespace OpenStack.Test.Storage
             var obj = new StorageObject(objectName, containerName, DateTime.UtcNow, "12345", 12345,
                 "application/octet-stream", new Dictionary<string, string>());
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.CreateStorageManifest(containerName, null, new Dictionary<string, string>(), new List<StorageObject>() { obj });
         }
 
@@ -809,7 +811,7 @@ namespace OpenStack.Test.Storage
             var obj = new StorageObject(objectName, containerName, DateTime.UtcNow, "12345", 12345,
                 "application/octet-stream", new Dictionary<string, string>());
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.CreateStorageManifest(containerName, string.Empty, new Dictionary<string, string>(), new List<StorageObject>() { obj });
         }
 
@@ -820,7 +822,7 @@ namespace OpenStack.Test.Storage
             var containerName = "TestContainer";
             var objectName = "TestObject";
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.CreateStorageManifest(containerName, objectName, new Dictionary<string, string>(), (List<StorageObject>)null);
         }
 
@@ -834,7 +836,7 @@ namespace OpenStack.Test.Storage
             var obj = new StorageObject(objectName, containerName, DateTime.UtcNow, "12345", 12345,
                 "application/octet-stream", new Dictionary<string, string>());
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.CreateStorageManifest(containerName, objectName, null, new List<StorageObject>() { obj });
         }
 
@@ -855,7 +857,7 @@ namespace OpenStack.Test.Storage
                 });
             };
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.CreateStorageFolder(containerName, folderName);
         }
 
@@ -876,7 +878,7 @@ namespace OpenStack.Test.Storage
                 });
             };
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.CreateStorageFolder(containerName, folderName);
         }
 
@@ -887,7 +889,7 @@ namespace OpenStack.Test.Storage
             var containerName = "someContainer";
             var folderName = "Test//Folder";
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.CreateStorageFolder(containerName, folderName);
         }
 
@@ -897,7 +899,7 @@ namespace OpenStack.Test.Storage
         {
             var folderName = "TestFolder";
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.CreateStorageFolder(null, folderName);
         }
 
@@ -907,7 +909,7 @@ namespace OpenStack.Test.Storage
         {
             var folderName = "TestFolder";
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.CreateStorageFolder(string.Empty, folderName);
         }
 
@@ -917,7 +919,7 @@ namespace OpenStack.Test.Storage
         {
             var containerName = "TestContainer";
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.CreateStorageFolder(containerName, null);
         }
 
@@ -927,7 +929,7 @@ namespace OpenStack.Test.Storage
         {
             var containerName = "TestContainer";
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.CreateStorageFolder(containerName, string.Empty);
         }
 
@@ -944,7 +946,7 @@ namespace OpenStack.Test.Storage
                  return await Task.Run(()=>obj);
             };
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.CreateStorageContainer(containerName, new Dictionary<string, string>());
         }
 
@@ -952,7 +954,7 @@ namespace OpenStack.Test.Storage
         [ExpectedException(typeof(ArgumentNullException))]
         public async Task CreatingStorageContainersWithNullContainerNameThrows()
         {
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.CreateStorageContainer(null, new Dictionary<string, string>());
         }
 
@@ -960,7 +962,7 @@ namespace OpenStack.Test.Storage
         [ExpectedException(typeof(ArgumentException))]
         public async Task CreatingStorageContainersWithEmptyContainerNameThrows()
         {
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.CreateStorageContainer(string.Empty, new Dictionary<string, string>());
         }
 
@@ -968,7 +970,7 @@ namespace OpenStack.Test.Storage
         [ExpectedException(typeof(ArgumentNullException))]
         public async Task CreatingStorageContainersWithNullMetadataThrows()
         {
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.CreateStorageContainer("TestContainer", null);
         }
 
@@ -985,7 +987,7 @@ namespace OpenStack.Test.Storage
                 return Task.Factory.StartNew(() => obj);
             };
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             var resp = await client.GetStorageContainer(containerName);
 
             Assert.AreEqual(obj, resp);
@@ -995,7 +997,7 @@ namespace OpenStack.Test.Storage
         [ExpectedException(typeof(ArgumentNullException))]
         public async Task GettingStorageContainersWithNullContainerNameThrows()
         {
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.GetStorageContainer(null);
         }
 
@@ -1003,7 +1005,7 @@ namespace OpenStack.Test.Storage
         [ExpectedException(typeof (ArgumentException))]
         public async Task GettingStorageContainersWithEmptyContainerNameThrows()
         {
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.GetStorageContainer(string.Empty);
         }
 
@@ -1019,7 +1021,7 @@ namespace OpenStack.Test.Storage
                 await Task.Run(() => Assert.AreEqual(s.Name, obj.Name));
             };
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.UpdateStorageContainer(obj);
         }
 
@@ -1027,7 +1029,7 @@ namespace OpenStack.Test.Storage
         [ExpectedException(typeof(ArgumentNullException))]
         public async Task UpdatingStorageContainersWithNullContainerThrows()
         {
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.UpdateStorageContainer(null);
         }
 
@@ -1043,7 +1045,7 @@ namespace OpenStack.Test.Storage
                 await Task.Run(()=>Assert.AreEqual(s, obj.Name));
             };
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.DeleteStorageContainer(obj.Name);
         }
 
@@ -1051,7 +1053,7 @@ namespace OpenStack.Test.Storage
         [ExpectedException(typeof(ArgumentNullException))]
         public async Task DeletingStorageContainersWithNullContainerNameThrows()
         {
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.DeleteStorageContainer(null);
         }
 
@@ -1059,7 +1061,7 @@ namespace OpenStack.Test.Storage
         [ExpectedException(typeof(ArgumentException))]
         public async Task DeletingStorageContainersWithEmptyContainerNameThrows()
         {
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.DeleteStorageContainer(string.Empty);
         }
 
@@ -1081,7 +1083,7 @@ namespace OpenStack.Test.Storage
                 });
             };
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.DeleteStorageObject(obj.ContainerName,obj.Name);
         }
 
@@ -1089,7 +1091,7 @@ namespace OpenStack.Test.Storage
         [ExpectedException(typeof(ArgumentNullException))]
         public async Task DeletingStorageObjectWithNullContainerNameThrows()
         {
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.DeleteStorageObject(null,"TestObject");
         }
 
@@ -1097,7 +1099,7 @@ namespace OpenStack.Test.Storage
         [ExpectedException(typeof(ArgumentException))]
         public async Task DeletingStorageObjectsWithEmptyContainerNameThrows()
         {
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.DeleteStorageObject(string.Empty, "TestObject");
         }
 
@@ -1105,7 +1107,7 @@ namespace OpenStack.Test.Storage
         [ExpectedException(typeof(ArgumentNullException))]
         public async Task DeletingStorageObjectWithNullObjectNameThrows()
         {
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.DeleteStorageObject("TestContainer", null);
         }
 
@@ -1113,7 +1115,7 @@ namespace OpenStack.Test.Storage
         [ExpectedException(typeof(ArgumentException))]
         public async Task DeletingStorageObjectsWithEmptyObjectNameThrows()
         {
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.DeleteStorageObject("TestContainer", string.Empty);
         }
 
@@ -1132,7 +1134,7 @@ namespace OpenStack.Test.Storage
                 });
             };
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.DeleteStorageFolder(containerName, folderName);
         }
 
@@ -1151,7 +1153,7 @@ namespace OpenStack.Test.Storage
                 });
             };
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.DeleteStorageFolder(containerName, folderName);
         }
 
@@ -1159,7 +1161,7 @@ namespace OpenStack.Test.Storage
         [ExpectedException(typeof(ArgumentNullException))]
         public async Task DeletingStorageFolderWithNullContainerNameThrows()
         {
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.DeleteStorageFolder(null, "TestFolder");
         }
 
@@ -1167,7 +1169,7 @@ namespace OpenStack.Test.Storage
         [ExpectedException(typeof(ArgumentException))]
         public async Task DeletingStorageFolderWithEmptyContainerNameThrows()
         {
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.DeleteStorageFolder(string.Empty, "TestFolder");
         }
 
@@ -1175,7 +1177,7 @@ namespace OpenStack.Test.Storage
         [ExpectedException(typeof(ArgumentNullException))]
         public async Task DeletingStorageFolderWithNullObjectNameThrows()
         {
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.DeleteStorageFolder("TestContainer", null);
         }
 
@@ -1183,7 +1185,7 @@ namespace OpenStack.Test.Storage
         [ExpectedException(typeof(ArgumentException))]
         public async Task DeletingStorageFolderWithEmptyObjectNameThrows()
         {
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.DeleteStorageFolder("TestContainer", string.Empty);
         }
 
@@ -1205,7 +1207,7 @@ namespace OpenStack.Test.Storage
                 });
             };
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.UpdateStorageObject(obj);
         }
 
@@ -1213,7 +1215,7 @@ namespace OpenStack.Test.Storage
         [ExpectedException(typeof(ArgumentNullException))]
         public async Task UpdatingStorageObjectWithNullContainerThrows()
         {
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.UpdateStorageObject(null);
         }
 
@@ -1239,7 +1241,7 @@ namespace OpenStack.Test.Storage
                 return obj;
             };
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             var resp = await client.DownloadStorageObject(containerName, objectName, respStream);
             respStream.Position = 0;
 
@@ -1253,7 +1255,7 @@ namespace OpenStack.Test.Storage
         {
             var objectName = "TestObject";
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.DownloadStorageObject(null, objectName, new MemoryStream());
         }
 
@@ -1263,7 +1265,7 @@ namespace OpenStack.Test.Storage
         {
             var objectName = "TestObject";
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.DownloadStorageObject(string.Empty, objectName, new MemoryStream());
         }
 
@@ -1273,7 +1275,7 @@ namespace OpenStack.Test.Storage
         {
             var containerName = "TestContainer";
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.DownloadStorageObject(containerName, null, new MemoryStream() );
         }
 
@@ -1283,7 +1285,7 @@ namespace OpenStack.Test.Storage
         {
             var containerName = "TestContainer";
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.DownloadStorageObject(containerName, string.Empty, new MemoryStream());
         }
 
@@ -1294,7 +1296,7 @@ namespace OpenStack.Test.Storage
             var containerName = "TestContainer";
             var objectName = "TestObject";
 
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None);
+            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
             await client.DownloadStorageObject(containerName, objectName, null);
         }
     }

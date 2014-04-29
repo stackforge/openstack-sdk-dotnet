@@ -25,13 +25,6 @@ namespace OpenStack.Identity
     public class OpenStackServiceCatalog : List<OpenStackServiceDefinition>, IOpenStackServiceCatalog
     {
         /// <inheritdoc/>
-        public Uri GetPublicEndpoint(string serviceName, string region)
-        {
-            var resolver = ServiceLocator.Instance.Locate<IOpenStackServiceEndpointResolver>();
-            return new Uri(resolver.ResolveEndpoint(this, serviceName, region));
-        }
-
-        /// <inheritdoc/>
         public bool Exists(string serviceName)
         {
             return this.Any(s => string.Equals(s.Name, serviceName, StringComparison.OrdinalIgnoreCase));

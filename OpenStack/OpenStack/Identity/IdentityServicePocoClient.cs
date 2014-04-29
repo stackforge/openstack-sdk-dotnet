@@ -29,25 +29,29 @@ namespace OpenStack.Identity
         internal IOpenStackCredential credential;
         internal CancellationToken cancellationToken;
         internal const string IdentityServiceName = "Identity";
+        internal IServiceLocator ServiceLocator;
 
         /// <summary>
         /// Creates a new instance of the IdentityServicePocoClient class.
         /// </summary>
         /// <param name="credential">The credential to be used when interacting with OpenStack.</param>
         /// <param name="cancellationToken">The cancellation token to be used when interacting with OpenStack.</param>
-        public IdentityServicePocoClient(IOpenStackCredential credential, CancellationToken cancellationToken)
+        /// <param name="serviceLocator">A service locator to be used to locate/inject dependent services.</param>
+        public IdentityServicePocoClient(IOpenStackCredential credential, CancellationToken cancellationToken, IServiceLocator serviceLocator)
         {
             credential.AssertIsNotNull("credential");
             cancellationToken.AssertIsNotNull("cancellationToken");
+            serviceLocator.AssertIsNotNull("serviceLocator", "Cannot create an identity service poco client with a null service locator.");
 
             this.credential = credential;
             this.cancellationToken = cancellationToken;
+            this.ServiceLocator = serviceLocator;
         }
 
         /// <inheritdoc/>
         public async Task<IOpenStackCredential> Authenticate()
         {
-            var client = ServiceLocator.Instance.Locate<IIdentityServiceRestClientFactory>().Create(this.credential, this.cancellationToken);
+            var client = this.ServiceLocator.Locate<IIdentityServiceRestClientFactory>().Create(this.credential, this.cancellationToken, this.ServiceLocator);
 
             var resp = await client.Authenticate();
 
@@ -58,10 +62,10 @@ namespace OpenStack.Identity
 
             var payload = await resp.ReadContentAsStringAsync();
 
-            var tokenConverter = ServiceLocator.Instance.Locate<IAccessTokenPayloadConverter>();
+            var tokenConverter = this.ServiceLocator.Locate<IAccessTokenPayloadConverter>();
             var accessToken = tokenConverter.Convert(payload);
 
-            var scConverter = ServiceLocator.Instance.Locate<IOpenStackServiceCatalogPayloadConverter>();
+            var scConverter = this.ServiceLocator.Locate<IOpenStackServiceCatalogPayloadConverter>();
             var serviceCatalog = scConverter.Convert(payload);
 
             this.credential.SetAccessTokenId(accessToken);
@@ -69,11 +73,10 @@ namespace OpenStack.Identity
 
             if (string.IsNullOrEmpty(this.credential.Region))
             {
-                var resolver = ServiceLocator.Instance.Locate<IOpenStackRegionResolver>();
+                var resolver = this.ServiceLocator.Locate<IOpenStackRegionResolver>();
                 var region = resolver.Resolve(this.credential.AuthenticationEndpoint, this.credential.ServiceCatalog, IdentityServiceName);
 
                 //TODO: figure out if we want to throw in the case where the region cannot be resolved... 
-
                 this.credential.SetRegion(region);
             }
 

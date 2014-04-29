@@ -1,7 +1,20 @@
-﻿using System;
-using System.Linq;
-using System.Security;
-using System.Threading;
+﻿// /* ============================================================================
+// Copyright 2014 Hewlett Packard
+//  
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0
+// 
+//  Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ============================================================================ */
+
+using System;
 using OpenStack;
 using OpenStack.Identity;
 using OpenStack.Storage;
@@ -19,19 +32,12 @@ namespace SimpleStorageExample
             var password = "password";
             var tenantId = "tenant Id"; // e.g. XXXXXXXXXXXXX-Project
 
-            //Convert the plain text password into a SecureString. 
-            //Ideally you should never store your passwords in plain text, but for this example we will.
-            var securePassword = new SecureString();
-            password.ToCharArray().ToList().ForEach(securePassword.AppendChar);
-
             //Construct an OpenStackCredential object that will be used to authenticate.
             //The credential will also be useful later as it contains a reference to the service catalog, and access token.
-            var credential = new OpenStackCredential(authUri, userName, securePassword, tenantId);
+            var credential = new OpenStackCredential(authUri, userName, password, tenantId);
 
             //Create a new OpenStackClient object using the credentials you just created.
-            //A cancellation token can also be supplied, this will allow you to cancel any long running tasks
-            //that the client may make.
-            var client = new OpenStackClient(credential, CancellationToken.None);
+            var client = OpenStackClientFactory.CreateClient(credential);
 
             //Connect the client to OpenStack. This will authenticate you, as well as construct the service catalog, 
             //and retrieve the access token that will be used in future calls to OpenStack services.

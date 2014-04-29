@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using OpenStack.Common.ServiceLocation;
 using OpenStack.Identity;
 
 namespace OpenStack.Storage
@@ -37,9 +38,9 @@ namespace OpenStack.Storage
         }
 
         /// <inheritdoc/>
-        public IOpenStackServiceClient Create(ICredential credential, CancellationToken cancellationToken)
+        public IOpenStackServiceClient Create(ICredential credential, CancellationToken cancellationToken, IServiceLocator serviceLocator)
         {
-            return new StorageServiceClient((IOpenStackCredential)credential, cancellationToken);
+            return new StorageServiceClient((IOpenStackCredential)credential, cancellationToken, serviceLocator);
         }
 
         /// <inheritdoc/>

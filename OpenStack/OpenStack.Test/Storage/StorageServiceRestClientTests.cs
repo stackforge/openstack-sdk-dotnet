@@ -23,7 +23,6 @@ using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using OpenStack.Common;
 using OpenStack.Common.Http;
 using OpenStack.Common.ServiceLocation;
 using OpenStack.Identity;
@@ -34,29 +33,26 @@ namespace OpenStack.Test.Storage
     [TestClass]
     public class StorageServiceRestClientTests
     {
-        internal TestOpenStackServiceEndpointResolver resolver;
         internal StorageRestSimulator simulator;
         internal string authId = "12345";
         internal Uri endpoint = new Uri("http://teststorageendpoint.com/v1/1234567890");
+        internal IServiceLocator ServiceLocator;
 
         [TestInitialize]
         public void TestSetup()
         {
-            this.resolver = new TestOpenStackServiceEndpointResolver() { Endpoint = endpoint };
             this.simulator = new StorageRestSimulator();
+            this.ServiceLocator = new ServiceLocator();
 
-            ServiceLocator.Reset();
-            var manager = ServiceLocator.Instance.Locate<IServiceLocationOverrideManager>();
+            var manager = this.ServiceLocator.Locate<IServiceLocationOverrideManager>();
             manager.RegisterServiceInstance(typeof(IHttpAbstractionClientFactory), new StorageRestSimulatorFactory(simulator));
-            manager.RegisterServiceInstance(typeof(IOpenStackServiceEndpointResolver), this.resolver);
         }
 
         [TestCleanup]
         public void TestCleanup()
         {
-            this.resolver = new TestOpenStackServiceEndpointResolver() { Endpoint = endpoint };
             this.simulator = new StorageRestSimulator();
-            ServiceLocator.Reset();
+            this.ServiceLocator = new ServiceLocator();
         }
 
         StorageServiceClientContext GetValidContext()
@@ -69,7 +65,7 @@ namespace OpenStack.Test.Storage
             var creds = new OpenStackCredential(this.endpoint, "SomeUser", "Password", "SomeTenant", "region-a.geo-1");
             creds.SetAccessTokenId(this.authId);
 
-            return new StorageServiceClientContext(creds, token, "Object Storage");
+            return new StorageServiceClientContext(creds, token, "Object Storage", endpoint);
         }
 
         #region CreateManifest Tests
@@ -81,7 +77,7 @@ namespace OpenStack.Test.Storage
             var containerName = "newContainer";
 
             var client =
-                new StorageServiceRestClient(GetValidContext());
+                new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
             var data = "Some random data";
             var content = TestHelper.CreateStream(data);
 
@@ -98,7 +94,7 @@ namespace OpenStack.Test.Storage
             var segPath = "blah/blah";
             var containerName = "newContainer";
 
-            var client = new StorageServiceRestClient(GetValidContext());
+            var client = new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             await client.CreateDynamicManifest(containerName, manifestName, new Dictionary<string, string>(), segPath);
 
@@ -113,7 +109,7 @@ namespace OpenStack.Test.Storage
             var containerName = "newContainer";
 
             var client =
-                new StorageServiceRestClient(GetValidContext());
+                new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
             var data = "Some random data";
             var content = TestHelper.CreateStream(data);
 
@@ -130,7 +126,7 @@ namespace OpenStack.Test.Storage
             var segPath = "blah/blah";
             var containerName = "newContainer";
 
-            var client = new StorageServiceRestClient(GetValidContext());
+            var client = new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             await client.CreateDynamicManifest(containerName, manifestName, new Dictionary<string, string>(), segPath);
 
@@ -152,7 +148,7 @@ namespace OpenStack.Test.Storage
             var containerName = "newContainer";
 
 
-            var client = new StorageServiceRestClientFactory().Create(GetValidContext()) as StorageServiceRestClient;
+            var client = new StorageServiceRestClientFactory().Create(GetValidContext(), this.ServiceLocator) as StorageServiceRestClient;
            
             var data = "Some random data";
             var content = TestHelper.CreateStream(data);
@@ -170,7 +166,7 @@ namespace OpenStack.Test.Storage
             var containerName = "newContainer";
 
             var client =
-                new StorageServiceRestClient(GetValidContext());
+                new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
             var data = "Some random data";
             var content = TestHelper.CreateStream(data);
 
@@ -187,7 +183,7 @@ namespace OpenStack.Test.Storage
             var containerName = "newContainer";
 
             var client =
-                 new StorageServiceRestClient(GetValidContext());
+                 new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
             var data = "Some random data";
             var content = TestHelper.CreateStream(data);
 
@@ -207,7 +203,7 @@ namespace OpenStack.Test.Storage
             var objectName = "NewObject";
 
             var client =
-                new StorageServiceRestClient(GetValidContext());
+                new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             var data = "Some random data";
             var content = TestHelper.CreateStream(data);
@@ -236,7 +232,7 @@ namespace OpenStack.Test.Storage
             var containerName = "newContainer";
 
             var client =
-                new StorageServiceRestClient(GetValidContext());
+                new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
             var data = "Some random data";
             var content = TestHelper.CreateStream(data);
             var hash = Convert.ToBase64String(MD5.Create().ComputeHash(content));
@@ -262,7 +258,7 @@ namespace OpenStack.Test.Storage
             var containerName = "newContainer";
 
             var client =
-                 new StorageServiceRestClient(GetValidContext());
+                 new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
             var data = "Some random data";
             var content = TestHelper.CreateStream(data);
 
@@ -289,7 +285,7 @@ namespace OpenStack.Test.Storage
             var containerName = "newContainer";
 
             var client =
-                new StorageServiceRestClient(GetValidContext());
+                new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
             var data = "Some random data";
             var content = TestHelper.CreateStream(data);
 
@@ -311,7 +307,7 @@ namespace OpenStack.Test.Storage
             var containerName = "newContainer";
 
             var client =
-                new StorageServiceRestClient(GetValidContext());
+                new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
             var data = "Some random data";
             var content = TestHelper.CreateStream(data);
 
@@ -333,7 +329,7 @@ namespace OpenStack.Test.Storage
             var containerName = "newContainer";
 
             var client =
-                 new StorageServiceRestClient(GetValidContext());
+                 new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
             var data = "Some random data";
             var content = TestHelper.CreateStream(data);
 
@@ -355,7 +351,7 @@ namespace OpenStack.Test.Storage
             var containerName = "newContainer";
 
             var client =
-                 new StorageServiceRestClient(GetValidContext());
+                 new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             var resp = await client.CreateObject(containerName, objectName, new Dictionary<string, string>(), null);
 
@@ -371,7 +367,7 @@ namespace OpenStack.Test.Storage
             var containerName = "new/Container";
 
             var client =
-                new StorageServiceRestClient(GetValidContext());
+                new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             await client.CreateObject(containerName, objectName, new Dictionary<string, string>(), null);
         }
@@ -386,7 +382,7 @@ namespace OpenStack.Test.Storage
             var context = GetValidContext();
             context.Credential.SetAccessTokenId(authId);
             var client =
-                new StorageServiceRestClient(context);
+                new StorageServiceRestClient(context, this.ServiceLocator);
 
             var data = "Some random data";
             var content = TestHelper.CreateStream(data);
@@ -406,7 +402,7 @@ namespace OpenStack.Test.Storage
             this.simulator.Delay = TimeSpan.FromMilliseconds(500);
 
             var client =
-                new StorageServiceRestClient(GetValidContext(token));
+                new StorageServiceRestClient(GetValidContext(token), this.ServiceLocator);
             var data = "Some random data";
             var content = TestHelper.CreateStream(data);
 
@@ -431,7 +427,7 @@ namespace OpenStack.Test.Storage
             var containerName = "newContainer";
 
             var client =
-                new StorageServiceRestClient(GetValidContext());
+                new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             await client.CreateContainer(containerName, new Dictionary<string, string>());
 
@@ -445,7 +441,7 @@ namespace OpenStack.Test.Storage
             var containerName = "newContainer";
 
             var client =
-                new StorageServiceRestClient(GetValidContext());
+                new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             await client.CreateContainer(containerName, new Dictionary<string, string>());
 
@@ -459,7 +455,7 @@ namespace OpenStack.Test.Storage
             var containerName = "newContainer";
 
             var client =
-                 new StorageServiceRestClient(GetValidContext());
+                 new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             var resp = await client.CreateContainer(containerName, new Dictionary<string, string>());
 
@@ -474,7 +470,7 @@ namespace OpenStack.Test.Storage
             var containerName = "new/Container";
 
             var client =
-                new StorageServiceRestClient(GetValidContext());
+                new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             await client.CreateContainer(containerName, new Dictionary<string, string>());
         }
@@ -485,7 +481,7 @@ namespace OpenStack.Test.Storage
             var containerName = "newContainer";
 
             var client =
-                 new StorageServiceRestClient(GetValidContext());
+                 new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
             
             var metaData = new Dictionary<string, string> { { "Test1", "Test1" }, { "Test2", "Test2" } };
 
@@ -506,7 +502,7 @@ namespace OpenStack.Test.Storage
             var containerName = "newContainer";
 
             var client =
-                new StorageServiceRestClient(GetValidContext());
+                new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             var resp = await client.CreateContainer(containerName, new Dictionary<string, string>());
 
@@ -532,7 +528,7 @@ namespace OpenStack.Test.Storage
             var containerName = "newContainer";
 
             var client =
-                new StorageServiceRestClient(GetValidContext());
+                new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             await client.GetContainer(containerName);
 
@@ -546,7 +542,7 @@ namespace OpenStack.Test.Storage
             var containerName = "newContainer";
 
             var client =
-                new StorageServiceRestClient(GetValidContext());
+                new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             await client.GetContainer(containerName);
 
@@ -560,7 +556,7 @@ namespace OpenStack.Test.Storage
             var containerName = "newContainer";
 
             var client =
-                 new StorageServiceRestClient(GetValidContext());
+                 new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             var resp = await client.GetContainer(containerName);
 
@@ -577,7 +573,7 @@ namespace OpenStack.Test.Storage
             this.simulator.Containers.Add(containerName, new StorageRestSimulator.StorageItem(containerName));
 
             var client =
-                 new StorageServiceRestClient(GetValidContext());
+                 new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             var resp = await client.GetContainer(containerName);
 
@@ -596,7 +592,7 @@ namespace OpenStack.Test.Storage
             this.simulator.Containers.Add(containerName, new StorageRestSimulator.StorageItem(containerName) { MetaData = metaData});
 
             var client =
-                 new StorageServiceRestClient(GetValidContext());
+                 new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             var resp = await client.GetContainer(containerName);
 
@@ -618,7 +614,7 @@ namespace OpenStack.Test.Storage
             var objectName = "newObject";
 
             var client =
-                new StorageServiceRestClient(GetValidContext());
+                new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             await client.GetObject(containerName, objectName);
 
@@ -633,7 +629,7 @@ namespace OpenStack.Test.Storage
             var objectName = "newObject";
 
             var client =
-                new StorageServiceRestClient(GetValidContext());
+                new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             await client.GetObject(containerName, objectName);
 
@@ -648,7 +644,7 @@ namespace OpenStack.Test.Storage
             var objectName = "newObject";
 
             var client =
-                 new StorageServiceRestClient(GetValidContext());
+                 new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             var resp = await client.GetObject(containerName, objectName);
 
@@ -669,7 +665,7 @@ namespace OpenStack.Test.Storage
             this.simulator.Objects.Add(objectName, new StorageRestSimulator.StorageItem(objectName) { Content = content });
 
             var client =
-                 new StorageServiceRestClient(GetValidContext());
+                 new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             var resp = await client.GetObject(containerName, objectName);
 
@@ -696,7 +692,7 @@ namespace OpenStack.Test.Storage
             this.simulator.Objects.Add(objectName, new StorageRestSimulator.StorageItem(objectName) { MetaData = metaData, Content = content});
 
             var client =
-                 new StorageServiceRestClient(GetValidContext());
+                 new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             var resp = await client.GetObject(containerName, objectName);
 
@@ -720,7 +716,7 @@ namespace OpenStack.Test.Storage
             var objectName = "newObject";
 
             var client =
-                new StorageServiceRestClient(GetValidContext());
+                new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             await client.DeleteObject(containerName, objectName);
 
@@ -735,7 +731,7 @@ namespace OpenStack.Test.Storage
             var objectName = "newObject";
 
             var client =
-                new StorageServiceRestClient(GetValidContext());
+                new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             await client.DeleteObject(containerName, objectName);
 
@@ -750,7 +746,7 @@ namespace OpenStack.Test.Storage
             var objectName = "newObject";
 
             var client =
-                 new StorageServiceRestClient(GetValidContext());
+                 new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             var resp = await client.DeleteObject(containerName, objectName);
 
@@ -769,7 +765,7 @@ namespace OpenStack.Test.Storage
             this.simulator.Objects.Add(objectName, new StorageRestSimulator.StorageItem(objectName) {Content = content});
 
             var client =
-                new StorageServiceRestClient(GetValidContext());
+                new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             var resp = await client.DeleteObject(containerName, objectName);
 
@@ -787,7 +783,7 @@ namespace OpenStack.Test.Storage
             var containerName = "newContainer";
 
             var client =
-                new StorageServiceRestClient(GetValidContext());
+                new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             await client.DeleteContainer(containerName);
 
@@ -801,7 +797,7 @@ namespace OpenStack.Test.Storage
             var containerName = "newContainer";
 
             var client =
-                new StorageServiceRestClient(GetValidContext());
+                new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             await client.DeleteContainer(containerName);
 
@@ -815,7 +811,7 @@ namespace OpenStack.Test.Storage
             var containerName = "newContainer";
 
             var client =
-                 new StorageServiceRestClient(GetValidContext());
+                 new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             var resp = await client.DeleteContainer(containerName);
 
@@ -831,7 +827,7 @@ namespace OpenStack.Test.Storage
             this.simulator.IsContainerEmpty = false;
 
             var client =
-                 new StorageServiceRestClient(GetValidContext());
+                 new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             var resp = await client.DeleteContainer(containerName);
 
@@ -847,7 +843,7 @@ namespace OpenStack.Test.Storage
             this.simulator.Containers.Add(containerName, new StorageRestSimulator.StorageItem(containerName));
 
             var client =
-                new StorageServiceRestClient(GetValidContext());
+                new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             var resp = await client.DeleteContainer(containerName);
 
@@ -866,7 +862,7 @@ namespace OpenStack.Test.Storage
             var objectName = "newObject";
 
             var client =
-                new StorageServiceRestClient(GetValidContext());
+                new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             var metadata = new Dictionary<string, string> { { "Test1", "Test1" }, { "Test2", "Test2" } };
 
@@ -883,7 +879,7 @@ namespace OpenStack.Test.Storage
             var objectName = "newObject";
 
             var client =
-                new StorageServiceRestClient(GetValidContext());
+                new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             var metadata = new Dictionary<string, string> { { "Test1", "Test1" }, { "Test2", "Test2" } };
 
@@ -900,7 +896,7 @@ namespace OpenStack.Test.Storage
             var objectName = "newObject";
 
             var client =
-                new StorageServiceRestClient(GetValidContext());
+                new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             var metadata = new Dictionary<string, string> { { "Test1", "Test1" }, { "Test2", "Test2" } };
 
@@ -919,7 +915,7 @@ namespace OpenStack.Test.Storage
             this.simulator.Objects.Add(objectName, new StorageRestSimulator.StorageItem(objectName) { MetaData = origMetaData });
 
             var client =
-                 new StorageServiceRestClient(GetValidContext());
+                 new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             var metadata = new Dictionary<string, string> { { "Test2", "Test2" } };
 
@@ -942,7 +938,7 @@ namespace OpenStack.Test.Storage
             var containerName = "newContainer";
 
             var client =
-                new StorageServiceRestClient(GetValidContext());
+                new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             var metadata = new Dictionary<string, string> { { "Test1", "Test1" }, { "Test2", "Test2" } };
 
@@ -958,7 +954,7 @@ namespace OpenStack.Test.Storage
             var containerName = "newContainer";
 
             var client =
-                new StorageServiceRestClient(GetValidContext());
+                new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             var metadata = new Dictionary<string, string> { { "Test1", "Test1" }, { "Test2", "Test2" } };
 
@@ -974,7 +970,7 @@ namespace OpenStack.Test.Storage
             var containerName = "newContainer";
 
             var client =
-                new StorageServiceRestClient(GetValidContext());
+                new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             var metadata = new Dictionary<string, string> { { "Test1", "Test1" }, { "Test2", "Test2" } };
 
@@ -992,7 +988,7 @@ namespace OpenStack.Test.Storage
             this.simulator.Containers.Add(containerName, new StorageRestSimulator.StorageItem(containerName) { MetaData = origMetaData });
 
             var client =
-                 new StorageServiceRestClient(GetValidContext());
+                 new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             var metadata = new Dictionary<string, string> { { "Test2", "Test2" } };
 
@@ -1015,7 +1011,7 @@ namespace OpenStack.Test.Storage
             var containerName = "newContainer";
 
             var client =
-                new StorageServiceRestClient(GetValidContext());
+                new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             await client.GetContainerMetadata(containerName);
 
@@ -1029,7 +1025,7 @@ namespace OpenStack.Test.Storage
             var containerName = "newContainer";
 
             var client =
-                new StorageServiceRestClient(GetValidContext());
+                new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             await client.GetContainerMetadata(containerName);
 
@@ -1043,7 +1039,7 @@ namespace OpenStack.Test.Storage
             var containerName = "newContainer";
 
             var client =
-                new StorageServiceRestClient(GetValidContext());
+                new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             var resp = await client.GetContainerMetadata(containerName);
 
@@ -1060,7 +1056,7 @@ namespace OpenStack.Test.Storage
             this.simulator.Containers.Add(containerName, new StorageRestSimulator.StorageItem(containerName) { MetaData = origMetaData });
 
             var client =
-                 new StorageServiceRestClient(GetValidContext());
+                 new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             var resp = await client.GetContainerMetadata(containerName);
 
@@ -1081,7 +1077,7 @@ namespace OpenStack.Test.Storage
             var objectName = "newObject";
 
             var client =
-                new StorageServiceRestClient(GetValidContext());
+                new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             await client.GetObjectMetadata(containerName, objectName);
 
@@ -1096,7 +1092,7 @@ namespace OpenStack.Test.Storage
             var objectName = "newObject";
 
             var client =
-                new StorageServiceRestClient(GetValidContext());
+                new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             await client.GetObjectMetadata(containerName, objectName);
 
@@ -1111,7 +1107,7 @@ namespace OpenStack.Test.Storage
             var objectName = "newObject";
 
             var client =
-                new StorageServiceRestClient(GetValidContext());
+                new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             var resp = await client.GetObjectMetadata(containerName, objectName);
 
@@ -1130,7 +1126,7 @@ namespace OpenStack.Test.Storage
             this.simulator.Objects.Add(objectName, new StorageRestSimulator.StorageItem(objectName) { MetaData = origMetaData, Content = content });
 
             var client =
-                 new StorageServiceRestClient(GetValidContext());
+                 new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             var resp = await client.GetObjectMetadata(containerName, objectName);
 
@@ -1153,7 +1149,7 @@ namespace OpenStack.Test.Storage
             var targetObjectName = "newObject";
 
             var client =
-                new StorageServiceRestClient(GetValidContext());
+                new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             await client.CopyObject(sourceContainerName, sourceObjectName, targetContainerName, targetObjectName);
 
@@ -1170,7 +1166,7 @@ namespace OpenStack.Test.Storage
             var targetObjectName = "newObject";
 
             var client =
-                new StorageServiceRestClient(GetValidContext());
+                new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             await client.CopyObject(sourceContainerName, sourceObjectName, targetContainerName, targetObjectName);
 
@@ -1187,7 +1183,7 @@ namespace OpenStack.Test.Storage
             var targetObjectName = "newObject";
 
             var client =
-                new StorageServiceRestClient(GetValidContext());
+                new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             await client.CopyObject(sourceContainerName, sourceObjectName, targetContainerName, targetObjectName);
 
@@ -1207,7 +1203,7 @@ namespace OpenStack.Test.Storage
             this.simulator.Containers.Add(targetContainerName, new StorageRestSimulator.StorageItem(targetContainerName));
 
             var client =
-                new StorageServiceRestClient(GetValidContext());
+                new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             var resp = await client.CopyObject(sourceContainerName, sourceObjectName, targetContainerName, targetObjectName);
 
@@ -1229,7 +1225,7 @@ namespace OpenStack.Test.Storage
             this.simulator.Objects.Add(sourceObjectName, new StorageRestSimulator.StorageItem(sourceObjectName) { MetaData = origMetaData, Content = content });
 
             var client =
-                new StorageServiceRestClient(GetValidContext());
+                new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             var resp = await client.CopyObject(sourceContainerName, sourceObjectName, targetContainerName, targetObjectName);
 
@@ -1251,7 +1247,7 @@ namespace OpenStack.Test.Storage
             this.simulator.Objects.Add(sourceObjectName, new StorageRestSimulator.StorageItem(sourceObjectName) { MetaData = origMetaData, Content = content });
 
             var client =
-                new StorageServiceRestClient(GetValidContext());
+                new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             var resp = await client.CopyObject(sourceContainerName, sourceObjectName, targetContainerName, targetObjectName);
 
@@ -1272,7 +1268,7 @@ namespace OpenStack.Test.Storage
             this.simulator.Containers.Add(sourceContainerName, new StorageRestSimulator.StorageItem(sourceContainerName));
             this.simulator.Objects.Add(sourceObjectName, new StorageRestSimulator.StorageItem(sourceObjectName) { MetaData = origMetaData, Content = content });
 
-            var client = new StorageServiceRestClient(GetValidContext());
+            var client = new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             var resp = await client.CopyObject(sourceContainerName, sourceObjectName, targetContainerName, targetObjectName);
 
@@ -1296,7 +1292,7 @@ namespace OpenStack.Test.Storage
             this.simulator.Objects.Add(sourceObjectName, new StorageRestSimulator.StorageItem(sourceObjectName) { MetaData = origMetaData, Content = content });
 
             var client =
-                new StorageServiceRestClient(GetValidContext());
+                new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             var resp = await client.CopyObject(sourceContainerName, sourceObjectName, targetContainerName, targetObjectName);
 
@@ -1317,7 +1313,7 @@ namespace OpenStack.Test.Storage
         public async Task GetStorageAccountIncludesAuthHeader()
         {
             var client =
-                new StorageServiceRestClient(GetValidContext());
+                new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             await client.GetAccount();
 
@@ -1329,7 +1325,7 @@ namespace OpenStack.Test.Storage
         public async Task GetStorageAccountFormsCorrectUrlAndMethod()
         {
             var client =
-                new StorageServiceRestClient(GetValidContext());
+                new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             await client.GetAccount();
 
@@ -1343,7 +1339,7 @@ namespace OpenStack.Test.Storage
             this.simulator.Containers.Add("TestContainer", new StorageRestSimulator.StorageItem("TestContainer"));
 
             var client =
-                 new StorageServiceRestClient(GetValidContext());
+                 new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             var resp = await client.GetAccount();
 
@@ -1368,7 +1364,7 @@ namespace OpenStack.Test.Storage
             var folderName = "newFolder";
 
             var client =
-                new StorageServiceRestClient(GetValidContext());
+                new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             await client.GetFolder(containerName, folderName);
 
@@ -1383,7 +1379,7 @@ namespace OpenStack.Test.Storage
             var folderName = "a/b/b/";
 
             var client =
-                new StorageServiceRestClient(GetValidContext());
+                new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             await client.GetFolder(containerName, folderName);
 
@@ -1398,7 +1394,7 @@ namespace OpenStack.Test.Storage
             var folderName = "/";
 
             var client =
-                new StorageServiceRestClient(GetValidContext());
+                new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             await client.GetFolder(containerName, folderName);
 
@@ -1413,7 +1409,7 @@ namespace OpenStack.Test.Storage
             var folderName = "a/b/b/";
 
             var client =
-                 new StorageServiceRestClient(GetValidContext());
+                 new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             var resp = await client.GetFolder(containerName, folderName);
 
@@ -1432,7 +1428,7 @@ namespace OpenStack.Test.Storage
             this.simulator.Objects.Add(folderName, new StorageRestSimulator.StorageItem(folderName) { Content = content });
 
             var client =
-                 new StorageServiceRestClient(GetValidContext());
+                 new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             var resp = await client.GetFolder(containerName, folderName);
 
@@ -1453,7 +1449,7 @@ namespace OpenStack.Test.Storage
             this.simulator.Objects.Add(folderName, new StorageRestSimulator.StorageItem(folderName) { MetaData = metaData, Content = content });
 
             var client =
-                 new StorageServiceRestClient(GetValidContext());
+                 new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             var resp = await client.GetFolder(containerName, folderName);
 
@@ -1474,7 +1470,7 @@ namespace OpenStack.Test.Storage
             var manifestName = "newManifest";
 
             var client =
-                new StorageServiceRestClient(GetValidContext());
+                new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             await client.GetManifestMetadata(containerName, manifestName);
 
@@ -1489,7 +1485,7 @@ namespace OpenStack.Test.Storage
             var manifestName = "a/b/b/manifest";
 
             var client =
-                new StorageServiceRestClient(GetValidContext());
+                new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             await client.GetManifestMetadata(containerName, manifestName);
 
@@ -1504,7 +1500,7 @@ namespace OpenStack.Test.Storage
             var manifestName = "a/b/b/manifest";
 
             var client =
-                 new StorageServiceRestClient(GetValidContext());
+                 new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             var resp = await client.GetManifestMetadata(containerName, manifestName);
 
@@ -1523,7 +1519,7 @@ namespace OpenStack.Test.Storage
             this.simulator.Objects.Add(manifestName, new StorageRestSimulator.StorageItem(manifestName) { Content = content });
 
             var client =
-                 new StorageServiceRestClient(GetValidContext());
+                 new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             var resp = await client.GetManifestMetadata(containerName, manifestName);
 
@@ -1544,7 +1540,7 @@ namespace OpenStack.Test.Storage
             this.simulator.Objects.Add(manifestName, new StorageRestSimulator.StorageItem(manifestName) { MetaData = metaData, Content = content });
 
             var client =
-                 new StorageServiceRestClient(GetValidContext());
+                 new StorageServiceRestClient(GetValidContext(), this.ServiceLocator);
 
             var resp = await client.GetManifestMetadata(containerName, manifestName);
 

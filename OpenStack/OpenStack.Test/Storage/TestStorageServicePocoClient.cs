@@ -17,6 +17,7 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using OpenStack.Common.ServiceLocation;
 using OpenStack.Storage;
 
 namespace OpenStack.Test.Storage
@@ -138,7 +139,7 @@ namespace OpenStack.Test.Storage
             this.client = client;
         }
 
-        public IStorageServicePocoClient Create(StorageServiceClientContext context)
+        public IStorageServicePocoClient Create(StorageServiceClientContext context, IServiceLocator serviceLocator)
         {
             return client;
         }

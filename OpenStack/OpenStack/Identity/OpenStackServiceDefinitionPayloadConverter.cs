@@ -26,6 +26,18 @@ namespace OpenStack.Identity
     /// <inheritdoc/>
     internal class OpenStackServiceDefinitionPayloadConverter : IOpenStackServiceDefinitionPayloadConverter
     {
+        internal IServiceLocator ServiceLocator;
+
+        /// <summary>
+        /// Creates a new instance of the OpenStackServiceDefinitionPayloadConverter class.
+        /// </summary>
+        /// <param name="serviceLocator">A service locator to be used to locate/inject dependent services.</param>
+        public OpenStackServiceDefinitionPayloadConverter(IServiceLocator serviceLocator)
+        {
+            serviceLocator.AssertIsNotNull("serviceLocator", "Cannot create a service definition payload converter with a null service locator.");
+            this.ServiceLocator = serviceLocator;
+        }
+
         /// <inheritdoc/>
         public OpenStackServiceDefinition Convert(string payload)
         {
@@ -55,7 +67,7 @@ namespace OpenStack.Identity
         /// <returns>A service endpoint.</returns>
         internal OpenStackServiceEndpoint ConvertEndpoint(JToken endpoint)
         {
-            var converter = ServiceLocator.Instance.Locate<IOpenStackServiceEndpointPayloadConverter>();
+            var converter = this.ServiceLocator.Locate<IOpenStackServiceEndpointPayloadConverter>();
             return converter.Convert(endpoint.ToString());
         }
     }

@@ -26,17 +26,15 @@ namespace OpenStack
     /// <inheritdoc/>
     public class OpenStackClient : IOpenStackClient
     {
-        internal CancellationToken cancellationToken;
+        internal CancellationToken CancellationToken;
+        internal IServiceLocator ServiceLocator;
 
         /// <inheritdoc/>
         public IOpenStackCredential Credential { get; private set; }
 
-        /// <summary>
-        /// Creates a new instance of the OpenStackClient class.
-        /// </summary>
-        public OpenStackClient()
+        internal OpenStackClient()
         {
-            //TODO: remove the need for a default constructor, as state becomes an issue. This will need to be done in conjunction with changes in the ClientManager
+            
         }
 
         /// <summary>
@@ -44,10 +42,14 @@ namespace OpenStack
         /// </summary>
         /// <param name="credential">The credential to be used by this client.</param>
         /// <param name="cancellationToken">The cancellation token to be used by this client.</param>
-        public OpenStackClient(IOpenStackCredential credential, CancellationToken cancellationToken)
+        /// <param name="serviceLocator">A service locator to be used to locate/inject dependent services.</param>
+        public OpenStackClient(IOpenStackCredential credential, CancellationToken cancellationToken, IServiceLocator serviceLocator)
         {
+            serviceLocator.AssertIsNotNull("serviceLocator", "Cannot create an OpenStack client with a null service locator.");
+
             this.Credential = credential;
-            this.cancellationToken = cancellationToken;
+            this.CancellationToken = cancellationToken;
+            this.ServiceLocator = serviceLocator;
         }
 
         /// <inheritdoc/>
@@ -73,8 +75,8 @@ namespace OpenStack
         /// <inheritdoc/>
         public T CreateServiceClient<T>(string version) where T : IOpenStackServiceClient
         {
-            var manager = ServiceLocator.Instance.Locate<IOpenStackServiceClientManager>();
-            return manager.CreateServiceClient<T>(this.Credential, this.cancellationToken);
+            var manager = this.ServiceLocator.Locate<IOpenStackServiceClientManager>();
+            return manager.CreateServiceClient<T>(this.Credential, this.CancellationToken);
         }
 
         /// <inheritdoc/>

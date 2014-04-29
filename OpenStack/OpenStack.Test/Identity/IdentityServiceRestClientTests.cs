@@ -31,14 +31,15 @@ namespace OpenStack.Test.Identity
     public class IdentityServiceRestClientTests
     {
         internal IdentityRestServiceSimulator simulator;
+        internal IServiceLocator ServiceLocator;
 
         [TestInitialize]
         public void TestSetup()
         {
             this.simulator = new IdentityRestServiceSimulator();
+            this.ServiceLocator = new ServiceLocator();
 
-            ServiceLocator.Reset();
-            var manager = ServiceLocator.Instance.Locate<IServiceLocationOverrideManager>();
+            var manager = this.ServiceLocator.Locate<IServiceLocationOverrideManager>();
             manager.RegisterServiceInstance(typeof(IHttpAbstractionClientFactory), new IdentityRestServiceSimulatorFactory(simulator));
         }
 
@@ -46,7 +47,7 @@ namespace OpenStack.Test.Identity
         public void TestCleanup()
         {
             this.simulator = new IdentityRestServiceSimulator();
-            ServiceLocator.Reset();
+            this.ServiceLocator = new ServiceLocator();
         }
 
         public IOpenStackCredential GetValidCredentials()
@@ -63,7 +64,7 @@ namespace OpenStack.Test.Identity
         public async Task AuthenticationMethodAndUriAreValid()
         {
             var creds = GetValidCredentials();
-            var client = new IdentityServiceRestClientFactory().Create(creds,CancellationToken.None);
+            var client = new IdentityServiceRestClientFactory().Create(creds,CancellationToken.None, this.ServiceLocator);
 
             await client.Authenticate();
 
@@ -75,7 +76,7 @@ namespace OpenStack.Test.Identity
         public async Task AuthenticateIncludesCorrectHeaders()
         {
             var creds = GetValidCredentials();
-            var client = new IdentityServiceRestClient(creds, CancellationToken.None);
+            var client = new IdentityServiceRestClient(creds, CancellationToken.None, this.ServiceLocator);
 
             await client.Authenticate();
 
@@ -88,7 +89,7 @@ namespace OpenStack.Test.Identity
         public async Task AuthenticateIncludesPayload()
         {
             var creds = GetValidCredentials();
-            var client = new IdentityServiceRestClient(creds, CancellationToken.None);
+            var client = new IdentityServiceRestClient(creds, CancellationToken.None, this.ServiceLocator);
 
             await client.Authenticate();
 

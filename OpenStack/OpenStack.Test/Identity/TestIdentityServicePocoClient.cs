@@ -17,6 +17,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using OpenStack.Common.ServiceLocation;
 using OpenStack.Identity;
 
 namespace OpenStack.Test.Identity
@@ -40,7 +41,7 @@ namespace OpenStack.Test.Identity
             this.client = client;
         }
 
-        public IIdentityServicePocoClient Create(IOpenStackCredential credentials, CancellationToken token)
+        public IIdentityServicePocoClient Create(IOpenStackCredential credentials, CancellationToken token, IServiceLocator serviceLocator)
         {
             return client;
         }

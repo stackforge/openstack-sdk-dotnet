@@ -119,25 +119,24 @@ namespace OpenStack.Test.ServiceLocation
         [TestInitialize]
         public void Initialize()
         {
-            ServiceLocator.Reset();
         }
 
         [TestCleanup]
         public void TestCleanup()
         {
-            ServiceLocator.Reset();
         }
 
         [TestMethod]
         public void CanRegisterAndLocateAService()
         {
+            var locator = new ServiceLocator();
             var myServiceInstance = new TestEchoService();
-            var manager = ServiceLocator.Instance.Locate<IServiceLocationRuntimeManager>();
+            var manager = locator.Locate<IServiceLocationRuntimeManager>();
             
             Assert.IsNotNull(manager);
             manager.RegisterServiceInstance<ITestEchoService>(myServiceInstance);
 
-            var service = ServiceLocator.Instance.Locate<ITestEchoService>();
+            var service = locator.Locate<ITestEchoService>();
             
             Assert.IsNotNull(service);
             Assert.AreEqual("Works", service.Echo("Works"));
@@ -147,25 +146,27 @@ namespace OpenStack.Test.ServiceLocation
         [ExpectedException(typeof(InvalidOperationException))]
         public void CannotLocateAServiceThatHasNotBeenRegistered()
         {
-            ServiceLocator.Instance.Locate<ITestEchoService>();
+            var locator = new ServiceLocator();
+            locator.Locate<ITestEchoService>();
         }
 
         [TestMethod]
         public void CanOverrideAndLocateAService()
         {
+            var locator = new ServiceLocator();
             var echoServiceInstance = new TestEchoService();
             var reverseEchoServiceInstance = new TestReverseEchoService();
-            var runtimeManager = ServiceLocator.Instance.Locate<IServiceLocationRuntimeManager>();
-            var overrrideManager = ServiceLocator.Instance.Locate<IServiceLocationOverrideManager>();
+            var runtimeManager = locator.Locate<IServiceLocationRuntimeManager>();
+            var overrrideManager = locator.Locate<IServiceLocationOverrideManager>();
 
             Assert.IsNotNull(runtimeManager);
             Assert.IsNotNull(overrrideManager);
 
             runtimeManager.RegisterServiceInstance<ITestEchoService>(echoServiceInstance);
             overrrideManager.RegisterServiceInstance<ITestEchoService>(reverseEchoServiceInstance);
-            
 
-            var service = ServiceLocator.Instance.Locate<ITestEchoService>();
+
+            var service = locator.Locate<ITestEchoService>();
 
             Assert.IsNotNull(service);
             Assert.IsInstanceOfType(service, typeof(TestReverseEchoService));
@@ -176,7 +177,8 @@ namespace OpenStack.Test.ServiceLocation
         [ExpectedException(typeof(InvalidOperationException))]
         public void CannotRegisterNullService()
         {
-            var runtimeManager = ServiceLocator.Instance.Locate<IServiceLocationRuntimeManager>();
+            var locator = new ServiceLocator();
+            var runtimeManager = locator.Locate<IServiceLocationRuntimeManager>();
 
             runtimeManager.RegisterServiceInstance<ITestEchoService>(null);
         }
@@ -185,7 +187,8 @@ namespace OpenStack.Test.ServiceLocation
         [ExpectedException(typeof(InvalidOperationException))]
         public void CannotRegisterNullType()
         {
-            var runtimeManager = ServiceLocator.Instance.Locate<IServiceLocationRuntimeManager>();
+            var locator = new ServiceLocator();
+            var runtimeManager = locator.Locate<IServiceLocationRuntimeManager>();
 
             runtimeManager.RegisterServiceInstance(null,new TestEchoService());
         }
@@ -194,7 +197,8 @@ namespace OpenStack.Test.ServiceLocation
         [ExpectedException(typeof(InvalidOperationException))]
         public void CannotRegisterNonInterface()
         {
-            var runtimeManager = ServiceLocator.Instance.Locate<IServiceLocationRuntimeManager>();
+            var locator = new ServiceLocator();
+            var runtimeManager = locator.Locate<IServiceLocationRuntimeManager>();
 
             runtimeManager.RegisterServiceInstance<string>("Hello!");
         }
@@ -203,7 +207,8 @@ namespace OpenStack.Test.ServiceLocation
         [ExpectedException(typeof(InvalidOperationException))]
         public void CannotRegisterAServiceLocator()
         {
-            var runtimeManager = ServiceLocator.Instance.Locate<IServiceLocationRuntimeManager>();
+            var locator = new ServiceLocator();
+            var runtimeManager = locator.Locate<IServiceLocationRuntimeManager>();
 
             runtimeManager.RegisterServiceInstance<IServiceLocator>(new TestServiceLocator());
         }
@@ -212,7 +217,8 @@ namespace OpenStack.Test.ServiceLocation
         [ExpectedException(typeof(InvalidOperationException))]
         public void CannotRegisterAServiceManager()
         {
-            var runtimeManager = ServiceLocator.Instance.Locate<IServiceLocationRuntimeManager>();
+            var locator = new ServiceLocator();
+            var runtimeManager = locator.Locate<IServiceLocationRuntimeManager>();
 
             runtimeManager.RegisterServiceInstance<IServiceLocationRuntimeManager>(new TestServiceManager());
         }
@@ -221,7 +227,8 @@ namespace OpenStack.Test.ServiceLocation
         [ExpectedException(typeof(InvalidOperationException))]
         public void CannotRegisterAnOverrideManager()
         {
-            var runtimeManager = ServiceLocator.Instance.Locate<IServiceLocationRuntimeManager>();
+            var locator = new ServiceLocator();
+            var runtimeManager = locator.Locate<IServiceLocationRuntimeManager>();
 
             runtimeManager.RegisterServiceInstance<IServiceLocationOverrideManager>(new TestServiceOverrideManager());
         }

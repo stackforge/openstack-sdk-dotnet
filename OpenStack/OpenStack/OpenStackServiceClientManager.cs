@@ -28,13 +28,15 @@ namespace OpenStack
     /// <inheritdoc/>
     internal class OpenStackServiceClientManager : IOpenStackServiceClientManager
     {
+        internal IServiceLocator ServiceLocator;
         internal IDictionary<Type, IOpenStackServiceClientDefinition> serviceClientDefinitions;
 
         /// <summary>
         /// Creates a new instance of the OpenStackServiceClientManager class.
         /// </summary>
-        internal OpenStackServiceClientManager()
+        internal OpenStackServiceClientManager(IServiceLocator serviceLocator)
         {
+            this.ServiceLocator = serviceLocator;
             this.serviceClientDefinitions = new Dictionary<Type, IOpenStackServiceClientDefinition>();
         }
 
@@ -47,7 +49,7 @@ namespace OpenStack
 
             //Ensure that the assembly that contains this credential has had a chance to be service located.
             //This is, at least for now, the entry point for third-parties can extend the API/SDK.
-            ServiceLocator.Instance.EnsureAssemblyRegistration(credential.GetType().GetTypeInfo().Assembly);
+            this.ServiceLocator.EnsureAssemblyRegistration(credential.GetType().GetTypeInfo().Assembly);
 
             foreach (var serviceClientDef in this.serviceClientDefinitions.Where(s =>typeof(T).GetTypeInfo().IsAssignableFrom(s.Key.GetTypeInfo())))
             {
@@ -75,7 +77,7 @@ namespace OpenStack
             IOpenStackServiceClient instance;
             try
             {
-                instance = clientDefinition.Create(credential, cancellationToken) as IOpenStackServiceClient;
+                instance = clientDefinition.Create(credential, cancellationToken, this.ServiceLocator) as IOpenStackServiceClient;
             }
             catch (Exception ex)
             {

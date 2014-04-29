@@ -15,6 +15,7 @@
 // ============================================================================ */
 
 using System.Threading;
+using OpenStack.Common.ServiceLocation;
 
 namespace OpenStack.Identity
 {
@@ -28,7 +29,8 @@ namespace OpenStack.Identity
         /// </summary>
         /// <param name="credential">The credential to be used when interacting with OpenStack.</param>
         /// <param name="cancellationToken">The cancellation token to be used when interacting with OpenStack.</param>
+        /// <param name="serviceLocator">A service locator to be used to locate/inject dependent services.</param>
         /// <returns>An instance of the client.</returns>
-        IIdentityServiceRestClient Create(IOpenStackCredential credential, CancellationToken cancellationToken);
+        IIdentityServiceRestClient Create(IOpenStackCredential credential, CancellationToken cancellationToken, IServiceLocator serviceLocator);
     }
 }

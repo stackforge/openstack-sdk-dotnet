@@ -25,24 +25,12 @@ namespace OpenStack.Common.ServiceLocation
     /// <inheritdoc/>
     public class ServiceLocator : IServiceLocator
     {
-        private static IServiceLocator _instance = new ServiceLocator();
         private readonly ServiceLocationManager _runtimeManager;
         private readonly Dictionary<Type, object> _services = new Dictionary<Type, object>();
         private readonly Dictionary<Type, object> _overrideServices = new Dictionary<Type, object>();
         private readonly IServiceLocationAssemblyScanner _scanner = new ServiceLocationAssemblyScanner();
 
-
-        public static IServiceLocator Instance
-        {
-            get { return _instance; }
-        }
-
-        internal static void Reset()
-        {
-            _instance = new ServiceLocator();
-        }
-
-        private ServiceLocator()
+        internal ServiceLocator()
         {
             this._runtimeManager = new ServiceLocationRuntimeManager(this);
             this._services.Add(typeof(IServiceLocationRuntimeManager), this._runtimeManager);

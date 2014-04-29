@@ -14,6 +14,8 @@
 // limitations under the License.
 // ============================================================================ */
 
+using OpenStack.Common.ServiceLocation;
+
 namespace OpenStack.Storage
 {
     /// <summary>
@@ -25,7 +27,8 @@ namespace OpenStack.Storage
         /// Creates a client that can be used to connect to an OpenStack storage service.
         /// </summary>
         /// <param name="context">The storage service context that the client will use.</param>
+        /// <param name="serviceLocator">A service locator to be used to locate/inject dependent services.</param>
         /// <returns>The client.</returns>
-        IStorageServiceRestClient Create(StorageServiceClientContext context);
+        IStorageServiceRestClient Create(StorageServiceClientContext context, IServiceLocator serviceLocator);
     }
 }

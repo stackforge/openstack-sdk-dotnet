@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using OpenStack.Identity;
 
 namespace OpenStack
@@ -39,6 +40,39 @@ namespace OpenStack
         /// <param name="version">The version that must be supported.</param>
         /// <returns>An instance of an OpenStack client.</returns>
         IOpenStackClient CreateClient(ICredential credential, string version);
+
+        /// <summary>
+        ///  Creates an instance of a client that can support the given credential and version.
+        /// </summary>
+        /// <param name="credential">The credential that must be supported.</param>
+        /// <param name="token">A cancellation token that can be used to cancel operations.</param>
+        /// <param name="version">The version that must be supported.</param>
+        /// <returns>An instance of an OpenStack client.</returns>
+        IOpenStackClient CreateClient(ICredential credential, CancellationToken token, string version);
+
+        /// <summary>
+        ///  Creates an instance of a client that can support the given credential and version.
+        /// </summary>
+        /// <param name="credential">The credential that must be supported.</param>
+        /// <returns>An instance of an OpenStack client.</returns>
+        IOpenStackClient CreateClient<T>(ICredential credential) where T : IOpenStackClient;
+
+        /// <summary>
+        ///  Creates an instance of a client that can support the given credential and version.
+        /// </summary>
+        /// <param name="credential">The credential that must be supported.</param>
+        /// <param name="version">The version that must be supported.</param>
+        /// <returns>An instance of an OpenStack client.</returns>
+        IOpenStackClient CreateClient<T>(ICredential credential, string version) where T : IOpenStackClient;
+
+        /// <summary>
+        ///  Creates an instance of a client that can support the given credential and version.
+        /// </summary>
+        /// <param name="credential">The credential that must be supported.</param>
+        /// <param name="token">A cancellation token that can be used to cancel operations.</param>
+        /// <param name="version">The version that must be supported.</param>
+        /// <returns>An instance of an OpenStack client.</returns>
+        IOpenStackClient CreateClient<T>(ICredential credential, CancellationToken token, string version) where T : IOpenStackClient;
 
         /// <summary>
         /// Registers a client for use.

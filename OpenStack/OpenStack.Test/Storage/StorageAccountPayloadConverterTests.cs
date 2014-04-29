@@ -16,9 +16,9 @@
 
 using System;
 using System.Linq;
-using System.Web;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OpenStack.Common.Http;
+using OpenStack.Common.ServiceLocation;
 using OpenStack.Storage;
 
 namespace OpenStack.Test.Storage
@@ -44,7 +44,7 @@ namespace OpenStack.Test.Storage
                 {"X-Account-Container-Count", "1"}
             };
 
-            var converter = new StorageAccountPayloadConverter();
+            var converter = new StorageAccountPayloadConverter(new ServiceLocator());
             var account = converter.Convert(accountName, headers, validSingleContainerJson);
 
             Assert.IsNotNull(account);
@@ -73,7 +73,7 @@ namespace OpenStack.Test.Storage
                 {"X-Account-Container-Count", "1"}
             };
 
-            var converter = new StorageAccountPayloadConverter();
+            var converter = new StorageAccountPayloadConverter(new ServiceLocator());
             converter.Convert(accountName, headers, validSingleContainerJson);
         }
 
@@ -95,7 +95,7 @@ namespace OpenStack.Test.Storage
                 {"X-Account-Container-Count", "1"}
             };
 
-            var converter = new StorageAccountPayloadConverter();
+            var converter = new StorageAccountPayloadConverter(new ServiceLocator());
             converter.Convert(accountName, headers, validSingleContainerJson);
         }
 
@@ -117,7 +117,7 @@ namespace OpenStack.Test.Storage
                 {"X-Account-Object-Count", "1"}
             };
 
-            var converter = new StorageAccountPayloadConverter();
+            var converter = new StorageAccountPayloadConverter(new ServiceLocator());
             converter.Convert(accountName, headers, validSingleContainerJson);
         }
 
@@ -140,7 +140,7 @@ namespace OpenStack.Test.Storage
                 {"X-Account-Container-Count", "1"}
             };
 
-            var converter = new StorageAccountPayloadConverter();
+            var converter = new StorageAccountPayloadConverter(new ServiceLocator());
             converter.Convert(accountName, headers, validSingleContainerJson);
         }
 
@@ -163,7 +163,7 @@ namespace OpenStack.Test.Storage
                 {"X-Account-Container-Count", "1"}
             };
 
-            var converter = new StorageAccountPayloadConverter();
+            var converter = new StorageAccountPayloadConverter(new ServiceLocator());
             converter.Convert(accountName, headers, validSingleContainerJson);
         }
 
@@ -186,7 +186,7 @@ namespace OpenStack.Test.Storage
                 {"X-Account-Container-Count", "NOT A NUMBER"}
             };
 
-            var converter = new StorageAccountPayloadConverter();
+            var converter = new StorageAccountPayloadConverter(new ServiceLocator());
             converter.Convert(accountName, headers, validSingleContainerJson);
         }
 
@@ -208,7 +208,7 @@ namespace OpenStack.Test.Storage
                 {"X-Account-Container-Count", "1"}
             };
 
-            var converter = new StorageAccountPayloadConverter();
+            var converter = new StorageAccountPayloadConverter(new ServiceLocator());
             converter.Convert(accountName, headers, invalidSingleContainerJson);
         }
 
@@ -230,7 +230,7 @@ namespace OpenStack.Test.Storage
                 {"X-Account-Container-Count", "1"}
             };
 
-            var converter = new StorageAccountPayloadConverter();
+            var converter = new StorageAccountPayloadConverter(new ServiceLocator());
             converter.Convert(null, headers, validSingleContainerJson);
         }
 
@@ -246,7 +246,7 @@ namespace OpenStack.Test.Storage
                                                   ""name"": ""TestContainer""
                                             }]";
 
-            var converter = new StorageAccountPayloadConverter();
+            var converter = new StorageAccountPayloadConverter(new ServiceLocator());
             converter.Convert(accountName, null, validSingleContainerJson);
         }
 
@@ -263,7 +263,7 @@ namespace OpenStack.Test.Storage
                 {"X-Account-Container-Count", "1"}
             };
 
-            var converter = new StorageAccountPayloadConverter();
+            var converter = new StorageAccountPayloadConverter(new ServiceLocator());
             converter.Convert(accountName, headers, null);
         }
     }

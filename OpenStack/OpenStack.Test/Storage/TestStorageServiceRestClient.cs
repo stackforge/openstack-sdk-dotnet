@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using OpenStack.Common.Http;
+using OpenStack.Common.ServiceLocation;
 using OpenStack.Storage;
 
 namespace OpenStack.Test.Storage
@@ -126,7 +127,7 @@ namespace OpenStack.Test.Storage
             this.Client = client;
         }
 
-        public IStorageServiceRestClient Create(StorageServiceClientContext context)
+        public IStorageServiceRestClient Create(StorageServiceClientContext context, IServiceLocator serviceLocator)
         {
             return Client;
         }

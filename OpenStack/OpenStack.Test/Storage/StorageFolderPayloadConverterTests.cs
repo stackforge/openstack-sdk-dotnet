@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using OpenStack.Common.ServiceLocation;
 using OpenStack.Storage;
 
 namespace OpenStack.Test.Storage
@@ -30,7 +31,7 @@ namespace OpenStack.Test.Storage
         public void CanAddFolderWithNestedFolders()
         {
             var objects = new List<StorageObject>() { new StorageObject("a/b/c/d/","a") };
-            var converter = new StorageFolderPayloadConverter();
+            var converter = new StorageFolderPayloadConverter(new ServiceLocator());
             var folders = converter.Convert(objects).ToList();
             
             Assert.AreEqual(1,folders.Count);
@@ -47,7 +48,7 @@ namespace OpenStack.Test.Storage
         public void CanAddFolderWithNestedFoldersAndDuplicateNames()
         {
             var objects = new List<StorageObject>() { new StorageObject("a/c/c/c/", "a") };
-            var converter = new StorageFolderPayloadConverter();
+            var converter = new StorageFolderPayloadConverter(new ServiceLocator());
             var folders = converter.Convert(objects).ToList();
 
             Assert.AreEqual(1, folders.Count);
@@ -64,7 +65,7 @@ namespace OpenStack.Test.Storage
         public void CanAddSingleFolder()
         {
             var objects = new List<StorageObject>() { new StorageObject("a/", "a") };
-            var converter = new StorageFolderPayloadConverter();
+            var converter = new StorageFolderPayloadConverter(new ServiceLocator());
             var folders = converter.Convert(objects).ToList();
 
             Assert.AreEqual(1, folders.Count);
@@ -77,7 +78,7 @@ namespace OpenStack.Test.Storage
         [ExpectedException(typeof(ArgumentNullException))]
         public void CanAddFolderWithNullObjectList()
         {
-            var converter = new StorageFolderPayloadConverter();
+            var converter = new StorageFolderPayloadConverter(new ServiceLocator());
             converter.Convert(null);
         }
 
@@ -86,7 +87,7 @@ namespace OpenStack.Test.Storage
         {
             var objects = new List<StorageObject>() { new StorageObject("a/", "a"), new StorageObject("a/b/c/d/", "a") };
 
-            var converter = new StorageFolderPayloadConverter();
+            var converter = new StorageFolderPayloadConverter(new ServiceLocator());
             var folders = converter.Convert(objects).ToList();
 
             Assert.AreEqual(1, folders.Count);
@@ -104,7 +105,7 @@ namespace OpenStack.Test.Storage
         {
             var objects = new List<StorageObject>() { new StorageObject("a/b/c/d/foo", "a"), new StorageObject("a/b/c/d/bar", "a") };
 
-            var converter = new StorageFolderPayloadConverter();
+            var converter = new StorageFolderPayloadConverter(new ServiceLocator());
             var folders = converter.Convert(objects).ToList();
             
             Assert.AreEqual(1, folders.Count);
@@ -127,7 +128,7 @@ namespace OpenStack.Test.Storage
         {
             var objects = new List<StorageObject>() { new StorageObject("a/b/c/d/foo", "a"), new StorageObject("a/b/c/d/bar", "a"), new StorageObject("xyz", "a") };
 
-            var converter = new StorageFolderPayloadConverter();
+            var converter = new StorageFolderPayloadConverter(new ServiceLocator());
             var folders = converter.Convert(objects).ToList();
 
             Assert.AreEqual(1, folders.Count);
@@ -150,7 +151,7 @@ namespace OpenStack.Test.Storage
         {
             var objects = new List<StorageObject>() { new StorageObject("a/b/c/d/foo", "a"), new StorageObject("a/b/c/d/bar", "a"), new StorageObject("thiswillsorttothetopofthelist", "a") };
 
-            var converter = new StorageFolderPayloadConverter();
+            var converter = new StorageFolderPayloadConverter(new ServiceLocator());
             var folders = converter.Convert(objects).ToList();
 
             Assert.AreEqual(1, folders.Count);
@@ -180,7 +181,7 @@ namespace OpenStack.Test.Storage
                 new StorageObject("a/", "a") 
             };
 
-            var converter = new StorageFolderPayloadConverter();
+            var converter = new StorageFolderPayloadConverter(new ServiceLocator());
             var folders = converter.Convert(objects).ToList();
 
             var aNode = folders[0];
@@ -225,7 +226,7 @@ namespace OpenStack.Test.Storage
                 new StorageObject("a/b/", "a", DateTime.Now, "12345", 100, "application/directory")
             };
 
-            var converter = new StorageFolderPayloadConverter();
+            var converter = new StorageFolderPayloadConverter(new ServiceLocator());
             var resp = converter.Convert(objects).ToList();
 
             Assert.AreEqual(1, resp.Count);
@@ -248,8 +249,8 @@ namespace OpenStack.Test.Storage
         public void CanConvertFoldersWithNoInputObjects()
         {
             var objects = new List<StorageObject>();
-            
-            var converter = new StorageFolderPayloadConverter();
+
+            var converter = new StorageFolderPayloadConverter(new ServiceLocator());
             var resp = converter.Convert(objects).ToList();
 
             Assert.AreEqual(0, resp.Count);
@@ -259,7 +260,7 @@ namespace OpenStack.Test.Storage
         [ExpectedException(typeof(ArgumentNullException))]
         public void CannotConvertFoldersWithNullObjectList()
         {
-           var converter = new StorageFolderPayloadConverter();
+            var converter = new StorageFolderPayloadConverter(new ServiceLocator());
            var resp = converter.Convert(null);
         }
 
@@ -277,7 +278,7 @@ namespace OpenStack.Test.Storage
                                     ""content_type"": ""application/octet-stream""
                                 }]";
 
-            var converter = new StorageFolderPayloadConverter();
+            var converter = new StorageFolderPayloadConverter(new ServiceLocator());
             var resp = converter.Convert(containerName, folderName, payload);
 
             Assert.AreEqual(1, resp.Objects.Count);
@@ -297,7 +298,7 @@ namespace OpenStack.Test.Storage
             var folderName = "a/b/c/";
             var payload = @"[]";
 
-            var converter = new StorageFolderPayloadConverter();
+            var converter = new StorageFolderPayloadConverter(new ServiceLocator());
             converter.Convert(containerName, folderName, payload);
         }
 
@@ -322,7 +323,7 @@ namespace OpenStack.Test.Storage
                                     ""content_type"": ""application/octet-stream""
                                 }]";
 
-            var converter = new StorageFolderPayloadConverter();
+            var converter = new StorageFolderPayloadConverter(new ServiceLocator());
             var resp = converter.Convert(containerName, folderName, payload);
 
             Assert.AreEqual(1, resp.Objects.Count);
@@ -354,7 +355,7 @@ namespace OpenStack.Test.Storage
                                         ""subdir"": ""a/b/c/x/""
                                 }]";
 
-            var converter = new StorageFolderPayloadConverter();
+            var converter = new StorageFolderPayloadConverter(new ServiceLocator());
             var resp = converter.Convert(containerName, folderName, payload);
 
             Assert.AreEqual(1, resp.Objects.Count);
@@ -405,7 +406,7 @@ namespace OpenStack.Test.Storage
                                 }
                             ]";
 
-            var converter = new StorageFolderPayloadConverter();
+            var converter = new StorageFolderPayloadConverter(new ServiceLocator());
             var resp = converter.Convert(containerName, folderName, payload);
 
             Assert.AreEqual("c", resp.Name);

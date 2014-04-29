@@ -25,14 +25,6 @@ namespace OpenStack.Identity
     internal interface IOpenStackServiceCatalog : IEnumerable<OpenStackServiceDefinition>
     {
         /// <summary>
-        /// Gets the public endpoint for the given service and region.
-        /// </summary>
-        /// <param name="serviceName">The name of the service.</param>
-        /// <param name="region">The region of the endpoint.</param>
-        /// <returns>A Uri that represents the public endpoint for the given service in the given region.</returns>
-        Uri GetPublicEndpoint(string serviceName, string region);
-
-        /// <summary>
         /// Determines if the given service exists in the catalog.
         /// </summary>
         /// <param name="serviceName">The name of the service to check for.</param>

@@ -32,6 +32,7 @@ namespace OpenStack.Storage
     {
         internal StorageServiceClientContext Context;
         internal const string StorageServiceName = "Object Storage";
+        internal IServiceLocator ServiceLocator;
 
         /// <inheritdoc/>
         public long LargeObjectThreshold { get; set; }
@@ -48,7 +49,21 @@ namespace OpenStack.Storage
             //      The reason is that this breaks encapsulation. The rest layer/client is responsible for resolving it's own endpoint,
             //      This object should not also try and resolve the uri. In general we abstracted the consumer away from the URI, we should not break that
             //      abstraction. 
-            return this.Context.Credential.ServiceCatalog.GetPublicEndpoint(StorageServiceName, this.Context.Credential.Region);
+            return this.Context.PublicEndpoint;
+        }
+
+        /// <summary>
+        /// Gets the public endpoint for a service in the given service catalog for the given region.
+        /// </summary>
+        /// <param name="serviceCatalog">The service catalog to search.</param>
+        /// <param name="serviceName">The name of the service to look for.</param>
+        /// <param name="region">The region to look for.</param>
+        /// <returns>A Uri for the public endpoint.</returns>
+        internal Uri GetPublicEndpoint(OpenStackServiceCatalog serviceCatalog, string serviceName, string region)
+        {
+            var resolver = this.ServiceLocator.Locate<IOpenStackServiceEndpointResolver>();
+            var endpoint = resolver.ResolveEndpoint(serviceCatalog, StorageServiceName, region);
+            return new Uri(endpoint);
         }
 
         /// <summary>
@@ -56,13 +71,18 @@ namespace OpenStack.Storage
         /// </summary>
         /// <param name="credentials">The credential to be used by this client.</param>
         /// <param name="token">The cancellation token to be used by this client.</param>
-        public StorageServiceClient(IOpenStackCredential credentials, CancellationToken token)
+        /// <param name="serviceLocator">A service locator to be used to locate/inject dependent services.</param>
+        public StorageServiceClient(IOpenStackCredential credentials, CancellationToken token, IServiceLocator serviceLocator)
         {
+            serviceLocator.AssertIsNotNull("serviceLocator", "Cannot create a storage service client with a null service locator.");
+
             this.LargeObjectThreshold = 524288000; //Set the default large file threshold to 500MB.
             this.LargeObjectSegments = 10; //set the default number of segments for large objects to 10.
             this.LargeObjectSegmentContainer = "LargeObjectSegments"; //set the default name of the container that will hold segments to 'LargeObjectSegments';
 
-            this.Context = new StorageServiceClientContext(credentials, token, StorageServiceName);
+            this.ServiceLocator = serviceLocator;
+            var endpoint = this.GetPublicEndpoint(credentials.ServiceCatalog, StorageServiceName, credentials.Region);
+            this.Context = new StorageServiceClientContext(credentials, token, StorageServiceName, endpoint);
         }
 
         /// <inheritdoc/>
@@ -198,7 +218,7 @@ namespace OpenStack.Storage
             folderName.AssertIsNotNullOrEmpty("folderName", "Cannot create a storage folder with a name that is null or empty.");
 
             folderName = EnsureTrailingSlashOnFolderName(folderName);
-            var validator = ServiceLocator.Instance.Locate<IStorageFolderNameValidator>();
+            var validator = this.ServiceLocator.Locate<IStorageFolderNameValidator>();
             if (!validator.Validate(folderName))
             {
                 throw new ArgumentException(string.Format("Folder name '{0}' is invalid. Folder names cannot includes  consecutive slashes.", folderName), "folderName");
@@ -305,7 +325,7 @@ namespace OpenStack.Storage
                 throw new ArgumentException("Cannot create a large object with zero or less segments.", "numberOfSegments");
             }
 
-            var factory = ServiceLocator.Instance.Locate<ILargeStorageObjectCreatorFactory>();
+            var factory = this.ServiceLocator.Locate<ILargeStorageObjectCreatorFactory>();
             var creator = factory.Create(this);
             return await creator.Create(containerName, objectName, metadata, content, numberOfSegments, this.LargeObjectSegmentContainer);
         }
@@ -316,7 +336,7 @@ namespace OpenStack.Storage
         /// <returns>A POCO client.</returns>
         internal IStorageServicePocoClient GetPocoClient()
         {
-            return ServiceLocator.Instance.Locate<IStorageServicePocoClientFactory>().Create(this.Context);
+            return this.ServiceLocator.Locate<IStorageServicePocoClientFactory>().Create(this.Context, this.ServiceLocator);
         }
 
         /// <summary>

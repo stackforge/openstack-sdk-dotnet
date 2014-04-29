@@ -14,15 +14,17 @@
 // limitations under the License.
 // ============================================================================ */
 
+using OpenStack.Common.ServiceLocation;
+
 namespace OpenStack.Storage
 {
     /// <inheritdoc/>
     internal class StorageServicePocoClientFactory : IStorageServicePocoClientFactory
     {
         /// <inheritdoc/>
-        public IStorageServicePocoClient Create(StorageServiceClientContext context)
+        public IStorageServicePocoClient Create(StorageServiceClientContext context, IServiceLocator serviceLocator)
         {
-            return new StorageServicePocoClient(context);
+            return new StorageServicePocoClient(context, serviceLocator);
         }
     }
 }

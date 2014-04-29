@@ -8,8 +8,6 @@ Quick Start Example
 The following code will connect to Openstack, and print out all of the containers in the default storage account::
 
     using System;
-    using System.Linq;
-    using System.Security;
     using System.Threading;
     using Openstack;
     using Openstack.Identity;
@@ -21,7 +19,7 @@ The following code will connect to Openstack, and print out all of the container
     var tenantId = "XXXXXXXXXXXXXX-Project";
 
     var credential = new OpenstackCredential(authUri, userName, password, tenantId);
-    var client = new OpenstackClient(credential, CancellationToken.None);
+    var client = OpenStackClientFactory.CreateClient(credential);
 
     await client.Connect();
 
