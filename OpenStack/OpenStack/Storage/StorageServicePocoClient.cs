@@ -30,14 +30,19 @@ namespace OpenStack.Storage
     internal class StorageServicePocoClient : IStorageServicePocoClient
     {
         internal StorageServiceClientContext _context;
+        internal IServiceLocator ServiceLocator;
 
         /// <summary>
         /// Creates a new instance of the StorageServicePocoClient class.
         /// </summary>
         /// <param name="context">The storage service to use for this client.</param>
-        internal StorageServicePocoClient(StorageServiceClientContext context)
+        /// <param name="serviceLocator">A service locator to be used to locate/inject dependent services.</param>
+        internal StorageServicePocoClient(StorageServiceClientContext context, IServiceLocator serviceLocator)
         {
+            serviceLocator.AssertIsNotNull("serviceLocator", "Cannot create a storage service poco client with a null service locator.");
+
             this._context = context;
+            this.ServiceLocator = serviceLocator;
         }
 
         /// <inheritdoc/>
@@ -55,7 +60,7 @@ namespace OpenStack.Storage
                 throw new InvalidOperationException(string.Format("Failed to create storage object '{0}'. The remote server returned the following status code: '{1}'.", obj.Name, resp.StatusCode));
             }
 
-            var converter = ServiceLocator.Instance.Locate<IStorageObjectPayloadConverter>();
+            var converter = this.ServiceLocator.Locate<IStorageObjectPayloadConverter>();
             var respObj = converter.Convert(obj.ContainerName, obj.FullName, resp.Headers);
 
             return respObj;
@@ -84,7 +89,7 @@ namespace OpenStack.Storage
             }
             else //static large object manifest
             {
-                var converter = ServiceLocator.Instance.Locate<IStorageObjectPayloadConverter>();
+                var converter = this.ServiceLocator.Locate<IStorageObjectPayloadConverter>();
                 var manifestPayload = converter.Convert(staticManifest.Objects).ConvertToStream();
 
                 resp = await client.CreateStaticManifest(staticManifest.ContainerName, staticManifest.FullName, staticManifest.Metadata, manifestPayload);
@@ -124,10 +129,9 @@ namespace OpenStack.Storage
                 throw new InvalidOperationException(string.Format("Failed to get storage account. The remote server returned the following status code: '{0}'.", resp.StatusCode));
             }
 
-            var endpoint = this._context.Credential.ServiceCatalog.GetPublicEndpoint(this._context.StorageServiceName, this._context.Credential.Region);
-            var accountName = endpoint.Segments.Last().TrimEnd('/');
+            var accountName = _context.PublicEndpoint.Segments.Last().TrimEnd('/');
 
-            var converter = ServiceLocator.Instance.Locate<IStorageAccountPayloadConverter>();
+            var converter = this.ServiceLocator.Locate<IStorageAccountPayloadConverter>();
             var account = converter.Convert(accountName, resp.Headers, await resp.ReadContentAsStringAsync());
 
             return account;
@@ -146,7 +150,7 @@ namespace OpenStack.Storage
                 throw new InvalidOperationException(string.Format("Failed to get storage container '{0}'. The remote server returned the following status code: '{1}'.", containerName, resp.StatusCode));
             }
 
-            var converter = ServiceLocator.Instance.Locate<IStorageContainerPayloadConverter>();
+            var converter = this.ServiceLocator.Locate<IStorageContainerPayloadConverter>();
             var container = converter.Convert(containerName, resp.Headers, await resp.ReadContentAsStringAsync());
 
             return container;
@@ -166,7 +170,7 @@ namespace OpenStack.Storage
                 throw new InvalidOperationException(string.Format("Failed to get storage object '{0}'. The remote server returned the following status code: '{1}'.", objectName, resp.StatusCode));
             }
 
-            var converter = ServiceLocator.Instance.Locate<IStorageObjectPayloadConverter>();
+            var converter = this.ServiceLocator.Locate<IStorageObjectPayloadConverter>();
             var obj = converter.Convert(containerName, objectName, resp.Headers);
 
             return obj;
@@ -185,7 +189,7 @@ namespace OpenStack.Storage
                 throw new InvalidOperationException(string.Format("Failed to get storage manifest '{0}'. The remote server returned the following status code: '{1}'.", manifestName, resp.StatusCode));
             }
 
-            var objectConverter = ServiceLocator.Instance.Locate<IStorageObjectPayloadConverter>();
+            var objectConverter = this.ServiceLocator.Locate<IStorageObjectPayloadConverter>();
             var obj = objectConverter.Convert(containerName, manifestName, resp.Headers);
 
             if (!(obj is StorageManifest))
@@ -217,7 +221,7 @@ namespace OpenStack.Storage
                 throw new InvalidOperationException(string.Format("Failed to download storage object '{0}'. The remote server returned the following status code: '{1}'.", objectName, resp.StatusCode));
             }
 
-            var converter = ServiceLocator.Instance.Locate<IStorageObjectPayloadConverter>();
+            var converter = this.ServiceLocator.Locate<IStorageObjectPayloadConverter>();
             var obj = converter.Convert(containerName, objectName, resp.Headers);
 
             await resp.Content.CopyToAsync(outputStream);
@@ -300,7 +304,7 @@ namespace OpenStack.Storage
 
             try
             {
-                var converter = ServiceLocator.Instance.Locate<IStorageFolderPayloadConverter>();
+                var converter = this.ServiceLocator.Locate<IStorageFolderPayloadConverter>();
                 var folder = converter.Convert(containerName, folderName, await resp.ReadContentAsStringAsync());
                 return folder;
             }
@@ -352,7 +356,7 @@ namespace OpenStack.Storage
         /// <returns>The client.</returns>
         internal IStorageServiceRestClient GetRestClient()
         {
-            return ServiceLocator.Instance.Locate<IStorageServiceRestClientFactory>().Create(this._context);
+            return this.ServiceLocator.Locate<IStorageServiceRestClientFactory>().Create(this._context, this.ServiceLocator);
         }
     }
 }

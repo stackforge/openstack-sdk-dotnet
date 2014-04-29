@@ -17,7 +17,11 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
+using System.Reflection;
+using System.Threading;
 using OpenStack.Common;
+using OpenStack.Common.ServiceLocation;
 using OpenStack.Identity;
 
 namespace OpenStack
@@ -25,13 +29,15 @@ namespace OpenStack
     /// <inheritdoc/>
     internal class OpenStackClientManager : IOpenStackClientManager
     {
+        internal IServiceLocator ServiceLocator;
         internal ICollection<Type> clients;
 
         /// <summary>
         /// Creates a new instance of the OpenStackClientManager class.
         /// </summary>
-        internal OpenStackClientManager()
+        internal OpenStackClientManager(IServiceLocator serviceLocator)
         {
+            this.ServiceLocator = serviceLocator;
             this.clients = new Collection<Type>();
         }
 
@@ -44,12 +50,59 @@ namespace OpenStack
         /// <inheritdoc/>
         public IOpenStackClient CreateClient(ICredential credential, string version)
         {
-            credential.AssertIsNotNull("credential","Cannot create an OpenStack client with a null credential.");
+            return this.CreateClient(credential, CancellationToken.None, version);
+        }
+
+        /// <inheritdoc/>
+        public IOpenStackClient CreateClient(ICredential credential, CancellationToken token, string version)
+        {
+            credential.AssertIsNotNull("credential", "Cannot create an OpenStack client with a null credential.");
             version.AssertIsNotNull("version", "Cannot create an OpenStack client with a null version.");
 
-            foreach (var clientType in this.clients)
+            //Ensure that the assembly that contains the credential has a chance to register itself.
+            this.ServiceLocator.EnsureAssemblyRegistration(credential.GetType().GetTypeInfo().Assembly);
+
+            return this.GetSupportedClient(this.clients, credential, token, version);
+        }
+
+        /// <inheritdoc/>
+        public IOpenStackClient CreateClient<T>(ICredential credential) where T : IOpenStackClient
+        {
+            return this.CreateClient<T>(credential, CancellationToken.None, string.Empty);
+        }
+
+        /// <inheritdoc/>
+        public IOpenStackClient CreateClient<T>(ICredential credential, string version) where T : IOpenStackClient
+        {
+            return this.CreateClient<T>(credential, CancellationToken.None, version);
+        }
+
+        /// <inheritdoc/>
+        public IOpenStackClient CreateClient<T>(ICredential credential, CancellationToken token, string version) where T: IOpenStackClient
+        {
+            credential.AssertIsNotNull("credential", "Cannot create an OpenStack client with a null credential.");
+            version.AssertIsNotNull("version", "Cannot create an OpenStack client with a null version.");
+
+            //Ensure that the assemblies that contain the credential and client type has had a chance to register itself.
+            this.ServiceLocator.EnsureAssemblyRegistration(credential.GetType().GetTypeInfo().Assembly);
+            this.ServiceLocator.EnsureAssemblyRegistration(typeof(T).GetTypeInfo().Assembly);
+
+            return this.GetSupportedClient(this.clients.Where(c => c == typeof(T)), credential, token, version);
+        }
+
+        /// <summary>
+        /// Gets a client for the given collection that supports the credential and version.
+        /// </summary>
+        /// <param name="clientTypes">A list client types.</param>
+        /// <param name="credential">A credential that needs to be supported.</param>
+        /// <param name="version">A version that needs to be supported.</param>
+        /// <param name="token">A cancellation token that can be used to cancel operations.</param>
+        /// <returns>A client that supports the given credential and version.</returns>
+        internal IOpenStackClient GetSupportedClient(IEnumerable<Type> clientTypes, ICredential credential, CancellationToken token, string version)
+        {
+            foreach (var clientType in clientTypes)
             {
-                var client = this.CreateClient(clientType);
+                var client = this.CreateClientInstance(clientType, credential, token);
                 if (client.IsSupported(credential, version))
                 {
                     return client;
@@ -63,19 +116,23 @@ namespace OpenStack
         /// Creates a new instance of the requested client type
         /// </summary>
         /// <param name="clientType">The type of the client to create.</param>
+        /// <param name="credential">A credential that needs to be supported.</param>
+        /// <param name="token">A cancellation token that can be used to cancel operations.</param>
         /// <returns>An instance of the requested client.</returns>
-        internal IOpenStackClient CreateClient(Type clientType)
+        internal IOpenStackClient CreateClientInstance(Type clientType, ICredential credential, CancellationToken token)
         {
             clientType.AssertIsNotNull("clientType", "Cannot create an OpenStack client with a null type.");
+            credential.AssertIsNotNull("credential", "Cannot create an OpenStack client with a null credential.");
+            token.AssertIsNotNull("credential", "Cannot create an OpenStack client with a null cancellation token. Use CancellationToken.None.");
 
-            IOpenStackClient instance; 
+            IOpenStackClient instance;
             try
             {
-                instance = Activator.CreateInstance(clientType) as IOpenStackClient;
+                instance = Activator.CreateInstance(clientType, credential, token, this.ServiceLocator) as IOpenStackClient;
             }
             catch (Exception ex)
             {
-                throw new InvalidOperationException(string.Format("Could not create a client of type '{0}'. See inner exception for details.", clientType.Name),ex);
+                throw new InvalidOperationException(string.Format("Could not create a client of type '{0}'. See inner exception for details.", clientType.Name), ex);
             }
 
             if (instance != null)

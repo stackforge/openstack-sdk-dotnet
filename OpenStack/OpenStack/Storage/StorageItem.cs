@@ -58,8 +58,10 @@ namespace OpenStack.Storage
         /// <returns>The "friendly" name of the item. (e.g. "b" if the items full name is "a/b")</returns>
         internal static string ExtractName(string fullItemName)
         {
-            var extractor = ServiceLocator.Instance.Locate<IStorageItemNameExtractor>();
-            return extractor.ExtractName(fullItemName);
+            var fullName = fullItemName.Trim('/');
+            var lastIndex = fullName.LastIndexOf('/');
+            lastIndex++;
+            return fullName.Substring(lastIndex, fullName.Length - lastIndex);
         }
     }
 }

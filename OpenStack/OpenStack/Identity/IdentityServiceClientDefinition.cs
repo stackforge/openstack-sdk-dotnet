@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using OpenStack.Common.ServiceLocation;
 
 namespace OpenStack.Identity
 {
@@ -36,9 +37,9 @@ namespace OpenStack.Identity
         }
 
         /// <inheritdoc/>
-        public IOpenStackServiceClient Create(ICredential credential, CancellationToken cancellationToken)
+        public IOpenStackServiceClient Create(ICredential credential, CancellationToken cancellationToken, IServiceLocator serviceLocator)
         {
-            return new IdentityServiceClient((IOpenStackCredential)credential, cancellationToken);
+            return new IdentityServiceClient((IOpenStackCredential)credential, cancellationToken, serviceLocator);
         }
 
         /// <inheritdoc/>

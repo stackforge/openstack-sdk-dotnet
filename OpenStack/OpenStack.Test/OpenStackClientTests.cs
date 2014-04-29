@@ -29,6 +29,8 @@ namespace OpenStack.Test
     [TestClass]
     public class OpenStackClientTests
     {
+        internal IServiceLocator ServiceLocator;
+
         internal class TestIdentityServiceClient : IIdentityServiceClient
         {
             internal IOpenStackCredential cred;
@@ -54,7 +56,7 @@ namespace OpenStack.Test
         {
             public string Name { get; private set; }
             
-            public IOpenStackServiceClient Create(ICredential credential, CancellationToken cancellationToken)
+            public IOpenStackServiceClient Create(ICredential credential, CancellationToken cancellationToken, IServiceLocator serviceLocator)
             {
                 return new TestIdentityServiceClient((IOpenStackCredential)credential, cancellationToken);
             }
@@ -73,11 +75,10 @@ namespace OpenStack.Test
         [TestInitialize]
         public void TestSetup()
         {
-           ServiceLocator.Reset();
+            this.ServiceLocator = new ServiceLocator();
 
-            var manager = ServiceLocator.Instance.Locate<IServiceLocationOverrideManager>();
-
-            var serviceManager = new OpenStackServiceClientManager();
+            var manager = this.ServiceLocator.Locate<IServiceLocationOverrideManager>();
+            var serviceManager = new OpenStackServiceClientManager(this.ServiceLocator);
             serviceManager.RegisterServiceClient<TestIdentityServiceClient>(new TestIdentityServiceClientDefinition());
             manager.RegisterServiceInstance(typeof(IOpenStackServiceClientManager), serviceManager);
         }
@@ -85,7 +86,7 @@ namespace OpenStack.Test
         [TestCleanup]
         public void TestCleanup()
         {
-            ServiceLocator.Reset();
+            this.ServiceLocator = new ServiceLocator();
         }
 
         [TestMethod]
@@ -94,7 +95,7 @@ namespace OpenStack.Test
             var client =
                 new OpenStackClient(
                     new OpenStackCredential(new Uri("http://someplace.org"), "someuser", "password",
-                        "sometenant"), CancellationToken.None);
+                        "sometenant"), CancellationToken.None, this.ServiceLocator);
             await client.Connect();
             Assert.AreEqual("12345", client.Credential.AccessTokenId);
         }
@@ -105,7 +106,7 @@ namespace OpenStack.Test
             var expectedRegion = "newregion";
             var client = new OpenStackClient(
                     new OpenStackCredential(new Uri("http://someplace.org"), "someuser", "password",
-                        "sometenant","oldregion"), CancellationToken.None);
+                        "sometenant", "oldregion"), CancellationToken.None, this.ServiceLocator);
             client.SetRegion(expectedRegion);
 
             Assert.AreEqual(expectedRegion, client.Credential.Region);
@@ -117,7 +118,7 @@ namespace OpenStack.Test
         {
             var client = new OpenStackClient(
                     new OpenStackCredential(new Uri("http://someplace.org"), "someuser", "password",
-                        "sometenant", "oldregion"), CancellationToken.None);
+                        "sometenant", "oldregion"), CancellationToken.None, this.ServiceLocator);
             client.SetRegion(null);
         }
 
@@ -127,7 +128,7 @@ namespace OpenStack.Test
         {
             var client = new OpenStackClient(
                     new OpenStackCredential(new Uri("http://someplace.org"), "someuser", "password",
-                        "sometenant", "oldregion"), CancellationToken.None);
+                        "sometenant", "oldregion"), CancellationToken.None, this.ServiceLocator);
             client.SetRegion(string.Empty);
         }
 

@@ -35,7 +35,6 @@ namespace OpenStack
             manager.RegisterServiceInstance(typeof(IStorageServiceRestClientFactory), new StorageServiceRestClientFactory());
             manager.RegisterServiceInstance(typeof(IStorageContainerNameValidator), new StorageContainerNameValidator());
             manager.RegisterServiceInstance(typeof(IStorageFolderNameValidator), new StorageFolderNameValidator());
-            manager.RegisterServiceInstance(typeof(IStorageItemNameExtractor), new StorageItemNameExtractor());
             manager.RegisterServiceInstance(typeof(ILargeStorageObjectCreatorFactory), new LargeStorageObjectCreatorFactory());
 
             //Identity related clients/services
@@ -45,23 +44,23 @@ namespace OpenStack
             manager.RegisterServiceInstance(typeof(IOpenStackRegionResolver), new OpenStackRegionResolver());
 
             //Converters
-            manager.RegisterServiceInstance(typeof(IStorageContainerPayloadConverter), new StorageContainerPayloadConverter());
+            manager.RegisterServiceInstance(typeof(IStorageContainerPayloadConverter), new StorageContainerPayloadConverter(locator));
             manager.RegisterServiceInstance(typeof(IStorageObjectPayloadConverter), new StorageObjectPayloadConverter());
-            manager.RegisterServiceInstance(typeof(IStorageFolderPayloadConverter), new StorageFolderPayloadConverter());
-            manager.RegisterServiceInstance(typeof(IStorageAccountPayloadConverter), new StorageAccountPayloadConverter());
+            manager.RegisterServiceInstance(typeof(IStorageFolderPayloadConverter), new StorageFolderPayloadConverter(locator));
+            manager.RegisterServiceInstance(typeof(IStorageAccountPayloadConverter), new StorageAccountPayloadConverter(locator));
             manager.RegisterServiceInstance(typeof(IAccessTokenPayloadConverter), new AccessTokenPayloadConverter());
-            manager.RegisterServiceInstance(typeof(IOpenStackServiceCatalogPayloadConverter), new OpenStackServiceCatalogPayloadConverter());
-            manager.RegisterServiceInstance(typeof(IOpenStackServiceDefinitionPayloadConverter), new OpenStackServiceDefinitionPayloadConverter());
+            manager.RegisterServiceInstance(typeof(IOpenStackServiceCatalogPayloadConverter), new OpenStackServiceCatalogPayloadConverter(locator));
+            manager.RegisterServiceInstance(typeof(IOpenStackServiceDefinitionPayloadConverter), new OpenStackServiceDefinitionPayloadConverter(locator));
             manager.RegisterServiceInstance(typeof(IOpenStackServiceEndpointPayloadConverter), new OpenStackServiceEndpointPayloadConverter());
             
 
             //Client Management
-            var clientManager = new OpenStackClientManager();
+            var clientManager = new OpenStackClientManager(locator);
             clientManager.RegisterClient<OpenStackClient>();
             manager.RegisterServiceInstance(typeof(IOpenStackClientManager), clientManager);
 
             //Service Management
-            var serviceManager = new OpenStackServiceClientManager();
+            var serviceManager = new OpenStackServiceClientManager(locator);
             serviceManager.RegisterServiceClient<StorageServiceClient>(new StorageServiceClientDefinition());
             serviceManager.RegisterServiceClient<IdentityServiceClient>(new IdentityServiceClientDefinition());
             manager.RegisterServiceInstance(typeof(IOpenStackServiceClientManager), serviceManager);

@@ -27,33 +27,37 @@ namespace OpenStack.Identity
     /// <inheritdoc/>
     internal class IdentityServiceRestClient : IIdentityServiceRestClient
     {
-        internal IOpenStackCredential credential;
-        internal CancellationToken cancellationToken;
+        internal IOpenStackCredential Credential;
+        internal CancellationToken CancellationToken;
+        internal IServiceLocator ServiceLocator;
         
         /// <summary>
         /// Creates a new instance of the IdentityServiceRestClient class.
         /// </summary>
         /// <param name="credential">The credential to be used by this client.</param>
         /// <param name="cancellationToken">The cancellation token to be used by this client.</param>
-        public IdentityServiceRestClient(IOpenStackCredential credential, CancellationToken cancellationToken)
+        /// <param name="serviceLocator">A service locator to be used to locate/inject dependent services.</param>
+        public IdentityServiceRestClient(IOpenStackCredential credential, CancellationToken cancellationToken, IServiceLocator serviceLocator)
         {
             credential.AssertIsNotNull("credential");
             cancellationToken.AssertIsNotNull("cancellationToken");
+            serviceLocator.AssertIsNotNull("serviceLocator", "Cannot create an identity service rest client with a null service locator.");
 
-            this.credential = credential;
-            this.cancellationToken = cancellationToken;
+            this.Credential = credential;
+            this.CancellationToken = cancellationToken;
+            this.ServiceLocator = serviceLocator;
         }
 
         /// <inheritdoc/>
         public async Task<IHttpResponseAbstraction> Authenticate()
         {
-            var client = ServiceLocator.Instance.Locate<IHttpAbstractionClientFactory>().Create(this.cancellationToken);
+            var client = this.ServiceLocator.Locate<IHttpAbstractionClientFactory>().Create(this.CancellationToken);
             client.Headers.Add("Accept", "application/json");
             client.ContentType = "application/json";
 
-            client.Uri = this.credential.AuthenticationEndpoint;
+            client.Uri = this.Credential.AuthenticationEndpoint;
             client.Method = HttpMethod.Post;
-            client.Content = CreateAuthenticationJsonPayload(this.credential).ConvertToStream();
+            client.Content = CreateAuthenticationJsonPayload(this.Credential).ConvertToStream();
 
             return await client.SendAsync();
         }

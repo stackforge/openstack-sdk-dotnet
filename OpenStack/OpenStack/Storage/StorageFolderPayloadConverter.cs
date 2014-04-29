@@ -29,6 +29,17 @@ namespace OpenStack.Storage
     internal class StorageFolderPayloadConverter : IStorageFolderPayloadConverter
     {
         internal const string consecutiveSlashRegex = @"/{2,}";
+        internal IServiceLocator ServiceLocator;
+
+        /// <summary>
+        /// Creates a new instance of the StorageFolderPayloadConverter class.
+        /// </summary>
+        /// <param name="serviceLocator">A service locator to be used to locate/inject dependent services.</param>
+        public StorageFolderPayloadConverter(IServiceLocator serviceLocator)
+        {
+            serviceLocator.AssertIsNotNull("serviceLocator", "Cannot create a storage folder payload converter with a null service locator.");
+            this.ServiceLocator = serviceLocator;
+        }
 
         /// <inheritdoc/>
         public IEnumerable<StorageFolder> Convert(IEnumerable<StorageObject> objects)
@@ -108,7 +119,7 @@ namespace OpenStack.Storage
                 var subFolders = array.Where(t => t["subdir"] != null);
                 var rawObjects = array.Where(t => t["subdir"] == null);
 
-                var objectConverter = ServiceLocator.Instance.Locate<IStorageObjectPayloadConverter>();
+                var objectConverter = this.ServiceLocator.Locate<IStorageObjectPayloadConverter>();
 
                 var objects = rawObjects.Select(t => objectConverter.ConvertSingle(t,containerName)).ToList();
                 objects.RemoveAll(o => string.Equals(o.FullName, folderName, StringComparison.Ordinal));

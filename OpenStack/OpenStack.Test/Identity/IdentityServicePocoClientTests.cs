@@ -33,14 +33,16 @@ namespace OpenStack.Test.Identity
     {
         internal TestIdentityServiceRestClient RestClient;
         internal string defaultRegion = "region-a.geo-1";
+        internal IServiceLocator ServiceLocator;
 
         [TestInitialize]
         public void TestSetup()
         {
             this.RestClient = new TestIdentityServiceRestClient();
+            this.ServiceLocator = new ServiceLocator();
+            this.ServiceLocator.EnsureAssemblyRegistration(typeof(ServiceLocator).Assembly);
 
-            ServiceLocator.Reset();
-            var manager = ServiceLocator.Instance.Locate<IServiceLocationOverrideManager>();
+            var manager = this.ServiceLocator.Locate<IServiceLocationOverrideManager>();
             manager.RegisterServiceInstance(typeof(IIdentityServiceRestClientFactory), new TestIdentityServiceRestClientFactory(RestClient));
             manager.RegisterServiceInstance(typeof(IOpenStackRegionResolver), new TestOpenStackRegionResolver(defaultRegion));
         }
@@ -49,7 +51,7 @@ namespace OpenStack.Test.Identity
         public void TestCleanup()
         {
             this.RestClient = new TestIdentityServiceRestClient();
-            ServiceLocator.Reset();
+            this.ServiceLocator = new ServiceLocator();
         }
 
         public IOpenStackCredential GetValidCredentials()
@@ -111,7 +113,7 @@ namespace OpenStack.Test.Identity
             this.RestClient.Response = restResp;
 
             var client =
-                new IdentityServicePocoClientFactory().Create(creds, CancellationToken.None) as
+                new IdentityServicePocoClientFactory().Create(creds, CancellationToken.None, this.ServiceLocator) as
                     IdentityServicePocoClient;
             var result = await client.Authenticate();
 
@@ -170,7 +172,7 @@ namespace OpenStack.Test.Identity
             var restResp = new HttpResponseAbstraction(content, new HttpHeadersAbstraction(), HttpStatusCode.NonAuthoritativeInformation);
             this.RestClient.Response = restResp;
 
-            var client = new IdentityServicePocoClient(creds, CancellationToken.None);
+            var client = new IdentityServicePocoClient(creds, CancellationToken.None, this.ServiceLocator);
             var result = await client.Authenticate();
 
             Assert.IsNotNull(result);
@@ -227,7 +229,7 @@ namespace OpenStack.Test.Identity
             var restResp = new HttpResponseAbstraction(content, new HttpHeadersAbstraction(), HttpStatusCode.NonAuthoritativeInformation);
             this.RestClient.Response = restResp;
 
-            var client = new IdentityServicePocoClient(creds, CancellationToken.None);
+            var client = new IdentityServicePocoClient(creds, CancellationToken.None, this.ServiceLocator);
             var result = await client.Authenticate();
 
             Assert.AreEqual(expectedRegion, result.Region);
@@ -242,7 +244,7 @@ namespace OpenStack.Test.Identity
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.Unauthorized);
             this.RestClient.Response = restResp;
 
-            var client = new IdentityServicePocoClient(creds, CancellationToken.None);
+            var client = new IdentityServicePocoClient(creds, CancellationToken.None, this.ServiceLocator);
             await client.Authenticate();
         }
 
@@ -255,7 +257,7 @@ namespace OpenStack.Test.Identity
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.BadRequest);
             this.RestClient.Response = restResp;
 
-            var client = new IdentityServicePocoClient(creds, CancellationToken.None);
+            var client = new IdentityServicePocoClient(creds, CancellationToken.None, this.ServiceLocator);
             await client.Authenticate();
         }
 
@@ -268,7 +270,7 @@ namespace OpenStack.Test.Identity
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.InternalServerError);
             this.RestClient.Response = restResp;
 
-            var client = new IdentityServicePocoClient(creds, CancellationToken.None);
+            var client = new IdentityServicePocoClient(creds, CancellationToken.None, this.ServiceLocator);
             await client.Authenticate();
         }
 
@@ -281,7 +283,7 @@ namespace OpenStack.Test.Identity
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.Forbidden);
             this.RestClient.Response = restResp;
 
-            var client = new IdentityServicePocoClient(creds, CancellationToken.None);
+            var client = new IdentityServicePocoClient(creds, CancellationToken.None, this.ServiceLocator);
             await client.Authenticate();
         }
 
@@ -294,7 +296,7 @@ namespace OpenStack.Test.Identity
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.MethodNotAllowed);
             this.RestClient.Response = restResp;
 
-            var client = new IdentityServicePocoClient(creds, CancellationToken.None);
+            var client = new IdentityServicePocoClient(creds, CancellationToken.None, this.ServiceLocator);
             await client.Authenticate();
         }
 
@@ -307,7 +309,7 @@ namespace OpenStack.Test.Identity
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.RequestEntityTooLarge);
             this.RestClient.Response = restResp;
 
-            var client = new IdentityServicePocoClient(creds, CancellationToken.None);
+            var client = new IdentityServicePocoClient(creds, CancellationToken.None, this.ServiceLocator);
             await client.Authenticate();
         }
 
@@ -320,7 +322,7 @@ namespace OpenStack.Test.Identity
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.ServiceUnavailable);
             this.RestClient.Response = restResp;
 
-            var client = new IdentityServicePocoClient(creds, CancellationToken.None);
+            var client = new IdentityServicePocoClient(creds, CancellationToken.None, this.ServiceLocator);
             await client.Authenticate();
         }
 
@@ -333,7 +335,7 @@ namespace OpenStack.Test.Identity
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.NotFound);
             this.RestClient.Response = restResp;
 
-            var client = new IdentityServicePocoClient(creds, CancellationToken.None);
+            var client = new IdentityServicePocoClient(creds, CancellationToken.None, this.ServiceLocator);
             await client.Authenticate();
         }
     }

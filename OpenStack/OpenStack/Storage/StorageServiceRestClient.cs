@@ -17,7 +17,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using OpenStack.Common;
@@ -29,17 +28,21 @@ namespace OpenStack.Storage
     /// <inheritdoc/>
     internal class StorageServiceRestClient : IStorageServiceRestClient
     {
-        internal StorageServiceClientContext context;
+        internal StorageServiceClientContext Context;
         internal IStorageContainerNameValidator StorageContainerNameValidator;
-
+        internal IServiceLocator ServiceLocator;
         /// <summary>
         /// Creates a new instance of the StorageServiceRestClient class.
         /// </summary>
-        /// <param name="context"></param>
-        internal StorageServiceRestClient(StorageServiceClientContext context)
+        /// <param name="context">The current storage service context to use.</param>
+        /// <param name="serviceLocator">A service locator to be used to locate/inject dependent services.</param>
+        internal StorageServiceRestClient(StorageServiceClientContext context, IServiceLocator serviceLocator)
         {
-            this.StorageContainerNameValidator = ServiceLocator.Instance.Locate<IStorageContainerNameValidator>();
-            this.context = context;
+            serviceLocator.AssertIsNotNull("serviceLocator", "Cannot create a storage service rest client with a null service locator.");
+            this.ServiceLocator = serviceLocator;
+            
+            this.StorageContainerNameValidator = this.ServiceLocator.Locate<IStorageContainerNameValidator>();
+            this.Context = context;
         }
 
         /// <inheritdoc/>
@@ -47,9 +50,9 @@ namespace OpenStack.Storage
         {
             AssertContainerNameIsValid(containerName);
 
-            var client = this.GetHttpClient(this.context);
+            var client = this.GetHttpClient(this.Context);
 
-            client.Uri = CreateRequestUri(GetServiceEndpoint(this.context), containerName, objectName);
+            client.Uri = CreateRequestUri(this.Context.PublicEndpoint, containerName, objectName);
             client.Method = HttpMethod.Put;
 
             this.AddItemMetadata(metadata, client);
@@ -67,9 +70,9 @@ namespace OpenStack.Storage
             segmentsPath.AssertIsNotNullOrEmpty("segmentsPath","Cannot create a dynamic large object manifest with a null or empty segments path.");
             metadata.AssertIsNotNull("metadata","Cannot create a storage manifest with null metadata.");
 
-            var client = this.GetHttpClient(this.context);
+            var client = this.GetHttpClient(this.Context);
 
-            client.Uri = CreateRequestUri(GetServiceEndpoint(this.context), containerName, manifestName);
+            client.Uri = CreateRequestUri(this.Context.PublicEndpoint, containerName, manifestName);
             client.Method = HttpMethod.Put;
             client.Content = new MemoryStream();
 
@@ -87,9 +90,9 @@ namespace OpenStack.Storage
             metadata.AssertIsNotNull("metadata", "Cannot create a storage manifest with null metadata.");
             content.AssertIsNotNull("content","Cannot create a static large object manifest with null content.");
 
-            var client = this.GetHttpClient(this.context);
+            var client = this.GetHttpClient(this.Context);
 
-            var baseUri = CreateRequestUri(GetServiceEndpoint(this.context), containerName);
+            var baseUri = CreateRequestUri(this.Context.PublicEndpoint, containerName);
             client.Uri = new Uri(string.Format("{0}/{1}?multipart-manifest=put", baseUri, manifestName));
             client.Method = HttpMethod.Put;
             client.Content = content;
@@ -104,9 +107,9 @@ namespace OpenStack.Storage
         {
             AssertContainerNameIsValid(containerName);
 
-            var client = this.GetHttpClient(this.context);
+            var client = this.GetHttpClient(this.Context);
 
-            client.Uri = CreateRequestUri(GetServiceEndpoint(this.context), containerName);
+            client.Uri = CreateRequestUri(this.Context.PublicEndpoint, containerName);
             client.Method = HttpMethod.Put;
             client.Content = new MemoryStream();
 
@@ -120,9 +123,9 @@ namespace OpenStack.Storage
         {
             AssertContainerNameIsValid(containerName);
 
-            var client = this.GetHttpClient(this.context);
+            var client = this.GetHttpClient(this.Context);
 
-            client.Uri = CreateRequestUri(GetServiceEndpoint(this.context), containerName, objectName);
+            client.Uri = CreateRequestUri(this.Context.PublicEndpoint, containerName, objectName);
             client.Method = HttpMethod.Get;
 
             return await client.SendAsync();
@@ -134,9 +137,9 @@ namespace OpenStack.Storage
             AssertContainerNameIsValid(containerName);
             folderName.AssertIsNotNullOrEmpty("folderName","Cannot get a folder with a null or empty folder name.");
 
-            var client = this.GetHttpClient(this.context);
+            var client = this.GetHttpClient(this.Context);
 
-            var baseUri = CreateRequestUri(GetServiceEndpoint(this.context), containerName);
+            var baseUri = CreateRequestUri(this.Context.PublicEndpoint, containerName);
             var prefix = string.Equals("/", folderName, StringComparison.Ordinal)
                 ? string.Empty
                 : string.Format("&prefix={0}", folderName);
@@ -152,9 +155,9 @@ namespace OpenStack.Storage
         {
             AssertContainerNameIsValid(containerName);
 
-            var client = this.GetHttpClient(this.context);
+            var client = this.GetHttpClient(this.Context);
 
-            client.Uri = CreateRequestUri(GetServiceEndpoint(this.context), containerName);
+            client.Uri = CreateRequestUri(this.Context.PublicEndpoint, containerName);
             client.Method = HttpMethod.Get;
 
             return await client.SendAsync();
@@ -165,9 +168,9 @@ namespace OpenStack.Storage
         {
             AssertContainerNameIsValid(containerName);
 
-            var client = this.GetHttpClient(this.context);
+            var client = this.GetHttpClient(this.Context);
 
-            client.Uri = CreateRequestUri(GetServiceEndpoint(this.context), containerName, objectName);
+            client.Uri = CreateRequestUri(this.Context.PublicEndpoint, containerName, objectName);
             client.Method = HttpMethod.Delete;
 
             return await client.SendAsync();
@@ -178,9 +181,9 @@ namespace OpenStack.Storage
         {
             AssertContainerNameIsValid(containerName);
 
-            var client = this.GetHttpClient(this.context);
+            var client = this.GetHttpClient(this.Context);
 
-            client.Uri = CreateRequestUri(GetServiceEndpoint(this.context), containerName);
+            client.Uri = CreateRequestUri(this.Context.PublicEndpoint, containerName);
             client.Method = HttpMethod.Delete;
 
             return await client.SendAsync();
@@ -191,9 +194,9 @@ namespace OpenStack.Storage
         {
             AssertContainerNameIsValid(containerName);
 
-            var client = this.GetHttpClient(this.context);
+            var client = this.GetHttpClient(this.Context);
 
-            client.Uri = CreateRequestUri(GetServiceEndpoint(this.context), containerName, objectName);
+            client.Uri = CreateRequestUri(this.Context.PublicEndpoint, containerName, objectName);
             client.Method = HttpMethod.Post;
             AddItemMetadata(metadata,client);
 
@@ -205,9 +208,9 @@ namespace OpenStack.Storage
         {
             AssertContainerNameIsValid(containerName);
 
-            var client = this.GetHttpClient(this.context);
+            var client = this.GetHttpClient(this.Context);
 
-            client.Uri = CreateRequestUri(GetServiceEndpoint(this.context), containerName);
+            client.Uri = CreateRequestUri(this.Context.PublicEndpoint, containerName);
             client.Method = HttpMethod.Post;
             AddItemMetadata(metadata, client);
 
@@ -219,9 +222,9 @@ namespace OpenStack.Storage
         {
             AssertContainerNameIsValid(containerName);
 
-            var client = this.GetHttpClient(this.context);
+            var client = this.GetHttpClient(this.Context);
 
-            client.Uri = CreateRequestUri(GetServiceEndpoint(this.context), containerName);
+            client.Uri = CreateRequestUri(this.Context.PublicEndpoint, containerName);
             client.Method = HttpMethod.Head;
 
             return await client.SendAsync();
@@ -232,9 +235,9 @@ namespace OpenStack.Storage
         {
             AssertContainerNameIsValid(containerName);
 
-            var client = this.GetHttpClient(this.context);
+            var client = this.GetHttpClient(this.Context);
 
-            client.Uri = CreateRequestUri(GetServiceEndpoint(this.context), containerName, objectName);
+            client.Uri = CreateRequestUri(this.Context.PublicEndpoint, containerName, objectName);
             client.Method = HttpMethod.Head;
 
             return await client.SendAsync();
@@ -246,9 +249,9 @@ namespace OpenStack.Storage
             AssertContainerNameIsValid(containerName);
             manifestName.AssertIsNotNullOrEmpty("manifestName", "Cannot get a manifest with a null or empty folder name.");
 
-            var client = this.GetHttpClient(this.context);
+            var client = this.GetHttpClient(this.Context);
 
-            var baseUri = CreateRequestUri(GetServiceEndpoint(this.context), containerName);
+            var baseUri = CreateRequestUri(this.Context.PublicEndpoint, containerName);
             client.Uri = new Uri(string.Format("{0}/{1}?multipart-manifest=get", baseUri, manifestName));
             client.Method = HttpMethod.Get;
 
@@ -261,9 +264,9 @@ namespace OpenStack.Storage
             AssertContainerNameIsValid(sourceContainerName);
             AssertContainerNameIsValid(targetContainerName);
 
-            var client = this.GetHttpClient(this.context);
+            var client = this.GetHttpClient(this.Context);
 
-            client.Uri = CreateRequestUri(GetServiceEndpoint(this.context), sourceContainerName, sourceObjectName);
+            client.Uri = CreateRequestUri(this.Context.PublicEndpoint, sourceContainerName, sourceObjectName);
             client.Headers.Add("Destination",string.Join("/", targetContainerName, targetObjectName));
 
             client.Method = new HttpMethod("COPY");
@@ -274,9 +277,9 @@ namespace OpenStack.Storage
         /// <inheritdoc/>
         public async Task<IHttpResponseAbstraction> GetAccount()
         {
-            var client = this.GetHttpClient(this.context);
+            var client = this.GetHttpClient(this.Context);
 
-            client.Uri = CreateRequestUri(GetServiceEndpoint(this.context));
+            client.Uri = CreateRequestUri(this.Context.PublicEndpoint);
             client.Method = HttpMethod.Get;
 
             return await client.SendAsync();
@@ -289,7 +292,7 @@ namespace OpenStack.Storage
         /// <returns>The Http client.</returns>
         internal IHttpAbstractionClient GetHttpClient(StorageServiceClientContext context)
         {
-            var client = ServiceLocator.Instance.Locate<IHttpAbstractionClientFactory>().Create(context.CancellationToken);
+            var client = this.ServiceLocator.Locate<IHttpAbstractionClientFactory>().Create(context.CancellationToken);
             AddAuthenticationHeader(context.Credential.AccessTokenId, client);
             client.Headers.Add("Accept","application/json");
             return client;
@@ -341,16 +344,6 @@ namespace OpenStack.Storage
         internal void AddAuthenticationHeader(string authenticationId, IHttpAbstractionClient client)
         {
             client.Headers.Add("X-Auth-Token", authenticationId);
-        }
-
-        /// <summary>
-        /// Gets the public endpoint for the remote service.
-        /// </summary>
-        /// <param name="context">The storage service context to use.</param>
-        /// <returns>The public endpoint for the remote storage service.</returns>
-        internal static Uri GetServiceEndpoint(StorageServiceClientContext context)
-        {
-            return context.Credential.ServiceCatalog.GetPublicEndpoint(context.StorageServiceName, context.Credential.Region);
         }
     }
 }

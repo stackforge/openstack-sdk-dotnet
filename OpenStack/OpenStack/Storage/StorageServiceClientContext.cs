@@ -14,6 +14,7 @@
 // limitations under the License.
 // ============================================================================ */
 
+using System;
 using System.Threading;
 using OpenStack.Identity;
 
@@ -40,17 +41,23 @@ namespace OpenStack.Storage
         public string StorageServiceName { get; set; }
 
         /// <summary>
+        /// Gets or sets the public endpoint.
+        /// </summary>
+        public Uri PublicEndpoint { get; set; }
+
+        /// <summary>
         /// Creates a new instance of the StorageServiceClientContext class.
         /// </summary>
         /// <param name="credential">The credential for this context.</param>
         /// <param name="cancellationToken">The cancellation token for this context.</param>
         /// <param name="serviceName">The name of the storage service.</param>
-        /// <param name="region">The region of the storage service.</param>
-        internal StorageServiceClientContext(IOpenStackCredential credential, CancellationToken cancellationToken, string serviceName)
+        /// <param name="publicEndpoint">The Uri for the public endpoint of the storage service.</param>
+        internal StorageServiceClientContext(IOpenStackCredential credential, CancellationToken cancellationToken, string serviceName, Uri publicEndpoint)
         {
             this.Credential = credential;
             this.CancellationToken = cancellationToken;
             this.StorageServiceName = serviceName;
+            this.PublicEndpoint = publicEndpoint;
         }
     }
 }

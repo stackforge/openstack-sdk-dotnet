@@ -18,6 +18,7 @@ using System;
 using System.Linq;
 using System.Web;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using OpenStack.Common.ServiceLocation;
 using OpenStack.Identity;
 
 namespace OpenStack.Test.Identity
@@ -54,7 +55,7 @@ namespace OpenStack.Test.Identity
                                         ]
                                     }";
 
-            var converter = new OpenStackServiceDefinitionPayloadConverter();
+            var converter = new OpenStackServiceDefinitionPayloadConverter(new ServiceLocator());
             var service = converter.Convert(serviceDefPayload);
 
             Assert.IsNotNull(service);
@@ -89,7 +90,7 @@ namespace OpenStack.Test.Identity
                                         ]
                                     }";
 
-            var converter = new OpenStackServiceDefinitionPayloadConverter();
+            var converter = new OpenStackServiceDefinitionPayloadConverter(new ServiceLocator());
             converter.Convert(serviceDefPayload);
         }
 
@@ -119,7 +120,7 @@ namespace OpenStack.Test.Identity
                                         ]
                                     }";
 
-            var converter = new OpenStackServiceDefinitionPayloadConverter();
+            var converter = new OpenStackServiceDefinitionPayloadConverter(new ServiceLocator());
             converter.Convert(serviceDefPayload);
         }
 
@@ -132,7 +133,7 @@ namespace OpenStack.Test.Identity
                                         ""type"": ""object-store"",
                                     }";
 
-            var converter = new OpenStackServiceDefinitionPayloadConverter();
+            var converter = new OpenStackServiceDefinitionPayloadConverter(new ServiceLocator());
             converter.Convert(serviceDefPayload);
         }
 
@@ -142,7 +143,7 @@ namespace OpenStack.Test.Identity
         {
             var serviceDefPayload = @" { }";
 
-            var converter = new OpenStackServiceDefinitionPayloadConverter();
+            var converter = new OpenStackServiceDefinitionPayloadConverter(new ServiceLocator());
             converter.Convert(serviceDefPayload);
         }
 
@@ -150,7 +151,7 @@ namespace OpenStack.Test.Identity
         [ExpectedException(typeof(ArgumentNullException))]
         public void CannotConvertWithNullJsonPayload()
         {
-            var converter = new OpenStackServiceDefinitionPayloadConverter();
+            var converter = new OpenStackServiceDefinitionPayloadConverter(new ServiceLocator());
             converter.Convert(null);
         }
 
@@ -160,7 +161,7 @@ namespace OpenStack.Test.Identity
         {
             var serviceDefPayload = @" { NOT JSON";
 
-            var converter = new OpenStackServiceDefinitionPayloadConverter();
+            var converter = new OpenStackServiceDefinitionPayloadConverter(new ServiceLocator());
             converter.Convert(serviceDefPayload);
         }
 
@@ -170,7 +171,7 @@ namespace OpenStack.Test.Identity
         {
             var serviceDefPayload = @"[]";
 
-            var converter = new OpenStackServiceDefinitionPayloadConverter();
+            var converter = new OpenStackServiceDefinitionPayloadConverter(new ServiceLocator());
             converter.Convert(serviceDefPayload);
         }
     }

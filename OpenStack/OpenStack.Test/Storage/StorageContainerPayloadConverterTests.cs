@@ -16,9 +16,9 @@
 
 using System;
 using System.Linq;
-using System.Web;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OpenStack.Common.Http;
+using OpenStack.Common.ServiceLocation;
 using OpenStack.Storage;
 
 namespace OpenStack.Test.Storage
@@ -42,7 +42,7 @@ namespace OpenStack.Test.Storage
                                             }
                                            ]";
 
-            var converter = new StorageContainerPayloadConverter();
+            var converter = new StorageContainerPayloadConverter(new ServiceLocator());
             var containers = converter.Convert(validMultipleContainerJson).ToList();
 
             Assert.AreEqual(2, containers.Count());
@@ -72,7 +72,7 @@ namespace OpenStack.Test.Storage
                                                   ""name"": ""TestContainer""
                                             }]";
 
-            var converter = new StorageContainerPayloadConverter();
+            var converter = new StorageContainerPayloadConverter(new ServiceLocator());
             var containers = converter.Convert(validSingleContainerJson).ToList();
 
             Assert.AreEqual(1, containers.Count());
@@ -90,7 +90,7 @@ namespace OpenStack.Test.Storage
         {
             var emptyJsonArray = @"[]";
 
-            var converter = new StorageContainerPayloadConverter();
+            var converter = new StorageContainerPayloadConverter(new ServiceLocator());
             var containers = converter.Convert(emptyJsonArray).ToList();
 
             Assert.AreEqual(0, containers.Count());
@@ -101,7 +101,7 @@ namespace OpenStack.Test.Storage
         {
             var payload = string.Empty;
 
-            var converter = new StorageContainerPayloadConverter();
+            var converter = new StorageContainerPayloadConverter(new ServiceLocator());
             var containers = converter.Convert(payload).ToList();
 
             Assert.AreEqual(0, containers.Count());
@@ -111,7 +111,7 @@ namespace OpenStack.Test.Storage
         [ExpectedException(typeof(ArgumentNullException))]
         public void CannotParseANullPayload()
         {
-            var converter = new StorageContainerPayloadConverter();
+            var converter = new StorageContainerPayloadConverter(new ServiceLocator());
             converter.Convert(null);
         }
 
@@ -119,7 +119,7 @@ namespace OpenStack.Test.Storage
         [ExpectedException(typeof(FormatException))]
         public void CannotParseInvalidJsonPayload()
         {
-            var converter = new StorageContainerPayloadConverter();
+            var converter = new StorageContainerPayloadConverter(new ServiceLocator());
             converter.Convert("[ { \"SomeAtrib\" }]");
         }
 
@@ -127,7 +127,7 @@ namespace OpenStack.Test.Storage
         [ExpectedException(typeof(FormatException))]
         public void CannotParseInvalidPayload()
         {
-            var converter = new StorageContainerPayloadConverter();
+            var converter = new StorageContainerPayloadConverter(new ServiceLocator());
             converter.Convert("NOT JSON");
         }
 
@@ -141,7 +141,7 @@ namespace OpenStack.Test.Storage
                                                   ""name"": ""TestContainer""
                                             }]";
 
-            var converter = new StorageContainerPayloadConverter();
+            var converter = new StorageContainerPayloadConverter(new ServiceLocator());
             converter.Convert(InvalidJsonWithoutBytes);
         }
 
@@ -155,7 +155,7 @@ namespace OpenStack.Test.Storage
                                                   ""name"": ""TestContainer""
                                             }]";
 
-            var converter = new StorageContainerPayloadConverter();
+            var converter = new StorageContainerPayloadConverter(new ServiceLocator());
             converter.Convert(InvalidJsonWithoutCount);
         }
 
@@ -169,7 +169,7 @@ namespace OpenStack.Test.Storage
                                                   ""bytes"": 7
                                             }]";
 
-            var converter = new StorageContainerPayloadConverter();
+            var converter = new StorageContainerPayloadConverter(new ServiceLocator());
             converter.Convert(InvalidJsonWithoutName);
         }
 
@@ -182,7 +182,7 @@ namespace OpenStack.Test.Storage
                                                   ""name"": ""TestContainer""
                                             }]";
 
-            var converter = new StorageContainerPayloadConverter();
+            var converter = new StorageContainerPayloadConverter(new ServiceLocator());
             try
             {
                 converter.Convert(InvalidJsonWithoutBytes);
@@ -206,7 +206,7 @@ namespace OpenStack.Test.Storage
                                                   ""name"": ""TestContainer""
                                             }]";
 
-            var converter = new StorageContainerPayloadConverter();
+            var converter = new StorageContainerPayloadConverter(new ServiceLocator());
             converter.Convert(InvalidJsonWithBadBytesValue);
         }
 
@@ -221,7 +221,7 @@ namespace OpenStack.Test.Storage
                                                   ""name"": ""TestContainer""
                                             }]";
 
-            var converter = new StorageContainerPayloadConverter();
+            var converter = new StorageContainerPayloadConverter(new ServiceLocator());
             converter.Convert(InvalidJsonWithBadCountValue);
         }
 
@@ -238,7 +238,7 @@ namespace OpenStack.Test.Storage
                                                 ""content_type"": ""application/octet-stream""
                                             }]";
 
-            var converter = new StorageContainerPayloadConverter();
+            var converter = new StorageContainerPayloadConverter(new ServiceLocator());
             var headers = new HttpHeadersAbstraction
             {
                 {"X-Container-Bytes-Used", "12345"},
@@ -316,7 +316,7 @@ namespace OpenStack.Test.Storage
                                         }
                                     ]";
 
-            var converter = new StorageContainerPayloadConverter();
+            var converter = new StorageContainerPayloadConverter(new ServiceLocator());
             var headers = new HttpHeadersAbstraction
             {
                 {"X-Container-Bytes-Used", "45"},
@@ -372,7 +372,7 @@ namespace OpenStack.Test.Storage
                                                 ""content_type"": ""application/octet-stream""
                                             }]";
 
-            var converter = new StorageContainerPayloadConverter();
+            var converter = new StorageContainerPayloadConverter(new ServiceLocator());
             var headers = new HttpHeadersAbstraction
             {
                 {"X-Container-Object-Count", "1"}
@@ -395,7 +395,7 @@ namespace OpenStack.Test.Storage
                                                 ""content_type"": ""application/octet-stream""
                                             }]";
 
-            var converter = new StorageContainerPayloadConverter();
+            var converter = new StorageContainerPayloadConverter(new ServiceLocator());
             var headers = new HttpHeadersAbstraction
             {
                 {"X-Container-Bytes-Used", "12345"}
@@ -418,7 +418,7 @@ namespace OpenStack.Test.Storage
                                                 ""content_type"": ""application/octet-stream""
                                             }]";
 
-            var converter = new StorageContainerPayloadConverter();
+            var converter = new StorageContainerPayloadConverter(new ServiceLocator());
             var headers = new HttpHeadersAbstraction
             {
                 {"X-Container-Bytes-Used", "This is not a number"},
@@ -442,7 +442,7 @@ namespace OpenStack.Test.Storage
                                                 ""content_type"": ""application/octet-stream""
                                             }]";
 
-            var converter = new StorageContainerPayloadConverter();
+            var converter = new StorageContainerPayloadConverter(new ServiceLocator());
             var headers = new HttpHeadersAbstraction
             {
                 {"X-Container-Bytes-Used", "12345"},
@@ -461,8 +461,8 @@ namespace OpenStack.Test.Storage
                                             {
                                                 ""hash"": ""d41d8cd98f00b204e9800998ecf8427e"",
                                                 ""last_modified"":";
-            
-            var converter = new StorageContainerPayloadConverter();
+
+            var converter = new StorageContainerPayloadConverter(new ServiceLocator());
             var headers = new HttpHeadersAbstraction
             {
                 {"X-Container-Bytes-Used", "12345"},
@@ -485,7 +485,7 @@ namespace OpenStack.Test.Storage
                                                 ""content_type"": ""application/octet-stream""
                                             }]";
 
-            var converter = new StorageContainerPayloadConverter();
+            var converter = new StorageContainerPayloadConverter(new ServiceLocator());
             var headers = new HttpHeadersAbstraction
             {
                 {"X-Container-Bytes-Used", "12345"},
@@ -508,7 +508,7 @@ namespace OpenStack.Test.Storage
                                                 ""content_type"": ""application/octet-stream""
                                             }]";
 
-            var converter = new StorageContainerPayloadConverter();
+            var converter = new StorageContainerPayloadConverter(new ServiceLocator());
 
             converter.Convert("Name", null, validObjectJson);
         }
@@ -517,7 +517,7 @@ namespace OpenStack.Test.Storage
         [ExpectedException(typeof(ArgumentNullException))]
         public void CannotParseContainerWithNullPayload()
         {
-            var converter = new StorageContainerPayloadConverter();
+            var converter = new StorageContainerPayloadConverter(new ServiceLocator());
             var headers = new HttpHeadersAbstraction
             {
                 {"X-Container-Bytes-Used", "12345"},

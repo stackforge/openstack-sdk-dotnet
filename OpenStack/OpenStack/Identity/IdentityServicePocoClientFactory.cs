@@ -15,6 +15,7 @@
 // ============================================================================ */
 
 using System.Threading;
+using OpenStack.Common.ServiceLocation;
 
 namespace OpenStack.Identity
 {
@@ -22,9 +23,9 @@ namespace OpenStack.Identity
     internal class IdentityServicePocoClientFactory :IIdentityServicePocoClientFactory
     {
         /// <inheritdoc/>
-        public IIdentityServicePocoClient Create(IOpenStackCredential credentials, CancellationToken token)
+        public IIdentityServicePocoClient Create(IOpenStackCredential credentials, CancellationToken token, IServiceLocator serviceLocator)
         {
-            return new IdentityServicePocoClient(credentials, token);
+            return new IdentityServicePocoClient(credentials, token, serviceLocator);
         }
     }
 }

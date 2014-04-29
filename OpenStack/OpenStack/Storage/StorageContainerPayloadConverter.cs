@@ -27,6 +27,18 @@ namespace OpenStack.Storage
     /// <inheritdoc/>
     internal class StorageContainerPayloadConverter : IStorageContainerPayloadConverter
     {
+        internal IServiceLocator ServiceLocator;
+
+        /// <summary>
+        /// Creates a new instance of the StorageContainerPayloadConverter class.
+        /// </summary>
+        /// <param name="serviceLocator">A service locator to be used to locate/inject dependent services.</param>
+        public StorageContainerPayloadConverter(IServiceLocator serviceLocator)
+        {
+            serviceLocator.AssertIsNotNull("serviceLocator", "Cannot create a storage container payload converter with a null service locator.");
+            this.ServiceLocator = serviceLocator;
+        }
+
         /// <inheritdoc/>
         public IEnumerable<StorageContainer> Convert(string payload)
         {
@@ -95,8 +107,8 @@ namespace OpenStack.Storage
             headers.AssertIsNotNull("headers");
             payload.AssertIsNotNull("payload");
 
-            var objectConverter = ServiceLocator.Instance.Locate<IStorageObjectPayloadConverter>();
-            var folderConverter = ServiceLocator.Instance.Locate<IStorageFolderPayloadConverter>();
+            var objectConverter = this.ServiceLocator.Locate<IStorageObjectPayloadConverter>();
+            var folderConverter = this.ServiceLocator.Locate<IStorageFolderPayloadConverter>();
 
             try
             {

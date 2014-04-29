@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using OpenStack.Common.ServiceLocation;
 using OpenStack.Identity;
 
 namespace OpenStack.Test
@@ -38,7 +39,7 @@ namespace OpenStack.Test
         {
             public string Name { get; private set; }
             
-            public IOpenStackServiceClient Create(ICredential credential, CancellationToken token)
+            public IOpenStackServiceClient Create(ICredential credential, CancellationToken token, IServiceLocator serviceLocator)
             {
                 return new TestOpenStackServiceClient(credential, token);
             }
@@ -81,7 +82,7 @@ namespace OpenStack.Test
         {
             public string Name { get; private set; }
 
-            public IOpenStackServiceClient Create(ICredential credential, CancellationToken token)
+            public IOpenStackServiceClient Create(ICredential credential, CancellationToken token, IServiceLocator serviceLocator)
             {
                 return new OtherTestOpenStackServiceClient(credential, token);
             }
@@ -113,7 +114,7 @@ namespace OpenStack.Test
         [TestMethod]
         public void CanRegisterANewService()
         {
-            var manager = new OpenStackServiceClientManager();
+            var manager = new OpenStackServiceClientManager(new ServiceLocator());
             manager.RegisterServiceClient<TestOpenStackServiceClient>(new TestOpenStackServiceClientDefinition());
 
             Assert.AreEqual(1, manager.serviceClientDefinitions.Count);
@@ -124,7 +125,7 @@ namespace OpenStack.Test
         [ExpectedException(typeof(InvalidOperationException))]
         public void CannotRegisterTheSameServiceTwice()
         {
-            var manager = new OpenStackServiceClientManager();
+            var manager = new OpenStackServiceClientManager(new ServiceLocator());
             manager.RegisterServiceClient<TestOpenStackServiceClient>(new TestOpenStackServiceClientDefinition());
             manager.RegisterServiceClient<TestOpenStackServiceClient>(new TestOpenStackServiceClientDefinition());
         }
@@ -132,7 +133,7 @@ namespace OpenStack.Test
         [TestMethod]
         public void CanRegisterMultipleServices()
         {
-            var manager = new OpenStackServiceClientManager();
+            var manager = new OpenStackServiceClientManager(new ServiceLocator());
             manager.RegisterServiceClient<TestOpenStackServiceClient>(new TestOpenStackServiceClientDefinition());
             manager.RegisterServiceClient<OtherTestOpenStackServiceClient>(new OtherTestOpenStackServiceClientDefinition());
 
@@ -144,7 +145,7 @@ namespace OpenStack.Test
         [TestMethod]
         public void CanListAvailableClients()
         {
-            var manager = new OpenStackServiceClientManager();
+            var manager = new OpenStackServiceClientManager(new ServiceLocator());
             manager.serviceClientDefinitions.Add(typeof(TestOpenStackServiceClient), new TestOpenStackServiceClientDefinition());
             manager.serviceClientDefinitions.Add(typeof(OtherTestOpenStackServiceClient), new OtherTestOpenStackServiceClientDefinition());
 
@@ -158,7 +159,7 @@ namespace OpenStack.Test
         [TestMethod]
         public void CanCreateAClient()
         {
-            var manager = new OpenStackServiceClientManager();
+            var manager = new OpenStackServiceClientManager(new ServiceLocator());
             manager.serviceClientDefinitions.Add(typeof(TestOpenStackServiceClient), new TestOpenStackServiceClientDefinition());
 
             var service = manager.CreateServiceClient<TestOpenStackServiceClient>(new OpenStackClientManagerTests.TestCredential(), CancellationToken.None);
@@ -171,7 +172,7 @@ namespace OpenStack.Test
         [ExpectedException(typeof(InvalidOperationException))]
         public void CannotCreateAServiceIfVersionIsNotSupported()
         {
-            var manager = new OpenStackServiceClientManager();
+            var manager = new OpenStackServiceClientManager(new ServiceLocator());
             manager.serviceClientDefinitions.Add(typeof(OtherTestOpenStackServiceClient), new OtherTestOpenStackServiceClientDefinition());
 
             manager.CreateServiceClient<OtherTestOpenStackServiceClient>(new OpenStackClientManagerTests.TestCredential(), CancellationToken.None);
@@ -181,7 +182,7 @@ namespace OpenStack.Test
         [ExpectedException(typeof(InvalidOperationException))]
         public void CannotCreateAClientIfNoServicesAreRegistered()
         {
-            var manager = new OpenStackServiceClientManager();
+            var manager = new OpenStackServiceClientManager(new ServiceLocator());
             manager.CreateServiceClient<OtherTestOpenStackServiceClient>(new OpenStackClientManagerTests.TestCredential(), CancellationToken.None);
         }
 
@@ -189,7 +190,7 @@ namespace OpenStack.Test
         [ExpectedException(typeof(ArgumentNullException))]
         public void CannotCreateAServiceWithNullCredential()
         {
-            var manager = new OpenStackServiceClientManager();
+            var manager = new OpenStackServiceClientManager(new ServiceLocator());
             manager.serviceClientDefinitions.Add(typeof(TestOpenStackServiceClient), new TestOpenStackServiceClientDefinition());
 
             manager.CreateServiceClient<TestOpenStackServiceClient>((ICredential)null, CancellationToken.None);
@@ -199,7 +200,7 @@ namespace OpenStack.Test
         [ExpectedException(typeof(ArgumentNullException))]
         public void CannotCreateAServiceWithNullCredentialAndVersion()
         {
-            var manager = new OpenStackServiceClientManager();
+            var manager = new OpenStackServiceClientManager(new ServiceLocator());
             manager.serviceClientDefinitions.Add(typeof(TestOpenStackServiceClient), new TestOpenStackServiceClientDefinition());
 
             manager.CreateServiceClient<TestOpenStackServiceClient>((ICredential)null, CancellationToken.None);
@@ -209,7 +210,7 @@ namespace OpenStack.Test
         [ExpectedException(typeof(InvalidOperationException))]
         public void CannotCreateAServiceWithCredentialAndNullFactory()
         {
-            var manager = new OpenStackServiceClientManager();
+            var manager = new OpenStackServiceClientManager(new ServiceLocator());
             manager.serviceClientDefinitions.Add(typeof(TestOpenStackServiceClient), null);
 
             manager.CreateServiceClient<TestOpenStackServiceClient>(new OpenStackClientManagerTests.TestCredential(), CancellationToken.None);
@@ -218,7 +219,7 @@ namespace OpenStack.Test
         [TestMethod]
         public void CanCreateAnInstanceOfAService()
         {
-            var manager = new OpenStackServiceClientManager();
+            var manager = new OpenStackServiceClientManager(new ServiceLocator());
 
             var service = manager.CreateServiceClientInstance(new TestOpenStackServiceClientDefinition(), new OpenStackClientManagerTests.TestCredential(), CancellationToken.None);
             Assert.IsNotNull(service);
@@ -229,7 +230,7 @@ namespace OpenStack.Test
         [ExpectedException(typeof(ArgumentNullException))]
         public void CanCreateAnInstanceOfAServiceWithNullFactory()
         {
-            var manager = new OpenStackServiceClientManager();
+            var manager = new OpenStackServiceClientManager(new ServiceLocator());
             manager.CreateServiceClientInstance(null, new OpenStackClientManagerTests.TestCredential(), CancellationToken.None);
         }
     }

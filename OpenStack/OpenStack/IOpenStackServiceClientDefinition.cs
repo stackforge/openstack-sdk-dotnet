@@ -16,6 +16,7 @@
 
 using System.Collections.Generic;
 using System.Threading;
+using OpenStack.Common.ServiceLocation;
 using OpenStack.Identity;
 
 namespace OpenStack
@@ -32,8 +33,9 @@ namespace OpenStack
         /// </summary>
         /// <param name="credential">The credential that the client will use.</param>
         /// <param name="cancellationToken">The cancellation token that the client will use.</param>
+        /// <param name="serviceLocator">A service locator to be used to locate/inject dependent services.</param>
         /// <returns></returns>
-        IOpenStackServiceClient Create(ICredential credential, CancellationToken cancellationToken);
+        IOpenStackServiceClient Create(ICredential credential, CancellationToken cancellationToken, IServiceLocator serviceLocator);
 
         /// <summary>
         /// Gets a list of supported versions.

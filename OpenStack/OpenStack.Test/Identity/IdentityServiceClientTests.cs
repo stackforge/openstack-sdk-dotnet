@@ -28,14 +28,15 @@ namespace OpenStack.Test.Identity
     public class IdentityServiceClientTests
     {
         internal TestIdentityServicePocoClient pocoClient;
+        internal IServiceLocator ServiceLocator;
 
         [TestInitialize]
         public void TestSetup()
         {
+            this.ServiceLocator = new ServiceLocator();
             this.pocoClient = new TestIdentityServicePocoClient();
 
-            ServiceLocator.Reset();
-            var manager = ServiceLocator.Instance.Locate<IServiceLocationOverrideManager>();
+            var manager = this.ServiceLocator.Locate<IServiceLocationOverrideManager>();
             manager.RegisterServiceInstance(typeof(IIdentityServicePocoClientFactory), new TestIdentityServicePocoClientFactory(pocoClient));
         }
 
@@ -43,7 +44,7 @@ namespace OpenStack.Test.Identity
         public void TestCleanup()
         {
             this.pocoClient = new TestIdentityServicePocoClient();
-            ServiceLocator.Reset();
+            this.ServiceLocator = new ServiceLocator();
         }
 
         public IOpenStackCredential GetValidCredentials()
@@ -68,7 +69,7 @@ namespace OpenStack.Test.Identity
                 return Task.Factory.StartNew(() => creds);
             };
 
-            var client = new IdentityServiceClientDefinition().Create(GetValidCredentials(),CancellationToken.None) as IdentityServiceClient;
+            var client = new IdentityServiceClientDefinition().Create(GetValidCredentials(), CancellationToken.None, this.ServiceLocator) as IdentityServiceClient;
             var resp = await client.Authenticate();
 
             Assert.AreEqual(creds, resp);
