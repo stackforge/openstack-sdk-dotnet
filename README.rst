@@ -18,7 +18,7 @@ The following code will connect to Openstack, and print out all of the container
     var password = "password";
     var tenantId = "XXXXXXXXXXXXXX-Project";
 
-    var credential = new OpenstackCredential(authUri, userName, password, tenantId);
+    var credential = new OpenStackCredential(authUri, userName, password, tenantId);
     var client = OpenStackClientFactory.CreateClient(credential);
 
     await client.Connect();
