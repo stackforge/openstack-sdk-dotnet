@@ -2,13 +2,8 @@
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
-/Openstack/Openstack/obj
-/Openstack/Openstack.Common/obj
-/Openstack/Openstack.Test/obj
-/Openstack/Bin
 *.user
 *.suo
-/Openstack/packages
-/Openstack/Openstack/obj
-/Openstack/Openstack.Common/obj
-/Openstack/Openstack.Test/obj
+packages/
+obj/
+bin/
