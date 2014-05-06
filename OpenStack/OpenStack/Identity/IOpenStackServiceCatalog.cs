@@ -22,7 +22,7 @@ namespace OpenStack.Identity
     /// <summary>
     /// A listing of services offered by a remote instance of OpenStack.
     /// </summary>
-    internal interface IOpenStackServiceCatalog : IEnumerable<OpenStackServiceDefinition>
+    public interface IOpenStackServiceCatalog : IEnumerable<OpenStackServiceDefinition>
     {
         /// <summary>
         /// Determines if the given service exists in the catalog.
@@ -37,5 +37,13 @@ namespace OpenStack.Identity
         /// <param name="availabilityZoneName">The name of the region/availability zone.</param>
         /// <returns>A list of available services.</returns>
         IEnumerable<OpenStackServiceDefinition> GetServicesInAvailabilityZone(string availabilityZoneName);
+
+        /// <summary>
+        /// Gets the public endpoint for a given service in a given region/availability zone.
+        /// </summary>
+        /// <param name="serviceName">The name of the service.</param>
+        /// <param name="region">The name of the region/availability zone.</param>
+        /// <returns></returns>
+        string GetPublicEndpoint(string serviceName, string region);
     }
 }

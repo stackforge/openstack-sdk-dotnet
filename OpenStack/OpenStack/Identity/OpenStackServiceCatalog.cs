@@ -17,7 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using OpenStack.Common.ServiceLocation;
+using OpenStack.Common;
 
 namespace OpenStack.Identity
 {
@@ -34,6 +34,29 @@ namespace OpenStack.Identity
         public IEnumerable<OpenStackServiceDefinition> GetServicesInAvailabilityZone(string availabilityZoneName)
         {
             return this.Where(s => s.Endpoints.Any(e => e.Region.Contains(availabilityZoneName)));
+        }
+
+        /// <inheritdoc/>
+        public string GetPublicEndpoint(string serviceName, string region)
+        {
+            serviceName.AssertIsNotNullOrEmpty("serviceName", "Cannot resolve the public endpoint of a service with a null or empty service name.");
+            region.AssertIsNotNull("region", "Cannot resolve the public endpoint of a service with a null or empty region.");
+
+            if (this.All(s => !string.Equals(s.Name, serviceName, StringComparison.OrdinalIgnoreCase)))
+            {
+                throw new InvalidOperationException(string.Format("Service catalog does not contain an entry for the '{0}' service. The request could not be completed.", serviceName));
+            }
+
+            var service = this.First(s => string.Equals(s.Name, serviceName, StringComparison.OrdinalIgnoreCase));
+
+            if (service.Endpoints.All(e => !string.Equals(e.Region, region, StringComparison.OrdinalIgnoreCase)))
+            {
+                throw new InvalidOperationException(string.Format("Service catalog does not contain an endpoint for the '{0}' service in the requested region. Region: '{1}'", serviceName, region));
+            }
+
+            var endpoint = service.Endpoints.First(e => string.Equals(e.Region, region, StringComparison.OrdinalIgnoreCase));
+
+            return endpoint.PublicUri;
         }
     }
 }

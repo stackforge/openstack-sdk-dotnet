@@ -25,10 +25,6 @@ namespace OpenStack.Test.Identity
     [TestClass]
     public class OpenStackServiceCatalogTests
     {
-        
-
-       
-
         [TestMethod]
         public void IfAServiceExistsCatalogReturnsTrue()
         {
@@ -125,6 +121,84 @@ namespace OpenStack.Test.Identity
             var catalog = new OpenStackServiceCatalog { serviceDef };
             var services = catalog.GetServicesInAvailabilityZone("some other region").ToList();
             Assert.AreEqual(1, services.Count());
+        }
+
+        [TestMethod]
+        public void CanGetPublicEndpointForAService()
+        {
+            var serviceName = "Test Service";
+            var regionName = "some region";
+            var expectedEndpoint = "http://public.endpoint.org";
+            var serviceDef = new OpenStackServiceDefinition(serviceName, "Test-Service",
+                new List<OpenStackServiceEndpoint>()
+                {
+                    new OpenStackServiceEndpoint(expectedEndpoint, "some region", "1.0",
+                        "http://www.someplace.com", "http://www.someplace.com")
+                });
+
+            var catalog = new OpenStackServiceCatalog { serviceDef };
+            var endpoint = catalog.GetPublicEndpoint(serviceName, regionName);
+            Assert.AreEqual(expectedEndpoint, endpoint);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void CannotGetPublicEndpointWithANullServiceName()
+        {
+            var catalog = new OpenStackServiceCatalog();
+            catalog.GetPublicEndpoint(null, "Some region");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void CannotGetPublicEndpointWithANullRegion()
+        {
+            var catalog = new OpenStackServiceCatalog();
+            catalog.GetPublicEndpoint("Test Service", null);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void CannotGetPublicEndpointWithAnEmptyServiceName()
+        {
+            var catalog = new OpenStackServiceCatalog();
+            catalog.GetPublicEndpoint(string.Empty, "Some region");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public void CannotGetPublicEndpointForAServiceThatIsNotInTheCatalog()
+        {
+            var serviceName = "Test Service";
+            var regionName = "some region";
+            var expectedEndpoint = "http://public.endpoint.org";
+            var serviceDef = new OpenStackServiceDefinition(serviceName, "Test-Service",
+                new List<OpenStackServiceEndpoint>()
+                {
+                    new OpenStackServiceEndpoint(expectedEndpoint, "some region", "1.0",
+                        "http://www.someplace.com", "http://www.someplace.com")
+                });
+
+            var catalog = new OpenStackServiceCatalog { serviceDef };
+            catalog.GetPublicEndpoint("Not-In-Catalog", regionName);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public void CannotGetPublicEndpointForAServiceThatIsNotInTheRegion()
+        {
+            var serviceName = "Test Service";
+            var regionName = "some region";
+            var expectedEndpoint = "http://public.endpoint.org";
+            var serviceDef = new OpenStackServiceDefinition(serviceName, "Test-Service",
+                new List<OpenStackServiceEndpoint>()
+                {
+                    new OpenStackServiceEndpoint(expectedEndpoint, "some region", "1.0",
+                        "http://www.someplace.com", "http://www.someplace.com")
+                });
+
+            var catalog = new OpenStackServiceCatalog { serviceDef };
+            catalog.GetPublicEndpoint(serviceName, "Not-in-catalog");
         }
     }
 }

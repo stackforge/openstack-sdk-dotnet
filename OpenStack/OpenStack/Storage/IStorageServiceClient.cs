@@ -43,12 +43,6 @@ namespace OpenStack.Storage
         string LargeObjectSegmentContainer { get; set; }
 
         /// <summary>
-        /// Gets the current public endpoint that this client is using.
-        /// </summary>
-        /// <returns>The public Uri.</returns>
-        Uri GetPublicEndpoint();
-
-        /// <summary>
         /// Creates a storage container on the remote OpenStack instance.
         /// </summary>
         /// <param name="containerName">The name of the container.</param>

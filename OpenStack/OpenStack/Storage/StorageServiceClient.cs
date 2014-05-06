@@ -43,29 +43,6 @@ namespace OpenStack.Storage
         /// <inheritdoc/>
         public string LargeObjectSegmentContainer { get; set; }
 
-        public Uri GetPublicEndpoint()
-        {
-            //TODO: This should be removed as soon as the CLI can deprecate it's usage of it. 
-            //      The reason is that this breaks encapsulation. The rest layer/client is responsible for resolving it's own endpoint,
-            //      This object should not also try and resolve the uri. In general we abstracted the consumer away from the URI, we should not break that
-            //      abstraction. 
-            return this.Context.PublicEndpoint;
-        }
-
-        /// <summary>
-        /// Gets the public endpoint for a service in the given service catalog for the given region.
-        /// </summary>
-        /// <param name="serviceCatalog">The service catalog to search.</param>
-        /// <param name="serviceName">The name of the service to look for.</param>
-        /// <param name="region">The region to look for.</param>
-        /// <returns>A Uri for the public endpoint.</returns>
-        internal Uri GetPublicEndpoint(OpenStackServiceCatalog serviceCatalog, string serviceName, string region)
-        {
-            var resolver = this.ServiceLocator.Locate<IOpenStackServiceEndpointResolver>();
-            var endpoint = resolver.ResolveEndpoint(serviceCatalog, StorageServiceName, region);
-            return new Uri(endpoint);
-        }
-
         /// <summary>
         /// Creates a new instance of the StorageServiceClient class.
         /// </summary>
@@ -81,7 +58,7 @@ namespace OpenStack.Storage
             this.LargeObjectSegmentContainer = "LargeObjectSegments"; //set the default name of the container that will hold segments to 'LargeObjectSegments';
 
             this.ServiceLocator = serviceLocator;
-            var endpoint = this.GetPublicEndpoint(credentials.ServiceCatalog, StorageServiceName, credentials.Region);
+            var endpoint = new Uri(credentials.ServiceCatalog.GetPublicEndpoint(StorageServiceName, credentials.Region));
             this.Context = new StorageServiceClientContext(credentials, token, StorageServiceName, endpoint);
         }
 

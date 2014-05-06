@@ -33,7 +33,6 @@ namespace OpenStack.Test.Storage
     public class StorageServiceClientTests
     {
         internal TestStorageServicePocoClient ServicePocoClient;
-        internal TestOpenStackServiceEndpointResolver resovler;
         internal TestLargeStorageObjectCreator loCreator;
         
         internal string authId = "12345";
@@ -44,21 +43,17 @@ namespace OpenStack.Test.Storage
         public void TestSetup()
         {
             this.ServicePocoClient = new TestStorageServicePocoClient();
-            this.resovler = new TestOpenStackServiceEndpointResolver();
-            this.resovler.Endpoint = new Uri(endpoint);
             this.loCreator = new TestLargeStorageObjectCreator();
             this.ServiceLocator = new ServiceLocator();
             
             var manager = this.ServiceLocator.Locate<IServiceLocationOverrideManager>();
             manager.RegisterServiceInstance(typeof(IStorageServicePocoClientFactory), new TestStorageServicePocoClientFactory(this.ServicePocoClient));
-            manager.RegisterServiceInstance(typeof(IOpenStackServiceEndpointResolver), resovler);
             manager.RegisterServiceInstance(typeof(ILargeStorageObjectCreatorFactory), new TestLargeStorageObjectCreatorFactory(this.loCreator));
         }
 
         [TestCleanup]
         public void TestCleanup()
         {
-            this.resovler = new TestOpenStackServiceEndpointResolver();
             this.ServicePocoClient = new TestStorageServicePocoClient();
             this.loCreator = new TestLargeStorageObjectCreator();
             this.ServiceLocator = new ServiceLocator();
@@ -66,19 +61,17 @@ namespace OpenStack.Test.Storage
 
         IOpenStackCredential GetValidCreds()
         {
+            var catalog = new OpenStackServiceCatalog();
+            catalog.Add(new OpenStackServiceDefinition(StorageServiceClient.StorageServiceName, "Storage Service",
+                new List<OpenStackServiceEndpoint>()
+                {
+                    new OpenStackServiceEndpoint(endpoint, string.Empty, "some version", "some version info", "1,2,3")
+                }));
+
             var creds = new OpenStackCredential(new Uri(this.endpoint), "SomeUser", "Password", "SomeTenant");
             creds.SetAccessTokenId(this.authId);
+            creds.SetServiceCatalog(catalog);
             return creds;
-        }
-
-        [TestMethod]
-        public void CanGetPublicEndpoint()
-        {
-            var expectedUri = new Uri(endpoint);
-            this.resovler.Endpoint = expectedUri;
-
-            var client = new StorageServiceClient(GetValidCreds(), CancellationToken.None, this.ServiceLocator);
-            Assert.AreEqual(expectedUri, client.GetPublicEndpoint());
         }
 
         [TestMethod]

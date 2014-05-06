@@ -40,7 +40,6 @@ namespace OpenStack
             //Identity related clients/services
             manager.RegisterServiceInstance(typeof(IIdentityServicePocoClientFactory), new IdentityServicePocoClientFactory());
             manager.RegisterServiceInstance(typeof(IIdentityServiceRestClientFactory), new IdentityServiceRestClientFactory());
-            manager.RegisterServiceInstance(typeof(IOpenStackServiceEndpointResolver), new OpenStackServiceEndpointResolver());
             manager.RegisterServiceInstance(typeof(IOpenStackRegionResolver), new OpenStackRegionResolver());
 
             //Converters

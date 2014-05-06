@@ -79,7 +79,6 @@
     <Compile Include="Identity\IOpenStackServiceCatalogPayloadConverter.cs" />
     <Compile Include="Identity\IOpenStackServiceDefinitionPayloadConverter.cs" />
     <Compile Include="Identity\IOpenStackServiceEndpointPayloadConverter.cs" />
-    <Compile Include="Identity\IOpenStackServiceEndpointResolver.cs" />
     <Compile Include="Identity\OpenStackCredential.cs" />
     <Compile Include="Identity\OpenStackRegionResolver.cs" />
     <Compile Include="Identity\OpenStackServiceCatalog.cs" />
@@ -88,7 +87,6 @@
     <Compile Include="Identity\OpenStackServiceDefinitionPayloadConverter.cs" />
     <Compile Include="Identity\OpenStackServiceEndpoint.cs" />
     <Compile Include="Identity\OpenStackServiceEndpointPayloadConverter.cs" />
-    <Compile Include="Identity\OpenStackServiceEndpointResolver.cs" />
     <Compile Include="IOpenStackClient.cs" />
     <Compile Include="IOpenStackClientManager.cs" />
     <Compile Include="IOpenStackServiceClient.cs" />

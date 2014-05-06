@@ -100,7 +100,6 @@
     <Compile Include="Storage\StorageItemTests.cs" />
     <Compile Include="Storage\LargeStorageObjectProviderTests.cs" />
     <Compile Include="TestOpenStackRegionResolver.cs" />
-    <Compile Include="TestOpenStackServiceEndpointResolver.cs" />
     <Compile Include="OpenStackClientTests.cs" />
   </ItemGroup>
   <ItemGroup>
