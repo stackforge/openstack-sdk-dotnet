@@ -224,7 +224,7 @@ namespace OpenStack.Storage
             var converter = this.ServiceLocator.Locate<IStorageObjectPayloadConverter>();
             var obj = converter.Convert(containerName, objectName, resp.Headers);
 
-            await resp.Content.CopyToAsync(outputStream);
+            await resp.Content.CopyAsync(outputStream);
             outputStream.Position = 0;
 
             return obj;

@@ -60,7 +60,7 @@ namespace OpenStack
             version.AssertIsNotNull("version", "Cannot create an OpenStack client with a null version.");
 
             //Ensure that the assembly that contains the credential has a chance to register itself.
-            this.ServiceLocator.EnsureAssemblyRegistration(credential.GetType().GetTypeInfo().Assembly);
+            this.ServiceLocator.EnsureAssemblyRegistration(credential.GetType().GetAssembly());
 
             return this.GetSupportedClient(this.clients, credential, token, version);
         }
@@ -84,8 +84,8 @@ namespace OpenStack
             version.AssertIsNotNull("version", "Cannot create an OpenStack client with a null version.");
 
             //Ensure that the assemblies that contain the credential and client type has had a chance to register itself.
-            this.ServiceLocator.EnsureAssemblyRegistration(credential.GetType().GetTypeInfo().Assembly);
-            this.ServiceLocator.EnsureAssemblyRegistration(typeof(T).GetTypeInfo().Assembly);
+            this.ServiceLocator.EnsureAssemblyRegistration(credential.GetType().GetAssembly());
+            this.ServiceLocator.EnsureAssemblyRegistration(typeof(T).GetAssembly());
 
             return this.GetSupportedClient(this.clients.Where(c => c == typeof(T)), credential, token, version);
         }

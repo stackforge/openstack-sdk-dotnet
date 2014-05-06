@@ -102,9 +102,8 @@ namespace OpenStack.Common.ServiceLocation
                 throw new InvalidOperationException(msg);
             }
 
-            var typeInfo = type.GetTypeInfo();
             
-            if (!typeInfo.IsInterface)
+            if (!type.IsInterface())
             {
                 var msg = string.Format(
                     CultureInfo.InvariantCulture,
@@ -113,8 +112,7 @@ namespace OpenStack.Common.ServiceLocation
                 throw new InvalidOperationException(msg);
             }
 
-            var implementationInfo = implementation.GetTypeInfo();
-            if (!typeInfo.IsAssignableFrom(implementationInfo))
+            if (!type.IsAssignableFrom(implementation))
             {
                 var msg = string.Format(
                     CultureInfo.InvariantCulture,

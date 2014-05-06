@@ -224,7 +224,7 @@ namespace OpenStack.Test.HttpAbstraction
             {
                 var inner = ex.InnerException;
                Assert.IsTrue(DateTime.Now - startTime < TimeSpan.FromSeconds(30));
-               Assert.IsTrue(inner.Message.Contains("A task was canceled"));
+               Assert.IsTrue(inner.Message.Contains("was canceled"));
             }
         }
 

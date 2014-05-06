@@ -188,7 +188,6 @@ namespace OpenStack.Test.Identity
         public void CannotGetPublicEndpointForAServiceThatIsNotInTheRegion()
         {
             var serviceName = "Test Service";
-            var regionName = "some region";
             var expectedEndpoint = "http://public.endpoint.org";
             var serviceDef = new OpenStackServiceDefinition(serviceName, "Test-Service",
                 new List<OpenStackServiceEndpoint>()

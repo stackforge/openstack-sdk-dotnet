@@ -49,10 +49,10 @@ namespace OpenStack
 
             //Ensure that the assembly that contains this credential has had a chance to be service located.
             //This is, at least for now, the entry point for third-parties can extend the API/SDK.
-            this.ServiceLocator.EnsureAssemblyRegistration(credential.GetType().GetTypeInfo().Assembly);
-            this.ServiceLocator.EnsureAssemblyRegistration(typeof(T).GetTypeInfo().Assembly);
+            this.ServiceLocator.EnsureAssemblyRegistration(credential.GetType().GetAssembly());
+            this.ServiceLocator.EnsureAssemblyRegistration(typeof(T).GetAssembly());
 
-            foreach (var serviceClientDef in this.serviceClientDefinitions.Where(s =>typeof(T).GetTypeInfo().IsAssignableFrom(s.Key.GetTypeInfo())))
+            foreach (var serviceClientDef in this.serviceClientDefinitions.Where(s =>typeof(T).IsAssignableFrom(s.Key)))
             {
                 if (serviceClientDef.Value != null && serviceClientDef.Value.IsSupported(credential))
                 {

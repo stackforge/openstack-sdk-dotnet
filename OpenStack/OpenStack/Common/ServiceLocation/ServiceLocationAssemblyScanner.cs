@@ -103,38 +103,33 @@ namespace OpenStack.Common.ServiceLocation
         /// <returns>A list of types.</returns>
         internal IEnumerable<Type> InternalGetRegistrarTypes()
         {
-            var rawTypeInfos = new List<TypeInfo>();
-            var serviceRegistrarTypeInfo = typeof (IServiceLocationRegistrar).GetTypeInfo();
+            var rawTypes = new List<Type>();
+            var serviceRegistrarType = typeof (IServiceLocationRegistrar);
 
             foreach (var assembly in this._assemblies)
             {
                 try
                 {
-                    rawTypeInfos.AddRange(assembly.DefinedTypes);
+                    rawTypes.AddRange(assembly.GetDefinedTypes());
                 }
                 catch (ReflectionTypeLoadException loadEx)
                 {
-                    var foundTypes = (from t in loadEx.Types where t != null select t.GetTypeInfo()).ToList();
-                    rawTypeInfos.AddRange(foundTypes);
+                    var foundTypes = (from t in loadEx.Types where t != null select t).ToList();
+                    rawTypes.AddRange(foundTypes);
                 }
             }
 
             var rawRegistrarTypes = new List<Type>();
-            foreach (var typeInfo in rawTypeInfos)
+            foreach (var type in rawTypes)
             {
-                if (typeInfo.IsInterface)
+                if (type.IsInterface())
                 {
                     continue;
                 }
 
-                if (serviceRegistrarTypeInfo.IsAssignableFrom(typeInfo) && typeInfo.DeclaredConstructors.Any(c => !c.GetParameters().Any()))
+                if (serviceRegistrarType.IsAssignableFrom(type) && type.GetDefinedConstructors().Any(c => !c.GetParameters().Any()))
                 {
-                    //This is an odd 'feature' in the PCL reflection code. Basically using TypeInfo.GetType() does not give you the 'real' type
-                    //so when the caller tries to use the returned type in a call to Activator.CreateInstance, it will try and create a RuntimeType object (which does not have a default constructor)
-                    //and fail. But by asking the assembly that the type came from for a reference to the type, the type that is returned can be created. Weird I know... but hey.
-                    var rawType = typeInfo.Assembly.GetType(typeInfo.FullName); 
-
-                    rawRegistrarTypes.Add(rawType);
+                    rawRegistrarTypes.Add(type);
                 }
             }
 

@@ -35,7 +35,7 @@ namespace OpenStack.Common.ServiceLocation
             this._runtimeManager = new ServiceLocationRuntimeManager(this);
             this._services.Add(typeof(IServiceLocationRuntimeManager), this._runtimeManager);
             this._services.Add(typeof(IServiceLocationOverrideManager), new ServiceLocationOverrideManager(this));
-            this._scanner.AddAssembly(this.GetType().GetTypeInfo().Assembly);
+            this._scanner.AddAssembly(this.GetType().GetAssembly());
             this.RegisterServices();
         }
 
