@@ -27,6 +27,7 @@ namespace OpenStack.Identity
         internal IOpenStackCredential Credential;
         internal CancellationToken CancellationToken;
         internal IServiceLocator ServiceLocator;
+        internal string ServiceName;
 
         /// <summary>
         /// Creates a new instance of the IdentityServiceClient class.
@@ -34,18 +35,20 @@ namespace OpenStack.Identity
         /// <param name="credential">The credential to be used by the client.</param>
         /// <param name="cancellationToken">A cancellation token to be used when completing requests.</param>
         /// <param name="serviceLocator">A service locator to be used to locate/inject dependent services.</param>
-        internal IdentityServiceClient(IOpenStackCredential credential, CancellationToken cancellationToken, IServiceLocator serviceLocator)
+        internal IdentityServiceClient(IOpenStackCredential credential, string serviceName, CancellationToken cancellationToken, IServiceLocator serviceLocator)
         {
             serviceLocator.AssertIsNotNull("serviceLocator", "Cannot create an identity service client with a null service locator.");
+            
             this.ServiceLocator = serviceLocator;
             this.Credential = credential;
             this.CancellationToken = cancellationToken;
+            this.ServiceName = serviceName;
         }
 
         /// <inheritdoc/>
         public async Task<IOpenStackCredential> Authenticate()
         {
-            var client = this.ServiceLocator.Locate<IIdentityServicePocoClientFactory>().Create(this.Credential, this.CancellationToken, this.ServiceLocator);
+            var client = this.ServiceLocator.Locate<IIdentityServicePocoClientFactory>().Create(this.Credential, this.ServiceName, this.CancellationToken, this.ServiceLocator);
             this.Credential = await client.Authenticate();
             return this.Credential;
         }

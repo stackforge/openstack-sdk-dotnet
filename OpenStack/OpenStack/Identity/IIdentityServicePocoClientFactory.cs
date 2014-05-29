@@ -28,9 +28,10 @@ namespace OpenStack.Identity
         /// Creates a client that can be used to interact with the remote OpenStack service.
         /// </summary>
         /// <param name="credentials">The credential to be used when interacting with OpenStack.</param>
+        /// <param name="serviceName">The name of the service to be used when interacting with OpenStack.</param>
         /// <param name="token">The cancellation token to be used when interacting with OpenStack.</param>
         /// <param name="serviceLocator">A service locator to be used to locate/inject dependent services.</param>
         /// <returns>An instance of the client.</returns>
-        IIdentityServicePocoClient Create(IOpenStackCredential credentials, CancellationToken token, IServiceLocator serviceLocator);
+        IIdentityServicePocoClient Create(IOpenStackCredential credentials, string serviceName, CancellationToken token, IServiceLocator serviceLocator);
     }
 }

@@ -31,7 +31,6 @@ namespace OpenStack.Storage
     internal class StorageServiceClient : IStorageServiceClient
     {
         internal StorageServiceClientContext Context;
-        internal const string StorageServiceName = "Object Storage";
         internal IServiceLocator ServiceLocator;
 
         /// <inheritdoc/>
@@ -49,7 +48,7 @@ namespace OpenStack.Storage
         /// <param name="credentials">The credential to be used by this client.</param>
         /// <param name="token">The cancellation token to be used by this client.</param>
         /// <param name="serviceLocator">A service locator to be used to locate/inject dependent services.</param>
-        public StorageServiceClient(IOpenStackCredential credentials, CancellationToken token, IServiceLocator serviceLocator)
+        public StorageServiceClient(IOpenStackCredential credentials, string serviceName, CancellationToken token, IServiceLocator serviceLocator)
         {
             serviceLocator.AssertIsNotNull("serviceLocator", "Cannot create a storage service client with a null service locator.");
 
@@ -58,8 +57,8 @@ namespace OpenStack.Storage
             this.LargeObjectSegmentContainer = "LargeObjectSegments"; //set the default name of the container that will hold segments to 'LargeObjectSegments';
 
             this.ServiceLocator = serviceLocator;
-            var endpoint = new Uri(credentials.ServiceCatalog.GetPublicEndpoint(StorageServiceName, credentials.Region));
-            this.Context = new StorageServiceClientContext(credentials, token, StorageServiceName, endpoint);
+            var endpoint = new Uri(credentials.ServiceCatalog.GetPublicEndpoint(serviceName, credentials.Region));
+            this.Context = new StorageServiceClientContext(credentials, token, serviceName, endpoint);
         }
 
         /// <inheritdoc/>

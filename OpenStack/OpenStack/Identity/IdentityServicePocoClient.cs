@@ -28,7 +28,7 @@ namespace OpenStack.Identity
     {
         internal IOpenStackCredential credential;
         internal CancellationToken cancellationToken;
-        internal const string IdentityServiceName = "Identity";
+        internal string ServiceName;
         internal IServiceLocator ServiceLocator;
 
         /// <summary>
@@ -37,15 +37,17 @@ namespace OpenStack.Identity
         /// <param name="credential">The credential to be used when interacting with OpenStack.</param>
         /// <param name="cancellationToken">The cancellation token to be used when interacting with OpenStack.</param>
         /// <param name="serviceLocator">A service locator to be used to locate/inject dependent services.</param>
-        public IdentityServicePocoClient(IOpenStackCredential credential, CancellationToken cancellationToken, IServiceLocator serviceLocator)
+        public IdentityServicePocoClient(IOpenStackCredential credential, string serviceName, CancellationToken cancellationToken, IServiceLocator serviceLocator)
         {
             credential.AssertIsNotNull("credential");
             cancellationToken.AssertIsNotNull("cancellationToken");
             serviceLocator.AssertIsNotNull("serviceLocator", "Cannot create an identity service poco client with a null service locator.");
+            serviceName.AssertIsNotNullOrEmpty("serviceName", "Cannot create an identity service poco client with a null or empty service name.");
 
             this.credential = credential;
             this.cancellationToken = cancellationToken;
             this.ServiceLocator = serviceLocator;
+            this.ServiceName = serviceName;
         }
 
         /// <inheritdoc/>
@@ -74,7 +76,7 @@ namespace OpenStack.Identity
             if (string.IsNullOrEmpty(this.credential.Region))
             {
                 var resolver = this.ServiceLocator.Locate<IOpenStackRegionResolver>();
-                var region = resolver.Resolve(this.credential.AuthenticationEndpoint, this.credential.ServiceCatalog, IdentityServiceName);
+                var region = resolver.Resolve(this.credential.AuthenticationEndpoint, this.credential.ServiceCatalog, this.ServiceName);
 
                 //TODO: figure out if we want to throw in the case where the region cannot be resolved... 
                 this.credential.SetRegion(region);

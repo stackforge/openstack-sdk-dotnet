@@ -60,15 +60,12 @@ namespace OpenStack.Identity
         {
             publicUri.AssertIsNotNull("publicUri", "Cannot create a service endpoint with a null public URI.");
             region.AssertIsNotNull("region", "Cannot create a service endpoint with a null public URI.");
-            version.AssertIsNotNull("version", "Cannot create a service endpoint with a null version.");
-            versionInfo.AssertIsNotNull("versionInfo", "Cannot create a service endpoint with a null version information URI.");
-            versionList.AssertIsNotNull("versionList", "Cannot create a service endpoint with a null version list URI.");
 
             this.PublicUri = publicUri;
             this.Region = region;
-            this.Version = version;
-            this.VersionInformation = versionInfo;
-            this.VersionList = versionList;
+            this.Version = version ?? string.Empty;
+            this.VersionInformation = versionInfo ?? string.Empty;
+            this.VersionList = versionList ?? string.Empty;
         }
     }
 }

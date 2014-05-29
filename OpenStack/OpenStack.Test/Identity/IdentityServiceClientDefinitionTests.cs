@@ -11,7 +11,7 @@ namespace OpenStack.Test.Identity
     {
         public IOpenStackCredential GetValidCredentials()
         {
-            var endpoint = new Uri("https://someidentityendpoint:35357/v2.0/tokens");
+            var endpoint = new Uri("https://someidentityendpoint:35357/v2.0");
             var userName = "TestUser";
             var password = "RandomPassword";
             var tenantId = "12345";
@@ -24,7 +24,7 @@ namespace OpenStack.Test.Identity
         {
             var client = new IdentityServiceClientDefinition();
 
-            Assert.IsTrue(client.IsSupported(GetValidCredentials()));
+            Assert.IsTrue(client.IsSupported(GetValidCredentials(), string.Empty));
         }
 
         [TestMethod]
@@ -39,7 +39,7 @@ namespace OpenStack.Test.Identity
 
             var client = new IdentityServiceClientDefinition();
             
-            Assert.IsFalse(client.IsSupported(creds));
+            Assert.IsFalse(client.IsSupported(creds, string.Empty));
         }
 
         [TestMethod]
