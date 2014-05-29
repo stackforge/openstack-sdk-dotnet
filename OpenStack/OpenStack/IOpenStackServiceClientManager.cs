@@ -31,6 +31,16 @@ namespace OpenStack
         /// </summary>
         /// <typeparam name="T">The type of client to be created.</typeparam>
         /// <param name="credential">The credential to be used by the client.</param>
+        /// <param name="serviceName">The name of the service to be used by the client.</param>
+        /// <param name="cancellationToken">The cancellation token to be used by the client.</param>
+        /// <returns>An instance of the requested client.</returns>
+        T CreateServiceClient<T>(ICredential credential, string serviceName, CancellationToken cancellationToken) where T : IOpenStackServiceClient;
+
+        /// <summary>
+        /// Create a client that can interact with the requested OpenStack service.
+        /// </summary>
+        /// <typeparam name="T">The type of client to be created.</typeparam>
+        /// <param name="credential">The credential to be used by the client.</param>
         /// <param name="cancellationToken">The cancellation token to be used by the client.</param>
         /// <returns>An instance of the requested client.</returns>
         T CreateServiceClient<T>(ICredential credential, CancellationToken cancellationToken) where T : IOpenStackServiceClient;

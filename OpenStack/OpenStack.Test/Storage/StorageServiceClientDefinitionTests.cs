@@ -29,7 +29,7 @@ namespace OpenStack.Test.Storage
             var catalog =
                 new OpenStackServiceCatalog
                 {
-                    new OpenStackServiceDefinition("Object Storage", "Test",
+                    new OpenStackServiceDefinition("Swift", "Test",
                         new List<OpenStackServiceEndpoint>()
                         {
                             new OpenStackServiceEndpoint("http://someplace.com", "somewhere", "1.0",
@@ -37,7 +37,7 @@ namespace OpenStack.Test.Storage
                         })
                 };
             creds.SetServiceCatalog(catalog);
-            Assert.IsTrue(client.IsSupported(creds));
+            Assert.IsTrue(client.IsSupported(creds, "Swift"));
         }
 
         [TestMethod]
@@ -48,7 +48,7 @@ namespace OpenStack.Test.Storage
             var catalog =
                 new OpenStackServiceCatalog
                 {
-                    new OpenStackServiceDefinition("Object Storage", "Test",
+                    new OpenStackServiceDefinition("Swift", "Test",
                         new List<OpenStackServiceEndpoint>()
                         {
                             new OpenStackServiceEndpoint("http://someplace.com", "somewhere", "2.0.0.0",
@@ -56,7 +56,26 @@ namespace OpenStack.Test.Storage
                         })
                 };
             creds.SetServiceCatalog(catalog);
-            Assert.IsFalse(client.IsSupported(creds));
+            Assert.IsFalse(client.IsSupported(creds, "Swift"));
+        }
+
+        [TestMethod]
+        public void CannotSupportUnknownServiceName()
+        {
+            var client = new StorageServiceClientDefinition();
+            var creds = GetValidCreds();
+            var catalog =
+                new OpenStackServiceCatalog
+                {
+                    new OpenStackServiceDefinition("Swift", "Test",
+                        new List<OpenStackServiceEndpoint>()
+                        {
+                            new OpenStackServiceEndpoint("http://someplace.com", "somewhere", "1.0",
+                               "http://www.someplace.com", "http://www.someplace.com")
+                        })
+                };
+            creds.SetServiceCatalog(catalog);
+            Assert.IsFalse(client.IsSupported(creds, "BadServiceName"));
         }
 
         [TestMethod]

@@ -41,7 +41,7 @@ namespace OpenStack.Test.Identity
             this.client = client;
         }
 
-        public IIdentityServicePocoClient Create(IOpenStackCredential credentials, CancellationToken token, IServiceLocator serviceLocator)
+        public IIdentityServicePocoClient Create(IOpenStackCredential credentials, string serviceName, CancellationToken token, IServiceLocator serviceLocator)
         {
             return client;
         }

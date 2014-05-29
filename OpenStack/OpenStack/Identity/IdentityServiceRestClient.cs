@@ -14,6 +14,7 @@
 // limitations under the License.
 // ============================================================================ */
 
+using System;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
@@ -55,7 +56,7 @@ namespace OpenStack.Identity
             client.Headers.Add("Accept", "application/json");
             client.ContentType = "application/json";
 
-            client.Uri = this.Credential.AuthenticationEndpoint;
+            client.Uri = new Uri(string.Format("{0}/tokens", this.Credential.AuthenticationEndpoint));
             client.Method = HttpMethod.Post;
             client.Content = CreateAuthenticationJsonPayload(this.Credential).ConvertToStream();
 

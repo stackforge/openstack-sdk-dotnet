@@ -33,7 +33,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json">
-      <HintPath>..\..\Bin\Debug\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\..\Bin\net45\Debug\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="OpenStack, Version=0.9.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>

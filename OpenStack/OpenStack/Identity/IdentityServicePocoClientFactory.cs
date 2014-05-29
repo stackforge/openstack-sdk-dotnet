@@ -23,9 +23,9 @@ namespace OpenStack.Identity
     internal class IdentityServicePocoClientFactory :IIdentityServicePocoClientFactory
     {
         /// <inheritdoc/>
-        public IIdentityServicePocoClient Create(IOpenStackCredential credentials, CancellationToken token, IServiceLocator serviceLocator)
+        public IIdentityServicePocoClient Create(IOpenStackCredential credentials, string serviceName, CancellationToken token, IServiceLocator serviceLocator)
         {
-            return new IdentityServicePocoClient(credentials, token, serviceLocator);
+            return new IdentityServicePocoClient(credentials, serviceName, token, serviceLocator);
         }
     }
 }

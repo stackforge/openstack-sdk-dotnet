@@ -31,7 +31,7 @@ namespace CustomServiceClientExample
             this.Name = typeof(EchoServiceClient).Name;
         }
 
-        public IOpenStackServiceClient Create(ICredential credential, CancellationToken cancellationToken, IServiceLocator serviceLocator)
+        public IOpenStackServiceClient Create(ICredential credential, string serviceName, CancellationToken cancellationToken, IServiceLocator serviceLocator)
         {
             return new EchoServiceClient(credential, cancellationToken, serviceLocator);
         }
@@ -41,7 +41,7 @@ namespace CustomServiceClientExample
             return new List<string>();
         }
 
-        public bool IsSupported(ICredential credential)
+        public bool IsSupported(ICredential credential, string serviceName)
         {
             return true;
         }

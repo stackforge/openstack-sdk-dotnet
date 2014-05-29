@@ -32,10 +32,11 @@ namespace OpenStack
         /// Creates an instance of the service client being defined.
         /// </summary>
         /// <param name="credential">The credential that the client will use.</param>
+        /// <param name="serviceName">The name of the service that the client will use.</param>
         /// <param name="cancellationToken">The cancellation token that the client will use.</param>
         /// <param name="serviceLocator">A service locator to be used to locate/inject dependent services.</param>
         /// <returns></returns>
-        IOpenStackServiceClient Create(ICredential credential, CancellationToken cancellationToken, IServiceLocator serviceLocator);
+        IOpenStackServiceClient Create(ICredential credential, string serviceName, CancellationToken cancellationToken, IServiceLocator serviceLocator);
 
         /// <summary>
         /// Gets a list of supported versions.
@@ -47,7 +48,8 @@ namespace OpenStack
         /// Determines if this client is currently supported.
         /// </summary>
         /// <param name="credential">The credential for the service to use.</param>
+        /// <param name="serviceName">The serviceName for the service.</param>
         /// <returns>A value indicating if the client is supported.</returns>
-        bool IsSupported(ICredential credential);
+        bool IsSupported(ICredential credential, string serviceName);
     }
 }

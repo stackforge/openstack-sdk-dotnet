@@ -39,7 +39,7 @@ namespace OpenStack.Test
         {
             public string Name { get; private set; }
             
-            public IOpenStackServiceClient Create(ICredential credential, CancellationToken token, IServiceLocator serviceLocator)
+            public IOpenStackServiceClient Create(ICredential credential, string serviceName, CancellationToken token, IServiceLocator serviceLocator)
             {
                 return new TestOpenStackServiceClient(credential, token);
             }
@@ -49,7 +49,7 @@ namespace OpenStack.Test
                 throw new NotImplementedException();
             }
 
-            public bool IsSupported(ICredential credential)
+            public bool IsSupported(ICredential credential, string serviceName)
             {
                 return true;
             }
@@ -82,7 +82,7 @@ namespace OpenStack.Test
         {
             public string Name { get; private set; }
 
-            public IOpenStackServiceClient Create(ICredential credential, CancellationToken token, IServiceLocator serviceLocator)
+            public IOpenStackServiceClient Create(ICredential credential, string serviceName, CancellationToken token, IServiceLocator serviceLocator)
             {
                 return new OtherTestOpenStackServiceClient(credential, token);
             }
@@ -92,7 +92,7 @@ namespace OpenStack.Test
                 throw new NotImplementedException();
             }
 
-            public bool IsSupported(ICredential credential)
+            public bool IsSupported(ICredential credential, string serviceName)
             {
                 return false;
             }
@@ -221,7 +221,7 @@ namespace OpenStack.Test
         {
             var manager = new OpenStackServiceClientManager(new ServiceLocator());
 
-            var service = manager.CreateServiceClientInstance(new TestOpenStackServiceClientDefinition(), new OpenStackClientManagerTests.TestCredential(), CancellationToken.None);
+            var service = manager.CreateServiceClientInstance(new TestOpenStackServiceClientDefinition(), new OpenStackClientManagerTests.TestCredential(), string.Empty, CancellationToken.None);
             Assert.IsNotNull(service);
             Assert.IsInstanceOfType(service, typeof(TestOpenStackServiceClient));
         }
@@ -231,7 +231,7 @@ namespace OpenStack.Test
         public void CanCreateAnInstanceOfAServiceWithNullFactory()
         {
             var manager = new OpenStackServiceClientManager(new ServiceLocator());
-            manager.CreateServiceClientInstance(null, new OpenStackClientManagerTests.TestCredential(), CancellationToken.None);
+            manager.CreateServiceClientInstance(null, new OpenStackClientManagerTests.TestCredential(), string.Empty, CancellationToken.None);
         }
     }
 }

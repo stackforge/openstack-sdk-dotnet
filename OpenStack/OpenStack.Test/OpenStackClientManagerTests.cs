@@ -83,6 +83,16 @@ namespace OpenStack.Test
                 throw new NotImplementedException();
             }
 
+            public T CreateServiceClientByName<T>(string serviceName) where T : IOpenStackServiceClient
+            {
+                throw new NotImplementedException();
+            }
+
+            public T CreateServiceClientByName<T>(string serviceName, string version) where T : IOpenStackServiceClient
+            {
+                throw new NotImplementedException();
+            }
+
             public IEnumerable<string> GetSupportedVersions()
             {
                 throw new NotImplementedException();
@@ -118,6 +128,16 @@ namespace OpenStack.Test
             }
 
             public T CreateServiceClient<T>(string version) where T : IOpenStackServiceClient
+            {
+                throw new NotImplementedException();
+            }
+
+            public T CreateServiceClientByName<T>(string serviceName) where T : IOpenStackServiceClient
+            {
+                throw new NotImplementedException();
+            }
+
+            public T CreateServiceClientByName<T>(string serviceName, string version) where T : IOpenStackServiceClient
             {
                 throw new NotImplementedException();
             }
@@ -162,6 +182,16 @@ namespace OpenStack.Test
             }
 
             public T CreateServiceClient<T>(string version) where T : IOpenStackServiceClient
+            {
+                throw new NotImplementedException();
+            }
+
+            public T CreateServiceClientByName<T>(string serviceName) where T : IOpenStackServiceClient
+            {
+                throw new NotImplementedException();
+            }
+
+            public T CreateServiceClientByName<T>(string serviceName, string version) where T : IOpenStackServiceClient
             {
                 throw new NotImplementedException();
             }

@@ -69,7 +69,7 @@ namespace OpenStack.Test.Identity
                 return Task.Factory.StartNew(() => creds);
             };
 
-            var client = new IdentityServiceClientDefinition().Create(GetValidCredentials(), CancellationToken.None, this.ServiceLocator) as IdentityServiceClient;
+            var client = new IdentityServiceClientDefinition().Create(GetValidCredentials(), string.Empty, CancellationToken.None, this.ServiceLocator) as IdentityServiceClient;
             var resp = await client.Authenticate();
 
             Assert.AreEqual(creds, resp);

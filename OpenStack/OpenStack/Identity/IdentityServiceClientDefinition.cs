@@ -25,6 +25,8 @@ namespace OpenStack.Identity
     /// <inheritdoc/>
     internal class IdentityServiceClientDefinition : IOpenStackServiceClientDefinition
     {
+        internal const string DefaultServiceName = "Keystone";
+
         /// <inheritdoc/>
         public string Name { get; private set; }
 
@@ -37,9 +39,10 @@ namespace OpenStack.Identity
         }
 
         /// <inheritdoc/>
-        public IOpenStackServiceClient Create(ICredential credential, CancellationToken cancellationToken, IServiceLocator serviceLocator)
+        public IOpenStackServiceClient Create(ICredential credential, string serviceName, CancellationToken cancellationToken, IServiceLocator serviceLocator)
         {
-            return new IdentityServiceClient((IOpenStackCredential)credential, cancellationToken, serviceLocator);
+            var srvName = string.IsNullOrEmpty(serviceName) ? DefaultServiceName : serviceName;
+            return new IdentityServiceClient((IOpenStackCredential)credential, srvName, cancellationToken, serviceLocator);
         }
 
         /// <inheritdoc/>
@@ -49,13 +52,13 @@ namespace OpenStack.Identity
         }
 
         /// <inheritdoc/>
-        public bool IsSupported(ICredential credential)
+        public bool IsSupported(ICredential credential, string serviceName)
         {
             if (credential != null && credential.AuthenticationEndpoint != null)
             {
-                //https://someidentityendpoint:35357/v2.0/tokens
+                //https://someidentityendpoint:35357/v2.0
                 var endpointSegs = credential.AuthenticationEndpoint.Segments;
-                if (endpointSegs.Count() == 3 && string.Equals(endpointSegs[1].Trim('/'), "v2.0", StringComparison.Ordinal))
+                if (endpointSegs.Count() == 2 && string.Equals(endpointSegs[1].Trim('/'), "v2.0", StringComparison.Ordinal))
                 {
                     return true;
                 }
