@@ -56,7 +56,7 @@ namespace OpenStack.Test
         {
             public string Name { get; private set; }
             
-            public IOpenStackServiceClient Create(ICredential credential, CancellationToken cancellationToken, IServiceLocator serviceLocator)
+            public IOpenStackServiceClient Create(ICredential credential, string serviceName, CancellationToken cancellationToken, IServiceLocator serviceLocator)
             {
                 return new TestIdentityServiceClient((IOpenStackCredential)credential, cancellationToken);
             }
@@ -66,7 +66,7 @@ namespace OpenStack.Test
                 return new List<string>();
             }
 
-            public bool IsSupported(ICredential credential)
+            public bool IsSupported(ICredential credential, string serviceName)
             {
                 return true;
             }

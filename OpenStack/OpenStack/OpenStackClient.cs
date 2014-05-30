@@ -80,6 +80,19 @@ namespace OpenStack
         }
 
         /// <inheritdoc/>
+        public T CreateServiceClientByName<T>(string serviceName) where T : IOpenStackServiceClient
+        {
+            return this.CreateServiceClientByName<T>(serviceName, string.Empty);
+        }
+
+        /// <inheritdoc/>
+        public T CreateServiceClientByName<T>(string serviceName, string version) where T : IOpenStackServiceClient
+        {
+            var manager = this.ServiceLocator.Locate<IOpenStackServiceClientManager>();
+            return manager.CreateServiceClient<T>(this.Credential, serviceName, this.CancellationToken);
+        }
+
+        /// <inheritdoc/>
         public IEnumerable<string> GetSupportedVersions()
         {
             //TODO: Figure out the actual supported version, or a better way to handle cases where the client does not care about version.

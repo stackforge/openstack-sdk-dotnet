@@ -30,19 +30,27 @@ namespace OpenStack.Identity
             serviceName.AssertIsNotNullOrEmpty("serviceName", "Cannot resolve a region with a null or empty service name.");
 
             var ret = string.Empty;
+            var cat = catalog.ToList();
 
-            var identService = catalog.FirstOrDefault(s => string.Equals(s.Name, serviceName, StringComparison.OrdinalIgnoreCase));
+            var identService = cat.FirstOrDefault(s => string.Equals(s.Name, serviceName, StringComparison.OrdinalIgnoreCase));
             
             if (identService == null)
             {
-                return ret;
+                //Fall back and see if any service can be found that publishes an endpoint that matches the one given.
+                identService = cat.FirstOrDefault(s => s.Endpoints.Any(e => endpoint.AbsoluteUri.TrimEnd('/').Contains(e.PublicUri.TrimEnd('/'))));
+                if (identService == null)
+                {
+                    //if no service can be found, either by name or endpoint, then return string.empty
+                    return ret;
+                }
             }
 
-            var defaultRegionEndpoint = identService.Endpoints.FirstOrDefault(e => endpoint.AbsoluteUri.Contains(e.PublicUri));
+            var defaultRegionEndpoint = identService.Endpoints.FirstOrDefault(e => endpoint.AbsoluteUri.TrimEnd('/').Contains(e.PublicUri.TrimEnd('/')));
             if (defaultRegionEndpoint != null && !string.IsNullOrEmpty(defaultRegionEndpoint.Region))
             {
                 ret = defaultRegionEndpoint.Region;
             }
+
             return ret;
         }
     }

@@ -79,6 +79,29 @@ namespace OpenStack.Test.Identity
         }
 
         [TestMethod]
+        public void CanResolveRegionWhenNoMatchingServicesButMatchingEndpoint()
+        {
+            var expectedRegion = "Some Region";
+            var catalog = new OpenStackServiceCatalog();
+            catalog.Add(new OpenStackServiceDefinition("Test Service", "Test-Service",
+                new List<OpenStackServiceEndpoint>()
+                {
+                    new OpenStackServiceEndpoint("http://the.endpoint.org", "Some Region" , "1.0",
+                        "http://www.someplace.com", "http://www.someplace.com")
+                }));
+
+            catalog.Add(new OpenStackServiceDefinition("Other Test Service", "Test-Service",
+                new List<OpenStackServiceEndpoint>()
+                {
+                    new OpenStackServiceEndpoint("http://other.endpoint.org", "some other region", "1.0",
+                        "http://www.someplace.com", "http://www.someplace.com")
+                }));
+            var resolver = new OpenStackRegionResolver();
+            var region = resolver.Resolve(new Uri("http://the.endpoint.org/v2/tokens"), catalog, "No Matching Service");
+            Assert.AreEqual(expectedRegion, region);
+        }
+
+        [TestMethod]
         public void CannotResolveRegionWhenMatchingEndpointHasEmptyRegion()
         {
             var expectedRegion = string.Empty;

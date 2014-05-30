@@ -17,7 +17,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using OpenStack.Common;
 using OpenStack.Common.ServiceLocation;
@@ -41,7 +40,14 @@ namespace OpenStack
         }
 
         /// <inheritdoc/>
-        public T CreateServiceClient<T>(ICredential credential, CancellationToken cancellationToken) where T : IOpenStackServiceClient
+        public T CreateServiceClient<T>(ICredential credential, CancellationToken cancellationToken)
+            where T : IOpenStackServiceClient
+        {
+            return CreateServiceClient<T>(credential, string.Empty, cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public T CreateServiceClient<T>(ICredential credential, string serviceName, CancellationToken cancellationToken) where T : IOpenStackServiceClient
         {
             credential.AssertIsNotNull("credential", "Cannot create an OpenStack service with a null credential.");
             cancellationToken.AssertIsNotNull("cancellationToken", "Cannot create an OpenStack service with a null cancellationToken.");
@@ -54,9 +60,9 @@ namespace OpenStack
 
             foreach (var serviceClientDef in this.serviceClientDefinitions.Where(s =>typeof(T).IsAssignableFrom(s.Key)))
             {
-                if (serviceClientDef.Value != null && serviceClientDef.Value.IsSupported(credential))
+                if (serviceClientDef.Value != null && serviceClientDef.Value.IsSupported(credential, serviceName))
                 {
-                    var client = this.CreateServiceClientInstance(serviceClientDef.Value, credential, cancellationToken);
+                    var client = this.CreateServiceClientInstance(serviceClientDef.Value, credential, serviceName, cancellationToken);
                     return (T) client;
                 }
             }
@@ -69,16 +75,17 @@ namespace OpenStack
         /// </summary>
         /// <param name="clientDefinition">A object that can be used to validate and create the give client type.</param>
         /// <param name="credential">The credential to be used by the created client.</param>
+        /// <param name="serviceName">The name of the service to be used by the created client.</param>
         /// <param name="cancellationToken">The cancellation token to be used by the created client.</param>
         /// <returns>An instance of the requested client.</returns>
-        internal IOpenStackServiceClient CreateServiceClientInstance(IOpenStackServiceClientDefinition clientDefinition, ICredential credential, CancellationToken cancellationToken)
+        internal IOpenStackServiceClient CreateServiceClientInstance(IOpenStackServiceClientDefinition clientDefinition, ICredential credential, string serviceName, CancellationToken cancellationToken)
         {
             clientDefinition.AssertIsNotNull("clientDefinition", "Cannot create an OpenStack service with a null client definition.");
 
             IOpenStackServiceClient instance;
             try
             {
-                instance = clientDefinition.Create(credential, cancellationToken, this.ServiceLocator) as IOpenStackServiceClient;
+                instance = clientDefinition.Create(credential, serviceName, cancellationToken, this.ServiceLocator) as IOpenStackServiceClient;
             }
             catch (Exception ex)
             {

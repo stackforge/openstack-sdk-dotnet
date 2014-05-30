@@ -67,8 +67,8 @@ namespace OpenStack.Test.Identity
             var client = new IdentityServiceRestClientFactory().Create(creds,CancellationToken.None, this.ServiceLocator);
 
             await client.Authenticate();
-
-            Assert.AreEqual(creds.AuthenticationEndpoint, this.simulator.Uri);
+            var expectedUri = new Uri(string.Format("{0}/tokens", creds.AuthenticationEndpoint));
+            Assert.AreEqual(expectedUri, this.simulator.Uri);
             Assert.AreEqual(HttpMethod.Post, this.simulator.Method);
         }
 

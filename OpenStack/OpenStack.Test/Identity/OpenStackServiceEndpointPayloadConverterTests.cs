@@ -97,8 +97,7 @@ namespace OpenStack.Test.Identity
         }
 
         [TestMethod]
-        [ExpectedException(typeof(FormatException))]
-        public void CannotConvertJsonPayloadWithMissingVersion()
+        public void CanConvertJsonPayloadWithMissingVersion()
         {
             var endpointPayload = @" {
                         ""tenantId"": ""10244656540440"",
@@ -114,8 +113,7 @@ namespace OpenStack.Test.Identity
         }
 
         [TestMethod]
-        [ExpectedException(typeof(FormatException))]
-        public void CannotConvertJsonPayloadWithMissingVersionInfoUri()
+        public void CanConvertJsonPayloadWithMissingVersionInfoUri()
         {
             var endpointPayload = @" {
                         ""tenantId"": ""10244656540440"",
@@ -131,8 +129,7 @@ namespace OpenStack.Test.Identity
         }
 
         [TestMethod]
-        [ExpectedException(typeof(FormatException))]
-        public void CannotConvertJsonPayloadWithMissingVersionListUri()
+        public void CanConvertJsonPayloadWithMissingVersionListUri()
         {
             var endpointPayload = @" {
                         ""tenantId"": ""10244656540440"",

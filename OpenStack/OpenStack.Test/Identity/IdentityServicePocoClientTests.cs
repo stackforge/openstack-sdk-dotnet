@@ -113,7 +113,7 @@ namespace OpenStack.Test.Identity
             this.RestClient.Response = restResp;
 
             var client =
-                new IdentityServicePocoClientFactory().Create(creds, CancellationToken.None, this.ServiceLocator) as
+                new IdentityServicePocoClientFactory().Create(creds, "Swift", CancellationToken.None, this.ServiceLocator) as
                     IdentityServicePocoClient;
             var result = await client.Authenticate();
 
@@ -172,7 +172,7 @@ namespace OpenStack.Test.Identity
             var restResp = new HttpResponseAbstraction(content, new HttpHeadersAbstraction(), HttpStatusCode.NonAuthoritativeInformation);
             this.RestClient.Response = restResp;
 
-            var client = new IdentityServicePocoClient(creds, CancellationToken.None, this.ServiceLocator);
+            var client = new IdentityServicePocoClient(creds, "Swift", CancellationToken.None, this.ServiceLocator);
             var result = await client.Authenticate();
 
             Assert.IsNotNull(result);
@@ -229,7 +229,7 @@ namespace OpenStack.Test.Identity
             var restResp = new HttpResponseAbstraction(content, new HttpHeadersAbstraction(), HttpStatusCode.NonAuthoritativeInformation);
             this.RestClient.Response = restResp;
 
-            var client = new IdentityServicePocoClient(creds, CancellationToken.None, this.ServiceLocator);
+            var client = new IdentityServicePocoClient(creds, "Swift", CancellationToken.None, this.ServiceLocator);
             var result = await client.Authenticate();
 
             Assert.AreEqual(expectedRegion, result.Region);
@@ -244,7 +244,7 @@ namespace OpenStack.Test.Identity
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.Unauthorized);
             this.RestClient.Response = restResp;
 
-            var client = new IdentityServicePocoClient(creds, CancellationToken.None, this.ServiceLocator);
+            var client = new IdentityServicePocoClient(creds, "Swift", CancellationToken.None, this.ServiceLocator);
             await client.Authenticate();
         }
 
@@ -257,7 +257,7 @@ namespace OpenStack.Test.Identity
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.BadRequest);
             this.RestClient.Response = restResp;
 
-            var client = new IdentityServicePocoClient(creds, CancellationToken.None, this.ServiceLocator);
+            var client = new IdentityServicePocoClient(creds, "Swift", CancellationToken.None, this.ServiceLocator);
             await client.Authenticate();
         }
 
@@ -270,7 +270,7 @@ namespace OpenStack.Test.Identity
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.InternalServerError);
             this.RestClient.Response = restResp;
 
-            var client = new IdentityServicePocoClient(creds, CancellationToken.None, this.ServiceLocator);
+            var client = new IdentityServicePocoClient(creds, "Swift", CancellationToken.None, this.ServiceLocator);
             await client.Authenticate();
         }
 
@@ -283,7 +283,7 @@ namespace OpenStack.Test.Identity
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.Forbidden);
             this.RestClient.Response = restResp;
 
-            var client = new IdentityServicePocoClient(creds, CancellationToken.None, this.ServiceLocator);
+            var client = new IdentityServicePocoClient(creds, "Swift", CancellationToken.None, this.ServiceLocator);
             await client.Authenticate();
         }
 
@@ -296,7 +296,7 @@ namespace OpenStack.Test.Identity
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.MethodNotAllowed);
             this.RestClient.Response = restResp;
 
-            var client = new IdentityServicePocoClient(creds, CancellationToken.None, this.ServiceLocator);
+            var client = new IdentityServicePocoClient(creds, "Swift", CancellationToken.None, this.ServiceLocator);
             await client.Authenticate();
         }
 
@@ -309,7 +309,7 @@ namespace OpenStack.Test.Identity
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.RequestEntityTooLarge);
             this.RestClient.Response = restResp;
 
-            var client = new IdentityServicePocoClient(creds, CancellationToken.None, this.ServiceLocator);
+            var client = new IdentityServicePocoClient(creds, "Swift", CancellationToken.None, this.ServiceLocator);
             await client.Authenticate();
         }
 
@@ -322,7 +322,7 @@ namespace OpenStack.Test.Identity
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.ServiceUnavailable);
             this.RestClient.Response = restResp;
 
-            var client = new IdentityServicePocoClient(creds, CancellationToken.None, this.ServiceLocator);
+            var client = new IdentityServicePocoClient(creds, "Swift", CancellationToken.None, this.ServiceLocator);
             await client.Authenticate();
         }
 
@@ -335,7 +335,7 @@ namespace OpenStack.Test.Identity
             var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.NotFound);
             this.RestClient.Response = restResp;
 
-            var client = new IdentityServicePocoClient(creds, CancellationToken.None, this.ServiceLocator);
+            var client = new IdentityServicePocoClient(creds, "Swift", CancellationToken.None, this.ServiceLocator);
             await client.Authenticate();
         }
     }

@@ -59,6 +59,23 @@ namespace OpenStack
         T CreateServiceClient<T>(string version) where T : IOpenStackServiceClient;
 
         /// <summary>
+        /// Creates a client for a given OpenStack service.
+        /// </summary>
+        /// <typeparam name="T">The type of client to create.</typeparam>
+        /// <param name="serviceName">The name of the service that must be supported.</param>
+        /// <returns>An implementation of the requested client.</returns>
+        T CreateServiceClientByName<T>(string serviceName) where T : IOpenStackServiceClient;
+
+        /// <summary>
+        /// Creates a client for a given OpenStack service that supports the given version.
+        /// </summary>
+        /// <typeparam name="T">The type of client to create.</typeparam>
+        /// <param name="serviceName">The name of the service that must be supported.</param>
+        /// <param name="version">The version that must be supported.</param>
+        /// <returns>An implementation of the requested client.</returns>
+        T CreateServiceClientByName<T>(string serviceName, string version) where T : IOpenStackServiceClient;
+
+        /// <summary>
         /// Gets a list of supported OpenStack versions for this client.
         /// </summary>
         /// <returns></returns>
