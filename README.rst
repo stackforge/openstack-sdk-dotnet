@@ -13,7 +13,7 @@ The following code will connect to Openstack, and print out all of the container
     using Openstack.Identity;
     using Openstack.Storage;
 
-    var authUri = new Uri("https://region.identity.host.com:12345/v2.0/tokens");
+    var authUri = new Uri("https://region.identity.host.com:12345/v2.0");
     var userName = "user name";
     var password = "password";
     var tenantId = "XXXXXXXXXXXXXX-Project";
