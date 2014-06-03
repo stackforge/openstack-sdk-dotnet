@@ -54,6 +54,20 @@
     <Compile Include="Common\ServiceLocation\ServiceLocationRegistrarFactory.cs" />
     <Compile Include="Common\ServiceLocation\ServiceLocator.cs" />
     <Compile Include="Common\StreamExtentions.cs" />
+    <Compile Include="Compute\ComputeFlavor.cs" />
+    <Compile Include="Compute\ComputeFlavorPayloadConverter.cs" />
+    <Compile Include="Compute\ComputeServiceClientDefinition.cs" />
+    <Compile Include="Compute\ComputeServiceClient.cs" />
+    <Compile Include="Compute\ComputeServicePocoClient.cs" />
+    <Compile Include="Compute\ComputeServicePocoClientFactory.cs" />
+    <Compile Include="Compute\ComputeServiceRestClient.cs" />
+    <Compile Include="Compute\ComputeServiceRestClientFactory.cs" />
+    <Compile Include="Compute\IComputeFlavorPayloadConverter.cs" />
+    <Compile Include="Compute\IComputeServiceClient.cs" />
+    <Compile Include="Compute\IComputeServicePocoClient.cs" />
+    <Compile Include="Compute\IComputeServicePocoClientFactory.cs" />
+    <Compile Include="Compute\IComputeServiceRestClient.cs" />
+    <Compile Include="Compute\IComputeServiceRestClientFactory.cs" />
     <Compile Include="Identity\AccessTokenPayloadConverter.cs" />
     <Compile Include="Identity\IAccessTokenPayloadConverter.cs" />
     <Compile Include="Identity\ICredential.cs" />
@@ -90,6 +104,7 @@
     <Compile Include="OpenStackClient.cs" />
     <Compile Include="OpenStackClientFactory.cs" />
     <Compile Include="OpenStackClientManager.cs" />
+    <Compile Include="Common\OpenStackServiceRestClientBase.cs" />
     <Compile Include="OpenStackServiceClientManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="..\AssemblyVersionInfo.cs">
@@ -124,7 +139,7 @@
     <Compile Include="Storage\StorageObject.cs" />
     <Compile Include="Storage\StorageObjectPayloadConverter.cs" />
     <Compile Include="Storage\StorageServiceClient.cs" />
-    <Compile Include="Storage\StorageServiceClientContext.cs" />
+    <Compile Include="ServiceClientContext.cs" />
     <Compile Include="Storage\StorageServiceClientDefinition.cs" />
     <Compile Include="Storage\StorageServicePocoClient.cs" />
     <Compile Include="Storage\StorageServicePocoClientFactory.cs" />

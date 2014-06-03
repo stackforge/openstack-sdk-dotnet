@@ -55,17 +55,17 @@ namespace OpenStack.Test.Storage
             this.ServiceLocator = new ServiceLocator();
         }
 
-        StorageServiceClientContext GetValidContext()
+        ServiceClientContext GetValidContext()
         {
             return GetValidContext(CancellationToken.None);
         }
 
-        StorageServiceClientContext GetValidContext(CancellationToken token)
+        ServiceClientContext GetValidContext(CancellationToken token)
         {
             var creds = new OpenStackCredential(this.endpoint, "SomeUser", "Password", "SomeTenant", "region-a.geo-1");
             creds.SetAccessTokenId(this.authId);
 
-            return new StorageServiceClientContext(creds, token, "Object Storage", endpoint);
+            return new ServiceClientContext(creds, token, "Object Storage", endpoint);
         }
 
         #region CreateManifest Tests
@@ -1310,6 +1310,7 @@ namespace OpenStack.Test.Storage
 
         #region Get AccountTests
 
+        [TestMethod]
         public async Task GetStorageAccountIncludesAuthHeader()
         {
             var client =

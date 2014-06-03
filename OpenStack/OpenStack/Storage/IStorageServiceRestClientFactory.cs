@@ -29,6 +29,6 @@ namespace OpenStack.Storage
         /// <param name="context">The storage service context that the client will use.</param>
         /// <param name="serviceLocator">A service locator to be used to locate/inject dependent services.</param>
         /// <returns>The client.</returns>
-        IStorageServiceRestClient Create(StorageServiceClientContext context, IServiceLocator serviceLocator);
+        IStorageServiceRestClient Create(ServiceClientContext context, IServiceLocator serviceLocator);
     }
 }

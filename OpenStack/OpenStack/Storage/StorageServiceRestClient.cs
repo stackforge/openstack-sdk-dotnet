@@ -26,23 +26,19 @@ using OpenStack.Common.ServiceLocation;
 namespace OpenStack.Storage
 {
     /// <inheritdoc/>
-    internal class StorageServiceRestClient : IStorageServiceRestClient
+    internal class StorageServiceRestClient : OpenStackServiceRestClientBase, IStorageServiceRestClient
     {
-        internal StorageServiceClientContext Context;
         internal IStorageContainerNameValidator StorageContainerNameValidator;
-        internal IServiceLocator ServiceLocator;
+
         /// <summary>
         /// Creates a new instance of the StorageServiceRestClient class.
         /// </summary>
         /// <param name="context">The current storage service context to use.</param>
         /// <param name="serviceLocator">A service locator to be used to locate/inject dependent services.</param>
-        internal StorageServiceRestClient(StorageServiceClientContext context, IServiceLocator serviceLocator)
+        internal StorageServiceRestClient(ServiceClientContext context, IServiceLocator serviceLocator)
+            : base(context, serviceLocator)
         {
-            serviceLocator.AssertIsNotNull("serviceLocator", "Cannot create a storage service rest client with a null service locator.");
-            this.ServiceLocator = serviceLocator;
-            
             this.StorageContainerNameValidator = this.ServiceLocator.Locate<IStorageContainerNameValidator>();
-            this.Context = context;
         }
 
         /// <inheritdoc/>
@@ -286,32 +282,6 @@ namespace OpenStack.Storage
         }
 
         /// <summary>
-        /// Creates an Http client to communicate with the remote OpenStack service.
-        /// </summary>
-        /// <param name="context">The storage context to use when creating the client.</param>
-        /// <returns>The Http client.</returns>
-        internal IHttpAbstractionClient GetHttpClient(StorageServiceClientContext context)
-        {
-            var client = this.ServiceLocator.Locate<IHttpAbstractionClientFactory>().Create(context.CancellationToken);
-            AddAuthenticationHeader(context.Credential.AccessTokenId, client);
-            client.Headers.Add("Accept","application/json");
-            return client;
-        }
-
-        /// <summary>
-        /// Creates a Uri for making requests to the remote service.
-        /// </summary>
-        /// <param name="endpoint">The root endpoint to use in the request.</param>
-        /// <param name="values">The additional parameters to add to the request.</param>
-        /// <returns>A complete request Uri.</returns>
-        internal Uri CreateRequestUri(Uri endpoint, params string[] values)
-        {
-            var temp = new List<string> {endpoint.AbsoluteUri};
-            temp.AddRange(values);
-            return new Uri(string.Join("/", temp.ToArray()));
-        }
-
-        /// <summary>
         /// Adds the appropriate heads to the Http client for the given items metadata.
         /// </summary>
         /// <param name="metadata">The items metadata.</param>
@@ -334,16 +304,6 @@ namespace OpenStack.Storage
             {
                 throw new ArgumentException(string.Format("Container name '{0}' is invalid. Container names cannot includes slashes.", containerName), "containerName");
             }
-        }
-
-        /// <summary>
-        /// Adds the appropriate authentication headers to the given http client.
-        /// </summary>
-        /// <param name="authenticationId">The access token id for the header.</param>
-        /// <param name="client">The http client.</param>
-        internal void AddAuthenticationHeader(string authenticationId, IHttpAbstractionClient client)
-        {
-            client.Headers.Add("X-Auth-Token", authenticationId);
         }
     }
 }

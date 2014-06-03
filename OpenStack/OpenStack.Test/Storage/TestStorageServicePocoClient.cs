@@ -139,7 +139,7 @@ namespace OpenStack.Test.Storage
             this.client = client;
         }
 
-        public IStorageServicePocoClient Create(StorageServiceClientContext context, IServiceLocator serviceLocator)
+        public IStorageServicePocoClient Create(ServiceClientContext context, IServiceLocator serviceLocator)
         {
             return client;
         }

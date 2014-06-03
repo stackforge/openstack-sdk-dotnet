@@ -54,12 +54,12 @@ namespace OpenStack.Test.Storage
             this.ServiceLocator = new ServiceLocator();
         }
 
-        StorageServiceClientContext GetValidContext()
+        ServiceClientContext GetValidContext()
         {
             var creds = new OpenStackCredential(this.endpoint, "SomeUser", "Password", "SomeTenant", "region-a.geo-1");
             creds.SetAccessTokenId(this.authId);
 
-            return new StorageServiceClientContext(creds, CancellationToken.None, "Object Storage", endpoint);
+            return new ServiceClientContext(creds, CancellationToken.None, "Object Storage", endpoint);
         }
 
         #region Get Storage Container Tests

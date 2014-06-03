@@ -67,6 +67,9 @@
     <Compile Include="..\OpenStack\Common\ObjectExtentions.cs">
       <Link>Common\ObjectExtentions.cs</Link>
     </Compile>
+    <Compile Include="..\OpenStack\Common\OpenStackServiceRestClientBase.cs">
+      <Link>Common\OpenStackServiceRestClientBase.cs</Link>
+    </Compile>
     <Compile Include="..\OpenStack\Common\ServiceLocation\IServiceLocationAssemblyScanner.cs">
       <Link>Common\ServiceLocation\IServiceLocationAssemblyScanner.cs</Link>
     </Compile>
@@ -102,6 +105,48 @@
     </Compile>
     <Compile Include="..\OpenStack\Common\ServiceLocation\ServiceLocator.cs">
       <Link>Common\ServiceLocation\ServiceLocator.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenStack\Compute\ComputeFlavor.cs">
+      <Link>Compute\ComputeFlavor.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenStack\Compute\ComputeFlavorPayloadConverter.cs">
+      <Link>Compute\ComputeFlavorPayloadConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenStack\Compute\ComputeServiceClient.cs">
+      <Link>Compute\ComputeServiceClient.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenStack\Compute\ComputeServiceClientDefinition.cs">
+      <Link>Compute\ComputeServiceClientDefinition.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenStack\Compute\ComputeServicePocoClient.cs">
+      <Link>Compute\ComputeServicePocoClient.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenStack\Compute\ComputeServicePocoClientFactory.cs">
+      <Link>Compute\ComputeServicePocoClientFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenStack\Compute\ComputeServiceRestClient.cs">
+      <Link>Compute\ComputeServiceRestClient.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenStack\Compute\ComputeServiceRestClientFactory.cs">
+      <Link>Compute\ComputeServiceRestClientFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenStack\Compute\IComputeFlavorPayloadConverter.cs">
+      <Link>Compute\IComputeFlavorPayloadConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenStack\Compute\IComputeServiceClient.cs">
+      <Link>Compute\IComputeServiceClient.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenStack\Compute\IComputeServicePocoClient.cs">
+      <Link>Compute\IComputeServicePocoClient.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenStack\Compute\IComputeServicePocoClientFactory.cs">
+      <Link>Compute\IComputeServicePocoClientFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenStack\Compute\IComputeServiceRestClient.cs">
+      <Link>Compute\IComputeServiceRestClient.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenStack\Compute\IComputeServiceRestClientFactory.cs">
+      <Link>Compute\IComputeServiceRestClientFactory.cs</Link>
     </Compile>
     <Compile Include="..\OpenStack\Identity\AccessTokenPayloadConverter.cs">
       <Link>Identity\AccessTokenPayloadConverter.cs</Link>
@@ -214,6 +259,9 @@
     <Compile Include="..\OpenStack\OpenStackServiceClientManager.cs">
       <Link>OpenStackServiceClientManager.cs</Link>
     </Compile>
+    <Compile Include="..\OpenStack\ServiceClientContext.cs">
+      <Link>ServiceClientContext.cs</Link>
+    </Compile>
     <Compile Include="Common\ReflectionExtentions.cs" />
     <Compile Include="Common\StreamExtentions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -307,9 +355,6 @@
     <Compile Include="..\OpenStack\Storage\StorageServiceClient.cs">
       <Link>Storage\StorageServiceClient.cs</Link>
     </Compile>
-    <Compile Include="..\OpenStack\Storage\StorageServiceClientContext.cs">
-      <Link>Storage\StorageServiceClientContext.cs</Link>
-    </Compile>
     <Compile Include="..\OpenStack\Storage\StorageServiceClientDefinition.cs">
       <Link>Storage\StorageServiceClientDefinition.cs</Link>
     </Compile>
@@ -340,6 +385,7 @@
       <HintPath>..\packages\Microsoft.Net.Http.2.2.22\lib\portable-net40+sl4+win8+wp71+wpa81\System.Net.Http.Primitives.dll</HintPath>
     </Reference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <Import Project="..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" />
   <Target Name="EnsureBclBuildImported" BeforeTargets="BeforeBuild" Condition="'$(BclBuildImported)' == ''">

@@ -57,6 +57,13 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Compute\ComputeFlavorPayloadConverterTests.cs" />
+    <Compile Include="Compute\ComputeRestSimulator.cs" />
+    <Compile Include="Compute\ComputeServiceRestClientTests.cs" />
+    <Compile Include="Compute\ComputeServicePocoClientTests.cs" />
+    <Compile Include="Compute\ComputeServiceClientTests.cs" />
+    <Compile Include="Compute\TestComputeServiceRestClient.cs" />
+    <Compile Include="Compute\TestComputeServicePocoClient.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="HttpAbstraction\HttpAbstractionClientTests.cs" />
     <Compile Include="HttpAbstraction\HttpHeadersAbstractionTests.cs" />
@@ -73,6 +80,7 @@
     <Compile Include="Identity\OpenStackServiceCatalogTests.cs" />
     <Compile Include="Identity\IdentityServiceClientDefinitionTests.cs" />
     <Compile Include="Identity\OpenStackRegionResolverTests.cs" />
+    <Compile Include="RestSimulator.cs" />
     <Compile Include="ServiceLocation\ServiceLocationAssemblyScannerTests.cs" />
     <Compile Include="ServiceLocation\ServiceLocatorTests.cs" />
     <Compile Include="..\AssemblyVersionInfo.cs">

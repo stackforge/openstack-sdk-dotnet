@@ -18,12 +18,12 @@ using System;
 using System.Threading;
 using OpenStack.Identity;
 
-namespace OpenStack.Storage
+namespace OpenStack
 {
     /// <summary>
     /// Wrapper class that provides a context for the various storage clients.
     /// </summary>
-    public class StorageServiceClientContext
+    public class ServiceClientContext
     {
         /// <summary>
         /// Gets or sets a credential that can be used to connect to the remote OpenStack service.
@@ -38,7 +38,7 @@ namespace OpenStack.Storage
         /// <summary>
         /// Gets or sets the name of the storage service.
         /// </summary>
-        public string StorageServiceName { get; set; }
+        public string ServiceName { get; set; }
 
         /// <summary>
         /// Gets or sets the public endpoint.
@@ -46,17 +46,17 @@ namespace OpenStack.Storage
         public Uri PublicEndpoint { get; set; }
 
         /// <summary>
-        /// Creates a new instance of the StorageServiceClientContext class.
+        /// Creates a new instance of the ServiceClientContext class.
         /// </summary>
         /// <param name="credential">The credential for this context.</param>
         /// <param name="cancellationToken">The cancellation token for this context.</param>
         /// <param name="serviceName">The name of the storage service.</param>
         /// <param name="publicEndpoint">The Uri for the public endpoint of the storage service.</param>
-        internal StorageServiceClientContext(IOpenStackCredential credential, CancellationToken cancellationToken, string serviceName, Uri publicEndpoint)
+        internal ServiceClientContext(IOpenStackCredential credential, CancellationToken cancellationToken, string serviceName, Uri publicEndpoint)
         {
             this.Credential = credential;
             this.CancellationToken = cancellationToken;
-            this.StorageServiceName = serviceName;
+            this.ServiceName = serviceName;
             this.PublicEndpoint = publicEndpoint;
         }
     }

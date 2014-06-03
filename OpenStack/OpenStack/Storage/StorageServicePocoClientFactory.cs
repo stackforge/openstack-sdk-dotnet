@@ -22,7 +22,7 @@ namespace OpenStack.Storage
     internal class StorageServicePocoClientFactory : IStorageServicePocoClientFactory
     {
         /// <inheritdoc/>
-        public IStorageServicePocoClient Create(StorageServiceClientContext context, IServiceLocator serviceLocator)
+        public IStorageServicePocoClient Create(ServiceClientContext context, IServiceLocator serviceLocator)
         {
             return new StorageServicePocoClient(context, serviceLocator);
         }

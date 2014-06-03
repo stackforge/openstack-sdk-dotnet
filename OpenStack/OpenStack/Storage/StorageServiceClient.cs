@@ -30,7 +30,7 @@ namespace OpenStack.Storage
     /// <inheritdoc/>
     internal class StorageServiceClient : IStorageServiceClient
     {
-        internal StorageServiceClientContext Context;
+        internal ServiceClientContext Context;
         internal IServiceLocator ServiceLocator;
 
         /// <inheritdoc/>
@@ -58,7 +58,7 @@ namespace OpenStack.Storage
 
             this.ServiceLocator = serviceLocator;
             var endpoint = new Uri(credentials.ServiceCatalog.GetPublicEndpoint(serviceName, credentials.Region));
-            this.Context = new StorageServiceClientContext(credentials, token, serviceName, endpoint);
+            this.Context = new ServiceClientContext(credentials, token, serviceName, endpoint);
         }
 
         /// <inheritdoc/>

@@ -28,7 +28,7 @@ using OpenStack.Common.Http;
 
 namespace OpenStack.Test.Storage
 {
-    public class StorageRestSimulator : DisposableClass, IHttpAbstractionClient
+    public class StorageRestSimulator : RestSimulator
     {
         internal class StorageItem
         {
@@ -65,12 +65,10 @@ namespace OpenStack.Test.Storage
             }
         }
 
-        public StorageRestSimulator()
+        public StorageRestSimulator() : base()
         {
-            this.Headers = new Dictionary<string, string>();
             this.Containers = new Dictionary<string, StorageItem>();
             this.Objects = new Dictionary<string, StorageItem>();
-            this.Delay = TimeSpan.FromMilliseconds(0);
             this.IsContainerEmpty = true;
         }
 
@@ -82,64 +80,12 @@ namespace OpenStack.Test.Storage
 
         internal Dictionary<string, StorageItem> Objects { get; set; }
 
-        public HttpMethod Method { get; set; }
-
-        public Uri Uri { get; set; }
-
-        public Stream Content { get; set; }
-
-        public IDictionary<string, string> Headers { get; private set; }
-
-        public string ContentType { get; set; }
-
-        public TimeSpan Timeout { get; set; }
-
-        public TimeSpan Delay { get; set; }
-
         public bool IsContainerEmpty { get; set; }
 
         //public event EventHandler<HttpProgressEventArgs> HttpReceiveProgress;
         //public event EventHandler<HttpProgressEventArgs> HttpSendProgress;
 
-        public Task<IHttpResponseAbstraction> SendAsync()
-        {
-            if (!this.Headers.ContainsKey("X-Auth-Token") || this.Headers["X-Auth-Token"] != "12345")
-            {
-                return Task.Factory.StartNew(() => TestHelper.CreateResponse(HttpStatusCode.Unauthorized));
-            }
-            IHttpResponseAbstraction retVal;
-            switch (this.Method.ToString().ToLowerInvariant())
-            {
-                case "get":
-                    retVal = HandleGet();
-                    break;
-                case "post":
-                    retVal = HandlePost();
-                    break;
-                case "put":
-                    retVal = HandlePut();
-                    break;
-                case "delete":
-                    retVal = HandleDelete();
-                    break;
-                case "head":
-                    retVal = HandleHead();
-                    break;
-                case "copy":
-                    retVal = HandleCopy();
-                    break;
-                default:
-                    retVal = TestHelper.CreateErrorResponse();
-                    break;
-            }
-
-            Thread.Sleep(Delay);
-            return Task.Factory.StartNew(() => retVal);
-        }
-
-        
-
-        private IHttpResponseAbstraction HandleCopy()
+        protected override IHttpResponseAbstraction HandleCopy()
         {
             var containerName = GetContainerName(this.Uri.Segments);
             var objectName = GetObjectName(this.Uri.Segments);
@@ -207,7 +153,7 @@ namespace OpenStack.Test.Storage
 
         }
 
-        private IHttpResponseAbstraction HandleHead()
+        protected override IHttpResponseAbstraction HandleHead()
         {
             var containerName = GetContainerName(this.Uri.Segments);
             var objectName = GetObjectName(this.Uri.Segments);
@@ -239,7 +185,7 @@ namespace OpenStack.Test.Storage
             return TestHelper.CreateResponse(HttpStatusCode.NoContent, headers);
         }
 
-        private IHttpResponseAbstraction HandleDelete()
+        protected override IHttpResponseAbstraction HandleDelete()
         {
             var containerName = GetContainerName(this.Uri.Segments);
             var objectName = GetObjectName(this.Uri.Segments);
@@ -280,7 +226,7 @@ namespace OpenStack.Test.Storage
             return TestHelper.CreateResponse(statusCode, GenerateDeleteHeaders());
         }
 
-        private IHttpResponseAbstraction HandlePut()
+        protected override IHttpResponseAbstraction HandlePut()
         {
             var containerName = GetContainerName(this.Uri.Segments);
             var objectName = GetObjectName(this.Uri.Segments);
@@ -314,7 +260,7 @@ namespace OpenStack.Test.Storage
             }
         }
 
-        private IHttpResponseAbstraction HandlePost()
+        protected override IHttpResponseAbstraction HandlePost()
         {
             var containerName = GetContainerName(this.Uri.Segments);
             var objectName = GetObjectName(this.Uri.Segments);
@@ -351,7 +297,7 @@ namespace OpenStack.Test.Storage
             return TestHelper.CreateResponse(HttpStatusCode.Accepted);
         }
 
-        private IHttpResponseAbstraction HandleGet()
+        protected override IHttpResponseAbstraction HandleGet()
         {
             var containerName = GetContainerName(this.Uri.Segments);
             var objectName = GetObjectName(this.Uri.Segments);

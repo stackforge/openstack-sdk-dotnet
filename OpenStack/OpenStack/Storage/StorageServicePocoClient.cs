@@ -29,7 +29,7 @@ namespace OpenStack.Storage
     /// <inheritdoc/>
     internal class StorageServicePocoClient : IStorageServicePocoClient
     {
-        internal StorageServiceClientContext _context;
+        internal ServiceClientContext _context;
         internal IServiceLocator ServiceLocator;
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace OpenStack.Storage
         /// </summary>
         /// <param name="context">The storage service to use for this client.</param>
         /// <param name="serviceLocator">A service locator to be used to locate/inject dependent services.</param>
-        internal StorageServicePocoClient(StorageServiceClientContext context, IServiceLocator serviceLocator)
+        internal StorageServicePocoClient(ServiceClientContext context, IServiceLocator serviceLocator)
         {
             serviceLocator.AssertIsNotNull("serviceLocator", "Cannot create a storage service poco client with a null service locator.");
 
