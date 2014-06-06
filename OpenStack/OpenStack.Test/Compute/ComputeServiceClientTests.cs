@@ -89,6 +89,87 @@ namespace OpenStack.Test.Compute
         }
 
         [TestMethod]
+        public async Task CanListImages()
+        {
+            var img1 = new ComputeImage("12345", "image1", new Uri("http://someuri.com/v2/images/12345"), new Uri("http://someuri.com/images/12345"),"active",DateTime.Now,DateTime.Now,10, 512, 100);
+            var img2 = new ComputeImage("23456", "image2", new Uri("http://someuri.com/v2/images/23456"), new Uri("http://someuri.com/images/23456"), "active", DateTime.Now, DateTime.Now, 10, 512, 100);
+            var images = new List<ComputeImage>() { img1, img2 };
+
+            this.ServicePocoClient.GetImagesDelegate = () => Task.Factory.StartNew(() => (IEnumerable<ComputeImage>)images);
+
+            var client = new ComputeServiceClient(GetValidCreds(), "Nova", CancellationToken.None, this.ServiceLocator);
+            var resp = await client.ListImages();
+            Assert.IsNotNull(resp);
+
+            var respImage = resp.ToList();
+            Assert.AreEqual(2, respImage.Count());
+            Assert.AreEqual(img1, respImage[0]);
+            Assert.AreEqual(img2, respImage[1]);
+        }
+
+        [TestMethod]
+        public async Task CanGetImage()
+        {
+            var img1 = new ComputeImage("12345", "image1", new Uri("http://someuri.com/v2/images/12345"), new Uri("http://someuri.com/images/12345"), "active", DateTime.Now, DateTime.Now, 10, 512, 100);
+
+            this.ServicePocoClient.GetImageDelegate = (id) =>
+            {
+                Assert.AreEqual("12345", id);
+                return Task.Factory.StartNew(() => img1);
+            };
+
+            var client = new ComputeServiceClient(GetValidCreds(), "Nova", CancellationToken.None, this.ServiceLocator);
+            var image = await client.GetImage("12345");
+
+            Assert.IsNotNull(image);
+            Assert.AreEqual(img1, image);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task GetImageWithNullImageIdThrows()
+        {
+            var client = new ComputeServiceClient(GetValidCreds(), "Nova", CancellationToken.None, this.ServiceLocator);
+            await client.GetImage(null);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task GetImageWithEmptyImageIdThrows()
+        {
+            var client = new ComputeServiceClient(GetValidCreds(), "Nova", CancellationToken.None, this.ServiceLocator);
+            await client.GetImage(string.Empty);
+        }
+
+        [TestMethod]
+        public async Task CanDeleteImage()
+        {
+            this.ServicePocoClient.DeleteImageDelegate = async (imageId) =>
+            {
+                await Task.Run(() => Assert.AreEqual(imageId, "12345"));
+            };
+
+            var client = new ComputeServiceClient(GetValidCreds(), "Nova", CancellationToken.None, this.ServiceLocator);
+            await client.DeleteImage("12345");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task DeleteImageWithNullImageIdThrows()
+        {
+            var client = new ComputeServiceClient(GetValidCreds(), "Nova", CancellationToken.None, this.ServiceLocator);
+            await client.DeleteImage(null);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task DeleteImageWithEmptyImageIdThrows()
+        {
+            var client = new ComputeServiceClient(GetValidCreds(), "Nova", CancellationToken.None, this.ServiceLocator);
+            await client.DeleteImage(string.Empty);
+        }
+
+        [TestMethod]
         public async Task CanGetFlavor()
         {
             var expectedFlavor = new ComputeFlavor("1", "m1.tiny", "512", "2", "10", new Uri("http://someuri.com/v2/flavors/1"),

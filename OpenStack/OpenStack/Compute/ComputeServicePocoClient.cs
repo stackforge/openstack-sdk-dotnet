@@ -76,6 +76,51 @@ namespace OpenStack.Compute
             return flavor;
         }
 
+        public async Task<IEnumerable<ComputeImage>> GetImages()
+        {
+            var client = this.GetRestClient();
+            var resp = await client.GetImages();
+
+            if (resp.StatusCode != HttpStatusCode.OK && resp.StatusCode != HttpStatusCode.NonAuthoritativeInformation)
+            {
+                throw new InvalidOperationException(string.Format("Failed to get compute images. The remote server returned the following status code: '{0}'.", resp.StatusCode));
+            }
+
+            var converter = this.ServiceLocator.Locate<IComputeImagePayloadConverter>();
+            var flavors = converter.ConvertImages(await resp.ReadContentAsStringAsync());
+
+            return flavors;
+        }
+
+        /// <inheritdoc/>
+        public async Task<ComputeImage> GetImage(string imageId)
+        {
+            var client = this.GetRestClient();
+            var resp = await client.GetImage(imageId);
+
+            if (resp.StatusCode != HttpStatusCode.OK && resp.StatusCode != HttpStatusCode.NonAuthoritativeInformation)
+            {
+                throw new InvalidOperationException(string.Format("Failed to get compute image. The remote server returned the following status code: '{0}'.", resp.StatusCode));
+            }
+
+            var converter = this.ServiceLocator.Locate<IComputeImagePayloadConverter>();
+            var flavor = converter.ConvertImage(await resp.ReadContentAsStringAsync());
+
+            return flavor;
+        }
+
+        /// <inheritdoc/>
+        public async Task DeleteImage(string imageId)
+        {
+            var client = this.GetRestClient();
+            var resp = await client.DeleteImage(imageId);
+
+            if (resp.StatusCode != HttpStatusCode.OK && resp.StatusCode != HttpStatusCode.NoContent)
+            {
+                throw new InvalidOperationException(string.Format("Failed to delete compute image. The remote server returned the following status code: '{0}'.", resp.StatusCode));
+            }
+        }
+
         /// <summary>
         /// Gets a client that can be used to connect to the REST endpoints of an OpenStack compute service.
         /// </summary>

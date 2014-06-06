@@ -57,6 +57,7 @@ namespace OpenStack
             manager.RegisterServiceInstance(typeof(IOpenStackServiceDefinitionPayloadConverter), new OpenStackServiceDefinitionPayloadConverter(locator));
             manager.RegisterServiceInstance(typeof(IOpenStackServiceEndpointPayloadConverter), new OpenStackServiceEndpointPayloadConverter());
             manager.RegisterServiceInstance(typeof(IComputeFlavorPayloadConverter), new ComputeFlavorPayloadConverter());
+            manager.RegisterServiceInstance(typeof(IComputeImagePayloadConverter), new ComputeImagePayloadConverter());
 
             //Client Management
             var clientManager = new OpenStackClientManager(locator);

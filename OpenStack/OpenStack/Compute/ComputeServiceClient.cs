@@ -62,6 +62,31 @@ namespace OpenStack.Compute
             return await client.GetFlavor(flavorId);
         }
 
+        /// <inheritdoc/>
+        public async Task<IEnumerable<ComputeImage>> ListImages()
+        {
+            var client = this.GetPocoClient();
+            return await client.GetImages();
+        }
+
+        /// <inheritdoc/>
+        public async Task<ComputeImage> GetImage(string imageId)
+        {
+            imageId.AssertIsNotNullOrEmpty("imageId", "Cannot get a compute image with a null or empty id.");
+
+            var client = this.GetPocoClient();
+            return await client.GetImage(imageId);
+        }
+
+        /// <inheritdoc/>
+        public async Task DeleteImage(string imageId)
+        {
+            imageId.AssertIsNotNullOrEmpty("imageId", "Cannot delete a compute image with a null or empty id.");
+
+            var client = this.GetPocoClient();
+            await client.DeleteImage(imageId);
+        }
+
         /// <summary>
         /// Gets a client to interact with the remote OpenStack instance.
         /// </summary>

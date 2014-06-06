@@ -55,13 +55,17 @@
     <Compile Include="Common\ServiceLocation\ServiceLocator.cs" />
     <Compile Include="Common\StreamExtentions.cs" />
     <Compile Include="Compute\ComputeFlavor.cs" />
+    <Compile Include="Compute\ComputeImagePayloadConverter.cs" />
     <Compile Include="Compute\ComputeFlavorPayloadConverter.cs" />
+    <Compile Include="Compute\ComputeImage.cs" />
+    <Compile Include="Compute\ComputeItem.cs" />
     <Compile Include="Compute\ComputeServiceClientDefinition.cs" />
     <Compile Include="Compute\ComputeServiceClient.cs" />
     <Compile Include="Compute\ComputeServicePocoClient.cs" />
     <Compile Include="Compute\ComputeServicePocoClientFactory.cs" />
     <Compile Include="Compute\ComputeServiceRestClient.cs" />
     <Compile Include="Compute\ComputeServiceRestClientFactory.cs" />
+    <Compile Include="Compute\IComputeImagePayloadConverter.cs" />
     <Compile Include="Compute\IComputeFlavorPayloadConverter.cs" />
     <Compile Include="Compute\IComputeServiceClient.cs" />
     <Compile Include="Compute\IComputeServicePocoClient.cs" />

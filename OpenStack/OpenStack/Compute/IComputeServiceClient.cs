@@ -37,5 +37,25 @@ namespace OpenStack.Compute
         /// <param name="flavorId">The id of the flavor.</param>
         /// <returns>An object that represents the given flavor.</returns>
         Task<ComputeFlavor> GetFlavor(string flavorId);
+
+        /// <summary>
+        /// Gets a list of images available on the remote OpenStack instance.
+        /// </summary>
+        /// <returns>An enumerable list of compute images.</returns>
+        Task<IEnumerable<ComputeImage>> ListImages();
+
+        /// <summary>
+        /// Gets the detailed metadata for a compute image.
+        /// </summary>
+        /// <param name="imageId">The id of the image.</param>
+        /// <returns>An object that represents the given image.</returns>
+        Task<ComputeImage> GetImage(string imageId);
+
+        /// <summary>
+        /// Deletes the compute image from the remote instance of OpenStack.
+        /// </summary>
+        /// <param name="imageId">The id of the image.</param>
+        /// <returns>An async task.</returns>
+        Task DeleteImage(string imageId);
     }
 }

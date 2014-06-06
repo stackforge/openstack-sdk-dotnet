@@ -56,5 +56,38 @@ namespace OpenStack.Compute
 
             return await client.SendAsync();
         }
+
+        /// <inheritdoc/>
+        public async Task<IHttpResponseAbstraction> GetImages()
+        {
+            var client = this.GetHttpClient(this.Context);
+
+            client.Uri = CreateRequestUri(this.Context.PublicEndpoint, "images/detail");
+            client.Method = HttpMethod.Get;
+
+            return await client.SendAsync();
+        }
+
+        /// <inheritdoc/>
+        public async Task<IHttpResponseAbstraction> GetImage(string imageId)
+        {
+            var client = this.GetHttpClient(this.Context);
+
+            client.Uri = CreateRequestUri(this.Context.PublicEndpoint, "images", imageId);
+            client.Method = HttpMethod.Get;
+
+            return await client.SendAsync();
+        }
+
+        /// <inheritdoc/>
+        public async Task<IHttpResponseAbstraction> DeleteImage(string imageId)
+        {
+            var client = this.GetHttpClient(this.Context);
+
+            client.Uri = CreateRequestUri(this.Context.PublicEndpoint, "images", imageId);
+            client.Method = HttpMethod.Delete;
+
+            return await client.SendAsync();
+        }
     }
 }

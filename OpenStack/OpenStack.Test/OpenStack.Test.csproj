@@ -57,6 +57,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Compute\ComputeImagePayloadConverterTests.cs" />
     <Compile Include="Compute\ComputeFlavorPayloadConverterTests.cs" />
     <Compile Include="Compute\ComputeRestSimulator.cs" />
     <Compile Include="Compute\ComputeServiceRestClientTests.cs" />

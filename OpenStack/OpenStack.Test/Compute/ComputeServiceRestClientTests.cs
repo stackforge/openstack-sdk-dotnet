@@ -15,6 +15,8 @@
 // ============================================================================ */
 
 using System;
+using System.Dynamic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
@@ -151,6 +153,152 @@ namespace OpenStack.Test.Compute
 
             var respContent = TestHelper.GetStringFromStream(resp.Content);
             Assert.IsTrue(respContent.Length > 0);
+        }
+
+        #endregion
+
+        #region Get Images Test
+
+        [TestMethod]
+        public async Task GetComputeImagesIncludesAuthHeader()
+        {
+            var client =
+                new ComputeServiceRestClient(GetValidContext(), this.ServiceLocator);
+
+            await client.GetImages();
+
+            Assert.IsTrue(this.simulator.Headers.ContainsKey("X-Auth-Token"));
+            Assert.AreEqual(this.authId, this.simulator.Headers["X-Auth-Token"]);
+        }
+
+        [TestMethod]
+        public async Task GetComputeImagesFormsCorrectUrlAndMethod()
+        {
+            var client =
+                new ComputeServiceRestClient(GetValidContext(), this.ServiceLocator);
+
+            await client.GetImages();
+
+            Assert.AreEqual(string.Format("{0}/images/detail", endpoint), this.simulator.Uri.ToString());
+            Assert.AreEqual(HttpMethod.Get, this.simulator.Method);
+        }
+
+        [TestMethod]
+        public async Task CanGetImages()
+        {
+            var created = DateTime.UtcNow.Subtract(TimeSpan.FromMinutes(10));
+            var updated = DateTime.UtcNow.Subtract(TimeSpan.FromMinutes(1));
+            this.simulator.Images.Add(new ComputeImage("1", "tiny",
+                new Uri("http://testcomputeendpoint.com/v2/1234567890/flavors/1"),
+                new Uri("http://testcomputeendpoint.com/1234567890/flavors/1"), "ACTIVE", created, updated, 10, 512, 100));
+
+            var client =
+                 new ComputeServiceRestClient(GetValidContext(), this.ServiceLocator);
+
+            var resp = await client.GetImages();
+
+            Assert.AreEqual(HttpStatusCode.OK, resp.StatusCode);
+
+            var respContent = TestHelper.GetStringFromStream(resp.Content);
+            Assert.IsTrue(respContent.Length > 0);
+        }
+
+        #endregion
+
+        #region Get Image Test
+
+        [TestMethod]
+        public async Task GetComputeImageIncludesAuthHeader()
+        {
+            var client =
+                new ComputeServiceRestClient(GetValidContext(), this.ServiceLocator);
+
+            await client.GetImage("12345");
+
+            Assert.IsTrue(this.simulator.Headers.ContainsKey("X-Auth-Token"));
+            Assert.AreEqual(this.authId, this.simulator.Headers["X-Auth-Token"]);
+        }
+
+        [TestMethod]
+        public async Task GetComputeImageFormsCorrectUrlAndMethod()
+        {
+            var imageId = "12345";
+            var client =
+                new ComputeServiceRestClient(GetValidContext(), this.ServiceLocator);
+
+            await client.GetImage(imageId);
+
+            Assert.AreEqual(string.Format("{0}/images/{1}", endpoint, imageId), this.simulator.Uri.ToString());
+            Assert.AreEqual(HttpMethod.Get, this.simulator.Method);
+        }
+
+        [TestMethod]
+        public async Task CanGetImage()
+        {
+            var imageId = "12345";
+            var created = DateTime.UtcNow.Subtract(TimeSpan.FromMinutes(10));
+            var updated = DateTime.UtcNow.Subtract(TimeSpan.FromMinutes(1));
+            this.simulator.Images.Add(new ComputeImage(imageId, "tiny",
+                new Uri("http://testcomputeendpoint.com/v2/1234567890/flavors/1"),
+                new Uri("http://testcomputeendpoint.com/1234567890/flavors/1"), "ACTIVE", created, updated, 10, 512, 100));
+
+            var client =
+                 new ComputeServiceRestClient(GetValidContext(), this.ServiceLocator);
+
+            var resp = await client.GetImage(imageId);
+
+            Assert.AreEqual(HttpStatusCode.OK, resp.StatusCode);
+
+            var respContent = TestHelper.GetStringFromStream(resp.Content);
+            Assert.IsTrue(respContent.Length > 0);
+        }
+
+        #endregion
+
+        #region Delete Image Test
+
+        [TestMethod]
+        public async Task DeleteComputeImageIncludesAuthHeader()
+        {
+            var client =
+                new ComputeServiceRestClient(GetValidContext(), this.ServiceLocator);
+
+            await client.DeleteImage("12345");
+
+            Assert.IsTrue(this.simulator.Headers.ContainsKey("X-Auth-Token"));
+            Assert.AreEqual(this.authId, this.simulator.Headers["X-Auth-Token"]);
+        }
+
+        [TestMethod]
+        public async Task DeleteComputeImageFormsCorrectUrlAndMethod()
+        {
+            var imageId = "12345";
+            var client =
+                new ComputeServiceRestClient(GetValidContext(), this.ServiceLocator);
+
+            await client.DeleteImage(imageId);
+
+            Assert.AreEqual(string.Format("{0}/images/{1}", endpoint, imageId), this.simulator.Uri.ToString());
+            Assert.AreEqual(HttpMethod.Delete, this.simulator.Method);
+        }
+
+        [TestMethod]
+        public async Task CanDeleteImage()
+        {
+            var imageId = "12345";
+            var created = DateTime.UtcNow.Subtract(TimeSpan.FromMinutes(10));
+            var updated = DateTime.UtcNow.Subtract(TimeSpan.FromMinutes(1));
+            this.simulator.Images.Add(new ComputeImage(imageId, "tiny",
+                new Uri("http://testcomputeendpoint.com/v2/1234567890/flavors/1"),
+                new Uri("http://testcomputeendpoint.com/1234567890/flavors/1"), "ACTIVE", created, updated, 10, 512, 100));
+
+            var client =
+                 new ComputeServiceRestClient(GetValidContext(), this.ServiceLocator);
+
+            var resp = await client.DeleteImage(imageId);
+
+            Assert.AreEqual(HttpStatusCode.OK, resp.StatusCode);
+            Assert.IsFalse(this.simulator.Images.Any());
         }
 
         #endregion

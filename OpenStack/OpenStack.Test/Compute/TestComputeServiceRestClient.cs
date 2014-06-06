@@ -36,6 +36,21 @@ namespace OpenStack.Test.Compute
             return Task.Factory.StartNew(() => Responses.Dequeue());
         }
 
+        public Task<IHttpResponseAbstraction> GetImages()
+        {
+            return Task.Factory.StartNew(() => Responses.Dequeue());
+        }
+
+        public Task<IHttpResponseAbstraction> GetImage(string imageId)
+        {
+            return Task.Factory.StartNew(() => Responses.Dequeue());
+        }
+
+        public Task<IHttpResponseAbstraction> DeleteImage(string imageId)
+        {
+            return Task.Factory.StartNew(() => Responses.Dequeue());
+        }
+
         public Task<IHttpResponseAbstraction> GetFlavors()
         {
             return Task.Factory.StartNew(() => Responses.Dequeue());

@@ -28,9 +28,30 @@ namespace OpenStack.Test.Compute
 
         public Func<Task<IEnumerable<ComputeFlavor>>> GetFlavorsDelegate { get; set; }
 
+        public Func<string, Task<ComputeImage>> GetImageDelegate { get; set; }
+
+        public Func<Task<IEnumerable<ComputeImage>>> GetImagesDelegate { get; set; }
+
+        public Func<string, Task> DeleteImageDelegate { get; set; }
+
         public async Task<ComputeFlavor> GetFlavor(string flavorId)
         {
             return await this.GetFlavorDelegate(flavorId);
+        }
+
+        public async Task<IEnumerable<ComputeImage>> GetImages()
+        {
+            return await this.GetImagesDelegate();
+        }
+
+        public async Task<ComputeImage> GetImage(string imageId)
+        {
+            return await this.GetImageDelegate(imageId);
+        }
+
+        public async Task DeleteImage(string imageId)
+        {
+            await this.DeleteImageDelegate(imageId);
         }
 
         public async Task<IEnumerable<ComputeFlavor>> GetFlavors()

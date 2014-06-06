@@ -21,18 +21,8 @@ namespace OpenStack.Compute
     /// <summary>
     /// Represents a Flavor on a remote OpenStack instance.
     /// </summary>
-    public class ComputeFlavor
+    public class ComputeFlavor : ComputeItem
     {
-        /// <summary>
-        /// Gets the name of the Flavor.
-        /// </summary>
-        public string Name { get; private set; }
-
-        /// <summary>
-        /// Gets the id of the Flavor.
-        /// </summary>
-        public string Id { get; private set; }
-
         /// <summary>
         /// Gets the amount of RAM for the Flavor.
         /// </summary>
@@ -49,16 +39,6 @@ namespace OpenStack.Compute
         public string Disk { get; private set; }
 
         /// <summary>
-        /// Gets the public Uri of the Flavor.
-        /// </summary>
-        public Uri PublicUri { get; private set; }
-
-        /// <summary>
-        /// Gets the permanent Uri of the Flavor.
-        /// </summary>
-        public Uri PermanentUri { get; private set; }
-
-        /// <summary>
         /// Create a new instance of the Flavor class.
         /// </summary>
         /// <param name="id">The Id of the flavor.</param>
@@ -68,15 +48,11 @@ namespace OpenStack.Compute
         /// <param name="disk">The size of the disk of the Flavor.</param>
         /// <param name="publicUri">The public Uri for the Flavor.</param>
         /// <param name="permanentUri">The permanent Uri of the Flavor.</param>
-        internal ComputeFlavor(string id, string name, string ram, string vcpus, string disk, Uri publicUri, Uri permanentUri)
+        internal ComputeFlavor(string id, string name, string ram, string vcpus, string disk, Uri publicUri, Uri permanentUri) : base (id, name, publicUri, permanentUri)
         {
-            this.Id = id;
-            this.Name = name;
             this.Ram = ram;
             this.Vcpus = vcpus;
             this.Disk = disk;
-            this.PublicUri = publicUri;
-            this.PermanentUri = permanentUri;
         }
     }
 }

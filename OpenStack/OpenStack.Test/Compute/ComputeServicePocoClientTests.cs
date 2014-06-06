@@ -302,5 +302,309 @@ namespace OpenStack.Test.Compute
         }
 
         #endregion
+
+        #region Get Compute Image Tests
+
+        [TestMethod]
+        public async Task CanGetComputeImageWithOkResponse()
+        {
+            var created = DateTime.Parse("2014-05-30T16:56:32Z").ToUniversalTime();
+            var updated = DateTime.Parse("2014-06-30T16:56:32Z").ToUniversalTime();
+            var payload = @"{
+                                    ""image"" : {
+                                        ""name"": ""image1"",
+                                        ""status"": ""ACTIVE"",
+                                        ""updated"": ""2014-06-30T16:56:32Z"",
+                                        ""created"": ""2014-05-30T16:56:32Z"",
+                                        ""minRam"": 512,
+                                        ""minDisk"": 10,
+                                        ""progress"": 100,
+                                        ""links"": [
+                                            {
+                                                ""href"": ""http://someuri.com/v2/images/12345"",
+                                                ""rel"": ""self""
+                                            },
+                                            {
+                                                ""href"": ""http://someuri.com/images/12345"",
+                                                ""rel"": ""bookmark""
+                                            }
+                                        ],
+                                        ""id"": ""12345""
+                                    }
+                                }";
+
+            var content = TestHelper.CreateStream(payload);
+
+            var restResp = new HttpResponseAbstraction(content, new HttpHeadersAbstraction(), HttpStatusCode.OK);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            var result = await client.GetImage("12345");
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual("image1", result.Name);
+            Assert.AreEqual("ACTIVE", result.Status);
+            Assert.AreEqual("12345", result.Id);
+            Assert.AreEqual(512, result.MinimumRamSize);
+            Assert.AreEqual(10, result.MinimumDiskSize);
+            Assert.AreEqual(100, result.UploadProgress);
+            Assert.AreEqual(created.ToLongTimeString(), result.CreateDate.ToLongTimeString());
+            Assert.AreEqual(updated.ToLongTimeString(), result.LastUpdated.ToLongTimeString());
+            Assert.AreEqual(new Uri("http://someuri.com/images/12345"), result.PermanentUri);
+            Assert.AreEqual(new Uri("http://someuri.com/v2/images/12345"), result.PublicUri);
+        }
+
+        [TestMethod]
+        public async Task CanGetComputeImageWithNonAuthoritativeResponse()
+        {
+            var created = DateTime.Parse("2014-05-30T16:56:32Z").ToUniversalTime();
+            var updated = DateTime.Parse("2014-06-30T16:56:32Z").ToUniversalTime();
+            var payload = @"{
+                                    ""image"" : {
+                                        ""name"": ""image1"",
+                                        ""status"": ""ACTIVE"",
+                                        ""updated"": ""2014-06-30T16:56:32Z"",
+                                        ""created"": ""2014-05-30T16:56:32Z"",
+                                        ""minRam"": 512,
+                                        ""minDisk"": 10,
+                                        ""progress"": 100,
+                                        ""links"": [
+                                            {
+                                                ""href"": ""http://someuri.com/v2/images/12345"",
+                                                ""rel"": ""self""
+                                            },
+                                            {
+                                                ""href"": ""http://someuri.com/images/12345"",
+                                                ""rel"": ""bookmark""
+                                            }
+                                        ],
+                                        ""id"": ""12345""
+                                    }
+                                }";
+
+            var content = TestHelper.CreateStream(payload);
+
+            var restResp = new HttpResponseAbstraction(content, new HttpHeadersAbstraction(), HttpStatusCode.NonAuthoritativeInformation);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            var result = await client.GetImage("12345");
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual("image1", result.Name);
+            Assert.AreEqual("ACTIVE", result.Status);
+            Assert.AreEqual("12345", result.Id);
+            Assert.AreEqual(512, result.MinimumRamSize);
+            Assert.AreEqual(10, result.MinimumDiskSize);
+            Assert.AreEqual(100, result.UploadProgress);
+            Assert.AreEqual(created.ToLongTimeString(), result.CreateDate.ToLongTimeString());
+            Assert.AreEqual(updated.ToLongTimeString(), result.LastUpdated.ToLongTimeString());
+            Assert.AreEqual(new Uri("http://someuri.com/images/12345"), result.PermanentUri);
+            Assert.AreEqual(new Uri("http://someuri.com/v2/images/12345"), result.PublicUri);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task CannotGetComputeImageWithNoContent()
+        {
+
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.NoContent);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.GetImage("1");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionthrownWhenGettingAComputeImageAndNotAuthed()
+        {
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.Unauthorized);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.GetImage("1");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionthrownWhenGettingAComputeImageAndServerError()
+        {
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.InternalServerError);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.GetImage("1");
+        }
+
+        #endregion
+
+        #region Get Compute Images Tests
+
+        [TestMethod]
+        public async Task CanGetComputeImagesWithOkResponse()
+        {
+            var payload = @"{
+                            ""images"": [
+                                {
+                                    ""id"": ""12345"",
+                                    ""links"": [
+                                        {
+                                            ""href"": ""http://someuri.com/v2/images/12345"",
+                                            ""rel"": ""self""
+                                        },
+                                        {
+                                            ""href"": ""http://someuri.com/images/12345"",
+                                            ""rel"": ""bookmark""
+                                        }
+                                    ],
+                                    ""name"": ""image1""
+                                }
+                            ]
+                        }";
+
+            var content = TestHelper.CreateStream(payload);
+
+            var restResp = new HttpResponseAbstraction(content, new HttpHeadersAbstraction(), HttpStatusCode.OK);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            var result = await client.GetImages();
+
+            Assert.IsNotNull(result);
+
+            var images = result.ToList();
+            Assert.AreEqual(1, images.Count());
+
+            var image = images.First();
+            Assert.AreEqual("image1", image.Name);
+            Assert.AreEqual("12345", image.Id);
+            Assert.AreEqual(new Uri("http://someuri.com/v2/images/12345"), image.PublicUri);
+            Assert.AreEqual(new Uri("http://someuri.com/images/12345"), image.PermanentUri);
+        }
+
+        [TestMethod]
+        public async Task CanGetComputeImagesWithNonAuthoritativeResponse()
+        {
+            var payload = @"{
+                            ""images"": [
+                                {
+                                    ""id"": ""12345"",
+                                    ""links"": [
+                                        {
+                                            ""href"": ""http://someuri.com/v2/images/12345"",
+                                            ""rel"": ""self""
+                                        },
+                                        {
+                                            ""href"": ""http://someuri.com/images/12345"",
+                                            ""rel"": ""bookmark""
+                                        }
+                                    ],
+                                    ""name"": ""image1""
+                                }
+                            ]
+                        }";
+
+            var content = TestHelper.CreateStream(payload);
+
+            var restResp = new HttpResponseAbstraction(content, new HttpHeadersAbstraction(), HttpStatusCode.NonAuthoritativeInformation);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            var result = await client.GetImages();
+
+            Assert.IsNotNull(result);
+
+            var images = result.ToList();
+            Assert.AreEqual(1, images.Count());
+
+            var image = images.First();
+            Assert.AreEqual("image1", image.Name);
+            Assert.AreEqual("12345", image.Id);
+            Assert.AreEqual(new Uri("http://someuri.com/v2/images/12345"), image.PublicUri);
+            Assert.AreEqual(new Uri("http://someuri.com/images/12345"), image.PermanentUri);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task CannotGetComputeImagesWithNoContent()
+        {
+
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.NoContent);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.GetImages();
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionthrownWhenGettingAComputeImagesAndNotAuthed()
+        {
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.Unauthorized);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.GetImages();
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionthrownWhenGettingAComputeImagesAndServerError()
+        {
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.InternalServerError);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.GetImages();
+        }
+
+        #endregion
+
+        #region Delete Compute Image Tests
+
+        [TestMethod]
+        public async Task CanDeleteComputeImageWithNoContentResponse()
+        {
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.NoContent);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.DeleteImage("12345");
+        }
+
+        [TestMethod]
+        public async Task CanDeleteComputeImageWithOkResponse()
+        {
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.OK);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.DeleteImage("12345");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionthrownWhenDeletingAComputeImageAndNotAuthed()
+        {
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.Unauthorized);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.DeleteImage("12345");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionthrownWhenDeletingAComputeImageAndServerError()
+        {
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.InternalServerError);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.DeleteImage("12345");
+        }
+
+        #endregion
     }
 }

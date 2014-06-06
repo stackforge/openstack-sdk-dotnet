@@ -112,6 +112,15 @@
     <Compile Include="..\OpenStack\Compute\ComputeFlavorPayloadConverter.cs">
       <Link>Compute\ComputeFlavorPayloadConverter.cs</Link>
     </Compile>
+    <Compile Include="..\OpenStack\Compute\ComputeImage.cs">
+      <Link>Compute\ComputeImage.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenStack\Compute\ComputeImagePayloadConverter.cs">
+      <Link>Compute\ComputeImagePayloadConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenStack\Compute\ComputeItem.cs">
+      <Link>Compute\ComputeItem.cs</Link>
+    </Compile>
     <Compile Include="..\OpenStack\Compute\ComputeServiceClient.cs">
       <Link>Compute\ComputeServiceClient.cs</Link>
     </Compile>
@@ -132,6 +141,9 @@
     </Compile>
     <Compile Include="..\OpenStack\Compute\IComputeFlavorPayloadConverter.cs">
       <Link>Compute\IComputeFlavorPayloadConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenStack\Compute\IComputeImagePayloadConverter.cs">
+      <Link>Compute\IComputeImagePayloadConverter.cs</Link>
     </Compile>
     <Compile Include="..\OpenStack\Compute\IComputeServiceClient.cs">
       <Link>Compute\IComputeServiceClient.cs</Link>

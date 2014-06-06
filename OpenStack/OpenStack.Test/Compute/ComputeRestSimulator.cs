@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Mime;
 using System.Text;
 using System.Threading;
 using OpenStack.Common.Http;
@@ -29,10 +30,12 @@ namespace OpenStack.Test.Compute
     public class ComputeRestSimulator : RestSimulator
     {
         internal ICollection<ComputeFlavor> Flavors { get; private set; }
+        internal ICollection<ComputeImage> Images { get; private set; }
 
         public ComputeRestSimulator() : base()
         {
             this.Flavors = new List<ComputeFlavor>();
+            this.Images = new List<ComputeImage>();
         }
 
         public ComputeRestSimulator(CancellationToken token) : this()
@@ -43,38 +46,79 @@ namespace OpenStack.Test.Compute
         {
             if (this.Uri.Segments.Count() >= 4)
             {
-                if (this.Uri.Segments[3].TrimEnd('/').ToLower() == "flavors")
+                switch (this.Uri.Segments[3].TrimEnd('/').ToLower())
                 {
-                    Stream flavorContent;
-                    if (this.Uri.Segments.Count() == 5)
-                    {
-                        //flavor id given, list single flavor
-                        var flavorId = this.Uri.Segments[4].TrimEnd('/');
-                        var flavor =
-                            this.Flavors.FirstOrDefault(
-                                f => string.Equals(f.Id, flavorId, StringComparison.OrdinalIgnoreCase));
-                        if(flavor == null)
-                        {
-                            return TestHelper.CreateResponse(HttpStatusCode.NotFound);
-                        }
-
-                        flavorContent = TestHelper.CreateStream(GenerateFlavorPayload(flavor));
-                    }
-                    else if (this.Uri.Segments.Count() == 4)
-                    {
-                        //no flavor id given, list all flavors
-                        flavorContent = TestHelper.CreateStream(GenerateFlavorsPayload());
-                    }
-                    else
-                    {
-                        //Unknown Uri format
-                        throw new NotImplementedException();
-                    }
-
-                    return TestHelper.CreateResponse(HttpStatusCode.OK, new Dictionary<string,string>(), flavorContent);
+                    case "flavors":
+                        return HandleGetFlavor();
+                    case "images":
+                        return HandleGetImage();
                 }
             }
             throw new NotImplementedException();
+        }
+
+        internal IHttpResponseAbstraction HandleGetFlavor()
+        {
+            Stream flavorContent;
+            if (this.Uri.Segments.Count() == 5)
+            {
+                //flavor id given, list single flavor
+                var flavorId = this.Uri.Segments[4].TrimEnd('/');
+                var flavor =
+                    this.Flavors.FirstOrDefault(
+                        f => string.Equals(f.Id, flavorId, StringComparison.OrdinalIgnoreCase));
+                if (flavor == null)
+                {
+                    return TestHelper.CreateResponse(HttpStatusCode.NotFound);
+                }
+
+                flavorContent = TestHelper.CreateStream(GenerateFlavorPayload(flavor));
+            }
+            else if (this.Uri.Segments.Count() == 4)
+            {
+                //no flavor id given, list all flavors
+                flavorContent = TestHelper.CreateStream(GenerateItemsPayload(this.Flavors,"flavors"));
+            }
+            else
+            {
+                //Unknown Uri format
+                throw new NotImplementedException();
+            }
+
+            return TestHelper.CreateResponse(HttpStatusCode.OK, new Dictionary<string, string>(), flavorContent);
+        }
+
+        internal IHttpResponseAbstraction HandleGetImage()
+        {
+            Stream imageContent;
+            if (this.Uri.Segments.Count() == 5)
+            {
+                //image id given, list single image
+                var imageId = this.Uri.Segments[4].TrimEnd('/');
+                if (imageId.ToLower() == "detail")
+                {
+                    imageContent = TestHelper.CreateStream(GenerateItemsPayload(this.Images, "images"));
+                }
+                else
+                {
+                    var image =
+                    this.Images.FirstOrDefault(
+                        f => string.Equals(f.Id, imageId, StringComparison.OrdinalIgnoreCase));
+                    if (image == null)
+                    {
+                        return TestHelper.CreateResponse(HttpStatusCode.NotFound);
+                    }
+
+                    imageContent = TestHelper.CreateStream(GenerateImagePayload(image));
+                }
+            }
+            else
+            {
+                //Unknown Uri format
+                throw new NotImplementedException();
+            }
+
+            return TestHelper.CreateResponse(HttpStatusCode.OK, new Dictionary<string, string>(), imageContent);
         }
 
         protected override IHttpResponseAbstraction HandlePost()
@@ -89,7 +133,23 @@ namespace OpenStack.Test.Compute
 
         protected override IHttpResponseAbstraction HandleDelete()
         {
-            throw new NotImplementedException();
+            if (this.Uri.Segments.Count() >= 4)
+            {
+                if (this.Uri.Segments[3].TrimEnd('/').ToLower() == "images")
+                {
+                    if (this.Uri.Segments.Count() == 5)
+                    {
+                        var imageId = this.Uri.Segments[4].TrimEnd('/');
+                        var image = this.Images.FirstOrDefault(i => i.Id == imageId);
+                        if (image != null)
+                        {
+                            this.Images.Remove(image);
+                            return TestHelper.CreateResponse(HttpStatusCode.OK);
+                        }
+                    }
+                }
+            }
+            return TestHelper.CreateResponse(HttpStatusCode.NotFound);
         }
 
         protected override IHttpResponseAbstraction HandleHead()
@@ -102,12 +162,12 @@ namespace OpenStack.Test.Compute
             throw new NotImplementedException();
         }
 
-        private string GenerateFlavorsPayload()
+        private string GenerateItemsPayload(IEnumerable<ComputeItem> items, string collectionName )
         {
             var payload = new StringBuilder();
-            payload.Append("{ \"flavors\": [");
+            payload.Append(string.Format("{{ \"{0}\": [",collectionName));
             var first = true;
-            foreach (var flavor in this.Flavors)
+            foreach (var item in items)
             {
                 if (!first)
                 {
@@ -115,17 +175,17 @@ namespace OpenStack.Test.Compute
                 }
 
                 payload.Append("{");
-                payload.Append(string.Format("\"id\": \"{0}\",", flavor.Id));
+                payload.Append(string.Format("\"id\": \"{0}\",", item.Id));
                 payload.Append("\"links\": [");
                 payload.Append("{");
-                payload.Append(string.Format("\"href\": \"{0}\",", flavor.PublicUri.AbsoluteUri));
+                payload.Append(string.Format("\"href\": \"{0}\",", item.PublicUri.AbsoluteUri));
                 payload.Append("\"rel\": \"self\"");
                 payload.Append("},{");
-                payload.Append(string.Format("\"href\": \"{0}\",", flavor.PermanentUri.AbsoluteUri));
+                payload.Append(string.Format("\"href\": \"{0}\",", item.PermanentUri.AbsoluteUri));
                 payload.Append("\"rel\": \"bookmark\"");
                 payload.Append("}");
                 payload.Append("],");
-                payload.Append(string.Format("\"name\": \"{0}\"", flavor.Name));
+                payload.Append(string.Format("\"name\": \"{0}\"", item.Name));
                 payload.Append("}");
                 first = false;
             }
@@ -156,6 +216,36 @@ namespace OpenStack.Test.Compute
                                 }}";
             return string.Format(payloadFixture, flavor.Name, flavor.PublicUri.AbsoluteUri,
                 flavor.PermanentUri.AbsoluteUri, flavor.Ram, flavor.Vcpus, flavor.Disk, flavor.Id);
+        }
+
+        private string GenerateImagePayload(ComputeImage image)
+        {
+            var payloadFixture = @"{{
+                                    ""image"" : {{
+                                        ""name"": ""{0}"",
+                                        ""status"": ""{1}"",
+                                        ""updated"": ""{2}"",
+                                        ""created"": ""{3}"",
+                                        ""minDisk"": {4},
+                                        ""progress"": {5},
+                                        ""minRam"": {6},
+                                        ""links"": [
+                                            {{
+                                                ""href"": ""{7}"",
+                                                ""rel"": ""self""
+                                            }},
+                                            {{
+                                                ""href"": ""{8}"",
+                                                ""rel"": ""bookmark""
+                                            }}
+                                        ],
+                                        ""id"": ""{9}""
+                                    }}
+                                }}";
+
+            return string.Format(payloadFixture, image.Name, image.Status, image.CreateDate, image.LastUpdated,
+                image.MinimumDiskSize, image.UploadProgress, image.MinimumRamSize, image.PublicUri.AbsoluteUri,
+                image.PermanentUri.AbsoluteUri, image.Id);
         }
     }
 
