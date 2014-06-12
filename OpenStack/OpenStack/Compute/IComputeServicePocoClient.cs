@@ -56,5 +56,53 @@ namespace OpenStack.Compute
         /// <param name="imageId">The id of the image.</param>
         /// <returns>An async task.</returns>
         Task DeleteImage(string imageId);
+
+        /// <summary>
+        /// Gets the associated metadata for a given compute image.
+        /// </summary>
+        /// <param name="imageId">The id for the image.</param>
+        /// <returns>A collection of key values pairs.</returns>
+        Task<IDictionary<string, string>> GetImageMetadata(string imageId);
+
+        /// <summary>
+        /// Updates the metadata for a given compute image. 
+        /// Note: If a key does not exist on the remote server, it will be created.
+        /// </summary>
+        /// <param name="imageId">The id for the image.</param>
+        /// <param name="metadata">A collection of key value pairs.</param>
+        /// <returns>An async task.</returns>
+        Task UpdateImageMetadata(string imageId, IDictionary<string, string> metadata);
+
+        /// <summary>
+        /// Deletes the given key from the metadata for the given compute image.
+        /// </summary>
+        /// <param name="imageId">The id for the image</param>
+        /// <param name="key">The metadata key to remove.</param>
+        /// <returns>An async task.</returns>
+        Task DeleteImageMetadata(string imageId, string key);
+
+        /// <summary>
+        /// Gets the associated metadata for a given compute server.
+        /// </summary>
+        /// <param name="serverId">The id for the server.</param>
+        /// <returns>A collection of key values pairs.</returns>
+        Task<IDictionary<string, string>> GetServerMetadata(string serverId);
+
+        /// <summary>
+        /// Updates the metadata for a given compute server. 
+        /// Note: If a key does not exist on the remote server, it will be created.
+        /// </summary>
+        /// <param name="serverId">The id for the server.</param>
+        /// <param name="metadata">A collection of key value pairs.</param>
+        /// <returns>An async task.</returns>
+        Task UpdateServerMetadata(string serverId, IDictionary<string, string> metadata);
+
+        /// <summary>
+        /// Deletes the given key from the metadata for the given compute server.
+        /// </summary>
+        /// <param name="serverId">The id for the server</param>
+        /// <param name="key">The metadata key to remove.</param>
+        /// <returns>An async task.</returns>
+        Task DeleteServerMetadata(string serverId, string key);
     }
 }

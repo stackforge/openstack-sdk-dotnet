@@ -85,7 +85,7 @@ namespace OpenStack.Compute
                     }
                 }
 
-                return new ComputeFlavor(id, name, ram, vcpus, disk, new Uri(publicLink), new Uri(permalink));
+                return new ComputeFlavor(id, name, ram, vcpus, disk, new Uri(publicLink), new Uri(permalink), new Dictionary<string, string>());
             }
             catch (Exception ex)
             {

@@ -46,6 +46,10 @@ namespace OpenStack.Test.Compute
                                                 ""rel"": ""bookmark""
                                             }}
                                         ],
+                                        ""metadata"": {{
+                                            ""kernel_id"": ""nokernel"",
+                                            ""ramdisk_id"": ""98765""
+                                        }},
                                         ""id"": ""{9}""
                                     }}
                                 }}";
@@ -106,6 +110,9 @@ namespace OpenStack.Test.Compute
             Assert.AreEqual(createdDate.ToLongTimeString(), image.CreateDate.ToLongTimeString());
             Assert.AreEqual(new Uri(imagePermUri), image.PermanentUri);
             Assert.AreEqual(new Uri(imagePublicUri), image.PublicUri);
+            Assert.AreEqual(2, image.Metadata.Count);
+            Assert.AreEqual("nokernel",image.Metadata["kernel_id"]);
+            Assert.AreEqual("98765",image.Metadata["ramdisk_id"]);
         }
 
         [TestMethod]
@@ -148,6 +155,86 @@ namespace OpenStack.Test.Compute
             Assert.AreEqual(updated.ToLongTimeString(), image.LastUpdated.ToLongTimeString());
             Assert.AreEqual(new Uri("http://someuri.com/images/12345"), image.PermanentUri);
             Assert.AreEqual(new Uri("http://someuri.com/v2/images/12345"), image.PublicUri);
+        }
+
+        public void CanConvertJsonPayloadMissingMetadataToImage()
+        {
+            var created = DateTime.Parse("2014-05-30T16:56:32Z").ToUniversalTime();
+            var updated = DateTime.Parse("2014-06-30T16:56:32Z").ToUniversalTime();
+            var missingFixture = @"{
+                                    ""image"" : {
+                                        ""name"": ""image1"",
+                                        ""status"": ""ACTIVE"",
+                                        ""updated"": ""2014-06-30T16:56:32Z"",
+                                        ""created"": ""2014-05-30T16:56:32Z"",
+                                        ""minDisk"": 10,
+                                        ""minRam"": 512,
+                                        ""progress"": 100,
+                                        ""links"": [
+                                            {
+                                                ""href"": ""http://someuri.com/v2/images/12345"",
+                                                ""rel"": ""self""
+                                            },
+                                            {
+                                                ""href"": ""http://someuri.com/images/12345"",
+                                                ""rel"": ""bookmark""
+                                            }
+                                        ],
+                                        ""id"": ""12345""
+                                    }
+                                }";
+
+            var converter = new ComputeImagePayloadConverter();
+            var image = converter.ConvertImage(missingFixture);
+            Assert.IsNotNull(image);
+            Assert.AreEqual("image1", image.Name);
+            Assert.AreEqual("ACTIVE", image.Status);
+            Assert.AreEqual("12345", image.Id);
+            Assert.AreEqual(512, image.MinimumRamSize);
+            Assert.AreEqual(10, image.MinimumDiskSize);
+            Assert.AreEqual(100, image.UploadProgress);
+            Assert.AreEqual(created.ToLongTimeString(), image.CreateDate.ToLongTimeString());
+            Assert.AreEqual(updated.ToLongTimeString(), image.LastUpdated.ToLongTimeString());
+            Assert.AreEqual(new Uri("http://someuri.com/images/12345"), image.PermanentUri);
+            Assert.AreEqual(new Uri("http://someuri.com/v2/images/12345"), image.PublicUri);
+            Assert.AreEqual(0, image.Metadata.Count);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(FormatException))]
+        public void CannotConvertJsonPayloadWithBadMetadataToImage()
+        {
+            var created = DateTime.Parse("2014-05-30T16:56:32Z").ToUniversalTime();
+            var updated = DateTime.Parse("2014-06-30T16:56:32Z").ToUniversalTime();
+            var missingFixture = @"{
+                                    ""image"" : {
+                                        ""name"": ""image1"",
+                                        ""status"": ""ACTIVE"",
+                                        ""updated"": ""2014-06-30T16:56:32Z"",
+                                        ""created"": ""2014-05-30T16:56:32Z"",
+                                        ""minDisk"": 10,
+                                        ""minRam"": 512,
+                                        ""progress"": 100,
+                                        ""links"": [
+                                            {
+                                                ""href"": ""http://someuri.com/v2/images/12345"",
+                                                ""rel"": ""self""
+                                            },
+                                            {
+                                                ""href"": ""http://someuri.com/images/12345"",
+                                                ""rel"": ""bookmark""
+                                            }
+                                        ],
+                                        ""metadata"": {
+                                            ""kernel_id"": { ""NotExpectyed"" : ""SomeBadValue"" },
+                                            ""ramdisk_id"": ""98765""
+                                        },
+                                        ""id"": ""12345""
+                                    }
+                                }";
+
+            var converter = new ComputeImagePayloadConverter();
+            converter.ConvertImage(missingFixture);
         }
 
         [TestMethod]

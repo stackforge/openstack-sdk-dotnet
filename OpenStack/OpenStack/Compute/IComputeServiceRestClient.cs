@@ -14,6 +14,8 @@
 // limitations under the License.
 // ============================================================================ */
 
+using System.Collections.Generic;
+
 namespace OpenStack.Compute
 {
     using System.Threading.Tasks;
@@ -56,5 +58,53 @@ namespace OpenStack.Compute
         /// <param name="imageId">The id of the image.</param>
         /// <returns>An HTTP response from the remote server.</returns>
         Task<IHttpResponseAbstraction> DeleteImage(string imageId);
+
+        /// <summary>
+        /// Gets the associated metadata for a given compute image.
+        /// </summary>
+        /// <param name="imageId">The id for the image.</param>
+        /// <returns>An HTTP response from the remote server.</returns>
+        Task<IHttpResponseAbstraction> GetImageMetadata(string imageId);
+
+        /// <summary>
+        /// Updates the metadata for a given compute image. 
+        /// Note: If a key does not exist on the remote server, it will be created.
+        /// </summary>
+        /// <param name="imageId">The id for the image.</param>
+        /// <param name="metadata">A collection of key value pairs.</param>
+        /// <returns>An HTTP response from the remote server.</returns>
+        Task<IHttpResponseAbstraction> UpdateImageMetadata(string imageId, IDictionary<string, string> metadata);
+
+        /// <summary>
+        /// Deletes the given key from the metadata for the given compute image.
+        /// </summary>
+        /// <param name="imageId">The id for the image.</param>
+        /// <param name="key">The metadata key to remove.</param>
+        /// <returns>An HTTP response from the remote server.</returns>
+        Task<IHttpResponseAbstraction> DeleteImageMetadata(string imageId, string key);
+
+        /// <summary>
+        /// Gets the associated metadata for a given compute flavor.
+        /// </summary>
+        /// <param name="flavorId">The id for the flavor.</param>
+        /// <returns>An HTTP response from the remote server.</returns>
+        Task<IHttpResponseAbstraction> GetServerMetadata(string flavorId);
+
+        /// <summary>
+        /// Updates the metadata for a given compute flavor. 
+        /// Note: If a key does not exist on the remote server, it will be created.
+        /// </summary>
+        /// <param name="serverId">The id for the flavor.</param>
+        /// <param name="metadata">A collection of key value pairs.</param>
+        /// <returns>An HTTP response from the remote server.</returns>
+        Task<IHttpResponseAbstraction> UpdateServerMetadata(string serverId, IDictionary<string, string> metadata);
+
+        /// <summary>
+        /// Deletes the given key from the metadata for the given compute flavor.
+        /// </summary>
+        /// <param name="serverId">The id for the flavor</param>
+        /// <param name="key">The metadata key to remove.</param>
+        /// <returns>An HTTP response from the remote server.</returns>
+        Task<IHttpResponseAbstraction> DeleteServerMetadata(string serverId, string key);
     }
 }

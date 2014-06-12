@@ -15,8 +15,8 @@
 // ============================================================================ */
 
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Serialization;
 using OpenStack.Common;
 using System.Linq;
 
@@ -88,7 +88,14 @@ namespace OpenStack.Compute
                     }
                 }
 
-                return new ComputeImage(id, name, new Uri(publicLink), new Uri(permalink), status, created, updated, minDisk, minRam, progress );
+                var metadata = new Dictionary<string, string>();
+                var metadataToken = imageToken["metadata"];
+                if (metadataToken != null)
+                {
+                    metadata = JsonConvert.DeserializeObject<Dictionary<string, string>>(metadataToken.ToString());
+                }
+
+                return new ComputeImage(id, name, new Uri(publicLink), new Uri(permalink), metadata, status, created, updated, minDisk, minRam, progress);
             }
             catch (Exception ex)
             {

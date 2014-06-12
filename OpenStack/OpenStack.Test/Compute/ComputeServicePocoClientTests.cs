@@ -15,12 +15,17 @@
 // ============================================================================ */
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using OpenStack.Common.Http;
 using OpenStack.Common.ServiceLocation;
 using OpenStack.Compute;
@@ -59,6 +64,34 @@ namespace OpenStack.Test.Compute
             creds.SetAccessTokenId(this.authId);
 
             return new ServiceClientContext(creds, CancellationToken.None, "Object Storage", endpoint);
+        }
+
+        private string GenerateMetadataPayload(IDictionary<string, string> metadata)
+        {
+            var payload = new StringBuilder();
+            payload.Append("{ \"metadata\" : {");
+            var isFirst = true;
+
+            foreach (var item in metadata)
+            {
+                if (!isFirst)
+                {
+                    payload.Append(",");
+                }
+
+                payload.AppendFormat("\"{0}\":\"{1}\"", item.Key, item.Value);
+                isFirst = false;
+            }
+
+            payload.Append("}}");
+            return payload.ToString();
+        }
+
+        private IDictionary<string, string> ParseMetadataPayload(string payload)
+        {
+            var jObj = JObject.Parse(payload);
+            var metaToken = jObj["metadata"];
+            return JsonConvert.DeserializeObject<Dictionary<string, string>>(metaToken.ToString());
         }
          
         #region Get Compute Flavor Tests
@@ -299,6 +332,153 @@ namespace OpenStack.Test.Compute
 
             var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
             await client.GetFlavors();
+        }
+
+        #endregion
+
+        #region Get Compute Server Metadata Tests
+
+        [TestMethod]
+        public async Task CanGetComputeServerMetadataWithNonAuthoritativeResponse()
+        {
+            var metadata = new Dictionary<string, string>() { { "item1", "value1" }, { "item2", "value2" } };
+            var content = TestHelper.CreateStream(GenerateMetadataPayload(metadata));
+
+            var restResp = new HttpResponseAbstraction(content, new HttpHeadersAbstraction(), HttpStatusCode.NonAuthoritativeInformation);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            var respData = await client.GetServerMetadata("1");
+
+            Assert.AreEqual(2, respData.Count);
+            Assert.AreEqual("value1", respData["item1"]);
+            Assert.AreEqual("value2", respData["item2"]);
+        }
+
+        [TestMethod]
+        public async Task CanGetComputeServerMetadataWithOkResponse()
+        {
+            var metadata = new Dictionary<string, string>() { { "item1", "value1" }, { "item2", "value2" } };
+            var content = TestHelper.CreateStream(GenerateMetadataPayload(metadata));
+
+            var restResp = new HttpResponseAbstraction(content, new HttpHeadersAbstraction(), HttpStatusCode.OK);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            var respData = await client.GetServerMetadata("1");
+
+            Assert.AreEqual(2, respData.Count);
+            Assert.AreEqual("value1", respData["item1"]);
+            Assert.AreEqual("value2", respData["item2"]);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionthrownWhenGettingComputeServerMetadataAndNotAuthed()
+        {
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.Unauthorized);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.GetServerMetadata("12345");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionthrownWhenGettingComputeServerMetadataAndServerError()
+        {
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.InternalServerError);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.GetServerMetadata("12345");
+        }
+
+        #endregion
+
+        #region Update Compute Server Metadata Tests
+
+        [TestMethod]
+        public async Task CanUpdateComputeServerMetadataWithOkResponse()
+        {
+            var metadata = new Dictionary<string, string>() { { "item1", "value1" }, { "item2", "value2" } };
+
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.OK);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.UpdateServerMetadata("1", metadata);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionthrownWhenUpdatingComputeServerMetadataAndNotAuthed()
+        {
+            var metadata = new Dictionary<string, string>() { { "item1", "value1" }, { "item2", "value2" } };
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.Unauthorized);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.UpdateServerMetadata("12345", metadata);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionthrownWhenUpdatingComputeServerMetadataAndServerError()
+        {
+            var metadata = new Dictionary<string, string>() { { "item1", "value1" }, { "item2", "value2" } };
+
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.InternalServerError);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.UpdateServerMetadata("12345", metadata);
+        }
+
+        #endregion
+
+        #region Delete Compute Server Metadata Tests
+
+        [TestMethod]
+        public async Task CanDeleteComputeServerMetadataWithNoContentResponse()
+        {
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.NoContent);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.DeleteServerMetadata("1", "item1");
+        }
+
+        [TestMethod]
+        public async Task CanDeleteComputeServerMetadataWithOkResponse()
+        {
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.OK);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.DeleteServerMetadata("1", "item1");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionthrownWhenDeletingComputeServerMetadataAndNotAuthed()
+        {
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.Unauthorized);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.DeleteServerMetadata("1", "item1");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionthrownWhenDeletingComputeServerMetadataAndServerError()
+        {
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.InternalServerError);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.DeleteServerMetadata("1", "item1");
         }
 
         #endregion
@@ -603,6 +783,153 @@ namespace OpenStack.Test.Compute
 
             var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
             await client.DeleteImage("12345");
+        }
+
+        #endregion
+
+        #region Get Compute Image Metadata Tests
+
+        [TestMethod]
+        public async Task CanGetComputeImageMetadataWithNonAuthoritativeResponse()
+        {
+            var metadata = new Dictionary<string, string>() { { "item1", "value1" }, { "item2", "value2" } };
+            var content = TestHelper.CreateStream(GenerateMetadataPayload(metadata));
+
+            var restResp = new HttpResponseAbstraction(content, new HttpHeadersAbstraction(), HttpStatusCode.NonAuthoritativeInformation);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            var respData = await client.GetImageMetadata("12345");
+
+            Assert.AreEqual(2, respData.Count);
+            Assert.AreEqual("value1", respData["item1"]);
+            Assert.AreEqual("value2", respData["item2"]);
+        }
+
+        [TestMethod]
+        public async Task CanGetComputeImageMetadataWithOkResponse()
+        {
+            var metadata = new Dictionary<string, string>() { { "item1", "value1" }, { "item2", "value2" } };
+            var content = TestHelper.CreateStream(GenerateMetadataPayload(metadata));
+
+            var restResp = new HttpResponseAbstraction(content, new HttpHeadersAbstraction(), HttpStatusCode.OK);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            var respData = await client.GetImageMetadata("12345");
+
+            Assert.AreEqual(2, respData.Count);
+            Assert.AreEqual("value1", respData["item1"]);
+            Assert.AreEqual("value2", respData["item2"]);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionthrownWhenGettingComputeImageMetadataAndNotAuthed()
+        {
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.Unauthorized);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.GetImageMetadata("12345");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionthrownWhenGettingComputeImageMetadataAndServerError()
+        {
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.InternalServerError);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.GetImageMetadata("12345");
+        }
+
+        #endregion
+
+        #region Update Compute Image Metadata Tests
+
+        [TestMethod]
+        public async Task CanUpdateComputeImageMetadataWithOkResponse()
+        {
+            var metadata = new Dictionary<string, string>() { { "item1", "value1" }, { "item2", "value2" } };
+
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.OK);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.UpdateImageMetadata("12345", metadata);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionthrownWhenUpdatingComputeImageMetadataAndNotAuthed()
+        {
+            var metadata = new Dictionary<string, string>() { { "item1", "value1" }, { "item2", "value2" } };
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.Unauthorized);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.UpdateImageMetadata("12345", metadata);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionthrownWhenUpdatingComputeImageMetadataAndServerError()
+        {
+            var metadata = new Dictionary<string, string>() { { "item1", "value1" }, { "item2", "value2" } };
+
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.InternalServerError);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.UpdateImageMetadata("12345", metadata);
+        }
+
+        #endregion
+
+        #region Delete Compute Image Metadata Tests
+
+        [TestMethod]
+        public async Task CanDeleteComputeImageMetadataWithNoContentResponse()
+        {
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.NoContent);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.DeleteImageMetadata("12345", "item1");
+        }
+
+        [TestMethod]
+        public async Task CanDeleteComputeImageMetadataWithOkResponse()
+        {
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.OK);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.DeleteImageMetadata("1", "item1");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionthrownWhenDeletingComputeImageMetadataAndNotAuthed()
+        {
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.Unauthorized);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.DeleteImageMetadata("1", "item1");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionthrownWhenDeletingComputeImageMetadataAndServerError()
+        {
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.InternalServerError);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.DeleteImageMetadata("1", "item1");
         }
 
         #endregion

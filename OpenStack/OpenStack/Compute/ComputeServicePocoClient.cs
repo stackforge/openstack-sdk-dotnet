@@ -76,6 +76,48 @@ namespace OpenStack.Compute
             return flavor;
         }
 
+        /// <inheritdoc/>
+        public async Task<IDictionary<string, string>> GetServerMetadata(string flavorId)
+        {
+            var client = this.GetRestClient();
+            var resp = await client.GetServerMetadata(flavorId);
+
+            if (resp.StatusCode != HttpStatusCode.OK && resp.StatusCode != HttpStatusCode.NonAuthoritativeInformation)
+            {
+                throw new InvalidOperationException(string.Format("Failed to get compute server metadata. The remote server returned the following status code: '{0}'.", resp.StatusCode));
+            }
+
+            var converter = this.ServiceLocator.Locate<IComputeItemMetadataPayloadConverter>();
+            var metadata = converter.Convert(await resp.ReadContentAsStringAsync());
+
+            return metadata;
+        }
+
+        /// <inheritdoc/>
+        public async Task UpdateServerMetadata(string flavorId, IDictionary<string, string> metadata)
+        {
+            var client = this.GetRestClient();
+            var resp = await client.UpdateServerMetadata(flavorId, metadata);
+
+            if (resp.StatusCode != HttpStatusCode.OK)
+            {
+                throw new InvalidOperationException(string.Format("Failed to update compute server metadata. The remote server returned the following status code: '{0}'.", resp.StatusCode));
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task DeleteServerMetadata(string flavorId, string key)
+        {
+            var client = this.GetRestClient();
+            var resp = await client.DeleteServerMetadata(flavorId, key);
+
+            if (resp.StatusCode != HttpStatusCode.OK && resp.StatusCode != HttpStatusCode.NoContent)
+            {
+                throw new InvalidOperationException(string.Format("Failed to delete compute server metadata. The remote server returned the following status code: '{0}'.", resp.StatusCode));
+            }
+        }
+
+        /// <inheritdoc/>
         public async Task<IEnumerable<ComputeImage>> GetImages()
         {
             var client = this.GetRestClient();
@@ -118,6 +160,47 @@ namespace OpenStack.Compute
             if (resp.StatusCode != HttpStatusCode.OK && resp.StatusCode != HttpStatusCode.NoContent)
             {
                 throw new InvalidOperationException(string.Format("Failed to delete compute image. The remote server returned the following status code: '{0}'.", resp.StatusCode));
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task<IDictionary<string, string>> GetImageMetadata(string imageId)
+        {
+            var client = this.GetRestClient();
+            var resp = await client.GetImageMetadata(imageId);
+
+            if (resp.StatusCode != HttpStatusCode.OK && resp.StatusCode != HttpStatusCode.NonAuthoritativeInformation)
+            {
+                throw new InvalidOperationException(string.Format("Failed to get compute image metadata. The remote server returned the following status code: '{0}'.", resp.StatusCode));
+            }
+
+            var converter = this.ServiceLocator.Locate<IComputeItemMetadataPayloadConverter>();
+            var metadata = converter.Convert(await resp.ReadContentAsStringAsync());
+
+            return metadata;
+        }
+
+        /// <inheritdoc/>
+        public async Task UpdateImageMetadata(string imageId, IDictionary<string, string> metadata)
+        {
+            var client = this.GetRestClient();
+            var resp = await client.UpdateImageMetadata(imageId, metadata);
+
+            if (resp.StatusCode != HttpStatusCode.OK)
+            {
+                throw new InvalidOperationException(string.Format("Failed to update compute image metadata. The remote server returned the following status code: '{0}'.", resp.StatusCode));
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task DeleteImageMetadata(string imageId, string key)
+        {
+            var client = this.GetRestClient();
+            var resp = await client.DeleteImageMetadata(imageId, key);
+
+            if (resp.StatusCode != HttpStatusCode.OK && resp.StatusCode != HttpStatusCode.NoContent)
+            {
+                throw new InvalidOperationException(string.Format("Failed to delete compute image metadata. The remote server returned the following status code: '{0}'.", resp.StatusCode));
             }
         }
 

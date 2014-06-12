@@ -14,6 +14,9 @@
 // limitations under the License.
 // ============================================================================ */
 
+using System.Collections;
+using System.Collections.Generic;
+
 namespace OpenStack.Compute
 {
     using System;
@@ -48,7 +51,9 @@ namespace OpenStack.Compute
         /// <param name="disk">The size of the disk of the Flavor.</param>
         /// <param name="publicUri">The public Uri for the Flavor.</param>
         /// <param name="permanentUri">The permanent Uri of the Flavor.</param>
-        internal ComputeFlavor(string id, string name, string ram, string vcpus, string disk, Uri publicUri, Uri permanentUri) : base (id, name, publicUri, permanentUri)
+        /// <param name="metadata">The metadata for the Flavor.</param>
+        internal ComputeFlavor(string id, string name, string ram, string vcpus, string disk, Uri publicUri,
+            Uri permanentUri, IDictionary<string, string> metadata) : base(id, name, publicUri, permanentUri)
         {
             this.Ram = ram;
             this.Vcpus = vcpus;

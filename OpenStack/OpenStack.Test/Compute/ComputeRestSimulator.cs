@@ -22,6 +22,9 @@ using System.Net;
 using System.Net.Mime;
 using System.Text;
 using System.Threading;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using OpenStack.Common;
 using OpenStack.Common.Http;
 using OpenStack.Compute;
 
@@ -30,12 +33,16 @@ namespace OpenStack.Test.Compute
     public class ComputeRestSimulator : RestSimulator
     {
         internal ICollection<ComputeFlavor> Flavors { get; private set; }
+
         internal ICollection<ComputeImage> Images { get; private set; }
+
+        internal ICollection<ComputeServer> Servers { get; private set; }
 
         public ComputeRestSimulator() : base()
         {
             this.Flavors = new List<ComputeFlavor>();
             this.Images = new List<ComputeImage>();
+            this.Servers = new List<ComputeServer>();
         }
 
         public ComputeRestSimulator(CancellationToken token) : this()
@@ -52,6 +59,8 @@ namespace OpenStack.Test.Compute
                         return HandleGetFlavor();
                     case "images":
                         return HandleGetImage();
+                    case "servers":
+                        return HandleGetServer();
                 }
             }
             throw new NotImplementedException();
@@ -60,29 +69,28 @@ namespace OpenStack.Test.Compute
         internal IHttpResponseAbstraction HandleGetFlavor()
         {
             Stream flavorContent;
-            if (this.Uri.Segments.Count() == 5)
+            switch (this.Uri.Segments.Count())
             {
-                //flavor id given, list single flavor
-                var flavorId = this.Uri.Segments[4].TrimEnd('/');
-                var flavor =
-                    this.Flavors.FirstOrDefault(
-                        f => string.Equals(f.Id, flavorId, StringComparison.OrdinalIgnoreCase));
-                if (flavor == null)
-                {
-                    return TestHelper.CreateResponse(HttpStatusCode.NotFound);
-                }
+                case 5:
+                    //flavor id given, list single flavor
+                    var flavorId = this.Uri.Segments[4].TrimEnd('/');
+                    var flavor =
+                        this.Flavors.FirstOrDefault(
+                            f => string.Equals(f.Id, flavorId, StringComparison.OrdinalIgnoreCase));
+                    if (flavor == null)
+                    {
+                        return TestHelper.CreateResponse(HttpStatusCode.NotFound);
+                    }
 
-                flavorContent = TestHelper.CreateStream(GenerateFlavorPayload(flavor));
-            }
-            else if (this.Uri.Segments.Count() == 4)
-            {
-                //no flavor id given, list all flavors
-                flavorContent = TestHelper.CreateStream(GenerateItemsPayload(this.Flavors,"flavors"));
-            }
-            else
-            {
-                //Unknown Uri format
-                throw new NotImplementedException();
+                    flavorContent = TestHelper.CreateStream(GenerateFlavorPayload(flavor));
+                    break;
+                case 4:
+                    //no flavor id given, list all flavors
+                    flavorContent = TestHelper.CreateStream(GenerateItemsPayload(this.Flavors, "flavors"));
+                    break;
+                default:
+                    //Unknown Uri format
+                    throw new NotImplementedException();
             }
 
             return TestHelper.CreateResponse(HttpStatusCode.OK, new Dictionary<string, string>(), flavorContent);
@@ -91,38 +99,107 @@ namespace OpenStack.Test.Compute
         internal IHttpResponseAbstraction HandleGetImage()
         {
             Stream imageContent;
-            if (this.Uri.Segments.Count() == 5)
+            switch (this.Uri.Segments.Count())
             {
-                //image id given, list single image
-                var imageId = this.Uri.Segments[4].TrimEnd('/');
-                if (imageId.ToLower() == "detail")
-                {
-                    imageContent = TestHelper.CreateStream(GenerateItemsPayload(this.Images, "images"));
-                }
-                else
-                {
-                    var image =
-                    this.Images.FirstOrDefault(
-                        f => string.Equals(f.Id, imageId, StringComparison.OrdinalIgnoreCase));
-                    if (image == null)
+                case 5:
+                    //image id given, list single image
+                    var imageId = this.Uri.Segments[4].TrimEnd('/');
+                    if (imageId.ToLower() == "detail")
+                    {
+                        imageContent = TestHelper.CreateStream(GenerateItemsPayload(this.Images, "images"));
+                    }
+                    else
+                    {
+                        var image =
+                            this.Images.FirstOrDefault(
+                                f => string.Equals(f.Id, imageId, StringComparison.OrdinalIgnoreCase));
+                        if (image == null)
+                        {
+                            return TestHelper.CreateResponse(HttpStatusCode.NotFound);
+                        }
+
+                        imageContent = TestHelper.CreateStream(GenerateImagePayload(image));
+                    }
+                    break;
+                case 6:
+                     if (this.Uri.Segments[5].TrimEnd('/').ToLower() != "metadata")
                     {
                         return TestHelper.CreateResponse(HttpStatusCode.NotFound);
                     }
-
-                    imageContent = TestHelper.CreateStream(GenerateImagePayload(image));
-                }
-            }
-            else
-            {
-                //Unknown Uri format
-                throw new NotImplementedException();
+                    var imgId = this.Uri.Segments[4].TrimEnd('/');
+                    var img =
+                        this.Images.FirstOrDefault(
+                            i => string.Equals(i.Id, imgId, StringComparison.OrdinalIgnoreCase));
+                    if (img == null)
+                    {
+                        return TestHelper.CreateResponse(HttpStatusCode.NotFound);
+                    }
+                    imageContent = TestHelper.CreateStream(GenerateMetadataPayload(img.Metadata));
+                    break;
+                default:
+                    throw new NotImplementedException();
             }
 
             return TestHelper.CreateResponse(HttpStatusCode.OK, new Dictionary<string, string>(), imageContent);
         }
 
+        internal IHttpResponseAbstraction HandleGetServer()
+        {
+            Stream serverContent;
+
+            if (this.Uri.Segments.Count() < 5)
+            {
+                if (this.Uri.Segments.Count() == 4)
+                {
+                    serverContent = TestHelper.CreateStream(GenerateItemsPayload(this.Flavors, "flavors"));
+                }
+                throw new NotImplementedException();
+            }
+
+            var srvId = this.Uri.Segments[4].TrimEnd('/');
+            var srv =
+                this.Servers.FirstOrDefault(
+                    s => string.Equals(s.Id, srvId, StringComparison.OrdinalIgnoreCase));
+            if (srv == null)
+            {
+                return TestHelper.CreateResponse(HttpStatusCode.NotFound);
+            }
+
+            
+            switch (this.Uri.Segments.Count())
+            {
+                case 6:
+                    if (this.Uri.Segments[5].TrimEnd('/').ToLower() != "metadata")
+                    {
+                        return TestHelper.CreateResponse(HttpStatusCode.NotFound);
+                    }
+                    
+                    serverContent = TestHelper.CreateStream(GenerateMetadataPayload(srv.Metadata));
+                    break;
+                case 5:
+                    //server id given, list single server
+                    serverContent = TestHelper.CreateStream(GenerateServerPayload(srv));
+                    break;
+                default:
+                    //Unknown Uri format
+                    throw new NotImplementedException();
+            }
+
+            return TestHelper.CreateResponse(HttpStatusCode.OK, new Dictionary<string, string>(), serverContent);
+        }
+
         protected override IHttpResponseAbstraction HandlePost()
         {
+            if (this.Uri.Segments.Count() >= 4)
+            {
+                switch (this.Uri.Segments[3].TrimEnd('/').ToLower())
+                {
+                    case "servers":
+                        return HandlePostServer();
+                    case "images":
+                        return HandlePostImage();
+                }
+            }
             throw new NotImplementedException();
         }
 
@@ -131,25 +208,141 @@ namespace OpenStack.Test.Compute
             throw new NotImplementedException();
         }
 
+        internal IHttpResponseAbstraction HandlePostImage()
+        {
+            switch (this.Uri.Segments.Count())
+            {
+                case 6:
+                    if (this.Uri.Segments[5].TrimEnd('/').ToLower() != "metadata")
+                    {
+                        return TestHelper.CreateResponse(HttpStatusCode.NotFound);
+                    }
+                    var imgId = this.Uri.Segments[4].TrimEnd('/');
+                    var img =
+                        this.Images.FirstOrDefault(
+                            i => string.Equals(i.Id, imgId, StringComparison.OrdinalIgnoreCase));
+                    if (img == null)
+                    {
+                        return TestHelper.CreateResponse(HttpStatusCode.NotFound);
+                    }
+
+                    ParseAndStoreMetadata(img, GetPayload(this.Content));
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
+
+            return TestHelper.CreateResponse(HttpStatusCode.OK, new Dictionary<string, string>());
+        }
+
+        internal IHttpResponseAbstraction HandlePostServer()
+        {
+            switch (this.Uri.Segments.Count())
+            {
+                case 6:
+                    if (this.Uri.Segments[5].TrimEnd('/').ToLower() != "metadata")
+                    {
+                        return TestHelper.CreateResponse(HttpStatusCode.NotFound);
+                    }
+                    var srvId = this.Uri.Segments[4].TrimEnd('/');
+                    var srv =
+                        this.Servers.FirstOrDefault(
+                            s => string.Equals(s.Id, srvId, StringComparison.OrdinalIgnoreCase));
+                    if (srv == null)
+                    {
+                        return TestHelper.CreateResponse(HttpStatusCode.NotFound);
+                    }
+
+                    ParseAndStoreMetadata(srv, GetPayload(this.Content));
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
+
+            return TestHelper.CreateResponse(HttpStatusCode.OK, new Dictionary<string, string>());
+        }
+
         protected override IHttpResponseAbstraction HandleDelete()
         {
             if (this.Uri.Segments.Count() >= 4)
             {
-                if (this.Uri.Segments[3].TrimEnd('/').ToLower() == "images")
+                switch (this.Uri.Segments[3].TrimEnd('/').ToLower())
                 {
-                    if (this.Uri.Segments.Count() == 5)
-                    {
-                        var imageId = this.Uri.Segments[4].TrimEnd('/');
-                        var image = this.Images.FirstOrDefault(i => i.Id == imageId);
-                        if (image != null)
-                        {
-                            this.Images.Remove(image);
-                            return TestHelper.CreateResponse(HttpStatusCode.OK);
-                        }
-                    }
+                    case "images":
+                        return HandleDeleteImages();
+                    case "flavors":
+                        return HandleDeleteFlavors();
+                    case "servers":
+                        return HandleDeleteServers();
                 }
             }
             return TestHelper.CreateResponse(HttpStatusCode.NotFound);
+        }
+
+        private IHttpResponseAbstraction HandleDeleteImages()
+        {
+            if (this.Uri.Segments.Count() < 5)
+            {
+                throw new NotImplementedException();
+            }
+
+            var imageId = this.Uri.Segments[4].TrimEnd('/');
+            var image = this.Images.FirstOrDefault(i => i.Id == imageId);
+            if (image == null)
+            {
+                return TestHelper.CreateResponse(HttpStatusCode.NotFound);
+            }
+
+            switch (this.Uri.Segments.Count())
+            {
+                case 5:
+                    this.Images.Remove(image);
+                    return TestHelper.CreateResponse(HttpStatusCode.OK);
+                case 7:
+                    var key = this.Uri.Segments[6].TrimEnd('/');
+                    if (!image.Metadata.ContainsKey(key))
+                    {
+                        return TestHelper.CreateResponse(HttpStatusCode.NotFound); 
+                    }
+                    image.Metadata.Remove(key);
+                    return TestHelper.CreateResponse(HttpStatusCode.OK);
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        private IHttpResponseAbstraction HandleDeleteFlavors()
+        {
+            throw new NotImplementedException();
+        }
+
+        private IHttpResponseAbstraction HandleDeleteServers()
+        {
+            if (this.Uri.Segments.Count() < 5)
+            {
+                throw new NotImplementedException();
+            }
+
+            var srvId = this.Uri.Segments[4].TrimEnd('/');
+            var srv = this.Servers.FirstOrDefault(s => s.Id == srvId);
+            if (srv == null)
+            {
+                return TestHelper.CreateResponse(HttpStatusCode.NotFound);
+            }
+
+            switch (this.Uri.Segments.Count())
+            {
+                case 7:
+                    var key = this.Uri.Segments[6].TrimEnd('/');
+                    if (!srv.Metadata.ContainsKey(key))
+                    {
+                        return TestHelper.CreateResponse(HttpStatusCode.NotFound);
+                    }
+                    srv.Metadata.Remove(key);
+                    return TestHelper.CreateResponse(HttpStatusCode.OK);
+                default:
+                    throw new NotImplementedException();
+            }
         }
 
         protected override IHttpResponseAbstraction HandleHead()
@@ -160,6 +353,14 @@ namespace OpenStack.Test.Compute
         protected override IHttpResponseAbstraction HandleCopy()
         {
             throw new NotImplementedException();
+        }
+
+        private string GetPayload(Stream input)
+        {
+            using (var sr = new StreamReader(input))
+            {
+                return sr.ReadToEnd();
+            }
         }
 
         private string GenerateItemsPayload(IEnumerable<ComputeItem> items, string collectionName )
@@ -246,6 +447,40 @@ namespace OpenStack.Test.Compute
             return string.Format(payloadFixture, image.Name, image.Status, image.CreateDate, image.LastUpdated,
                 image.MinimumDiskSize, image.UploadProgress, image.MinimumRamSize, image.PublicUri.AbsoluteUri,
                 image.PermanentUri.AbsoluteUri, image.Id);
+        }
+
+        private string GenerateServerPayload(ComputeServer server)
+        {
+            throw new NotImplementedException();
+        }
+
+        private string GenerateMetadataPayload(IDictionary<string, string> metadata)
+        {
+            var payload = new StringBuilder();
+            payload.Append("{ \"metadata\" : {");
+            var isFirst = true;
+
+            foreach (var item in metadata)
+            {
+                if (!isFirst)
+                {
+                    payload.Append(",");
+                }
+
+                payload.AppendFormat("\"{0}\":\"{1}\"", item.Key, item.Value);
+                isFirst = false;
+            }
+
+            payload.Append("}}");
+            return payload.ToString();
+        }
+
+        private void ParseAndStoreMetadata(MetadataComputeItem item, string payload)
+        {
+            var jObj = JObject.Parse(payload);
+            var metaToken = jObj["metadata"];
+            var metdata = JsonConvert.DeserializeObject<Dictionary<string, string>>(metaToken.ToString());
+            item.Metadata = metdata;
         }
     }
 

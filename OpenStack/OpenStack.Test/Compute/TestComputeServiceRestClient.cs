@@ -31,7 +31,27 @@ namespace OpenStack.Test.Compute
 
         public Queue<IHttpResponseAbstraction> Responses { get; set; }
 
+        public Task<IHttpResponseAbstraction> GetFlavors()
+        {
+            return Task.Factory.StartNew(() => Responses.Dequeue());
+        }
+
         public Task<IHttpResponseAbstraction> GetFlavor(string flavorId)
+        {
+            return Task.Factory.StartNew(() => Responses.Dequeue());
+        }
+
+        public Task<IHttpResponseAbstraction> GetServerMetadata(string serverId)
+        {
+            return Task.Factory.StartNew(() => Responses.Dequeue());
+        }
+
+        public Task<IHttpResponseAbstraction> UpdateServerMetadata(string serverId, IDictionary<string, string> metadata)
+        {
+            return Task.Factory.StartNew(() => Responses.Dequeue());
+        }
+
+        public Task<IHttpResponseAbstraction> DeleteServerMetadata(string serverId, string key)
         {
             return Task.Factory.StartNew(() => Responses.Dequeue());
         }
@@ -51,7 +71,17 @@ namespace OpenStack.Test.Compute
             return Task.Factory.StartNew(() => Responses.Dequeue());
         }
 
-        public Task<IHttpResponseAbstraction> GetFlavors()
+        public Task<IHttpResponseAbstraction> GetImageMetadata(string imageId)
+        {
+            return Task.Factory.StartNew(() => Responses.Dequeue());
+        }
+
+        public Task<IHttpResponseAbstraction> UpdateImageMetadata(string imageId, IDictionary<string, string> metadata)
+        {
+            return Task.Factory.StartNew(() => Responses.Dequeue());
+        }
+
+        public Task<IHttpResponseAbstraction> DeleteImageMetadata(string imageId, string key)
         {
             return Task.Factory.StartNew(() => Responses.Dequeue());
         }

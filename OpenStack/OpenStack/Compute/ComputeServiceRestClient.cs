@@ -14,6 +14,8 @@
 // limitations under the License.
 // ============================================================================ */
 
+using System.Collections.Generic;
+
 namespace OpenStack.Compute
 {
     using System;
@@ -26,6 +28,11 @@ namespace OpenStack.Compute
     /// <inheritdoc/>
     internal class ComputeServiceRestClient : OpenStackServiceRestClientBase, IComputeServiceRestClient
     {
+        internal const string MetadataUrlMoniker = "metadata";
+        internal const string ImagesUrlMoniker = "images";
+        internal const string FlavorsUrlMoniker = "flavors";
+        internal const string ServersUrlMoniker = "servers";
+
         /// <summary>
         /// Creates a new instance of the ComputeServiceRestClient class.
         /// </summary>
@@ -40,7 +47,7 @@ namespace OpenStack.Compute
         {
             var client = this.GetHttpClient(this.Context);
 
-            client.Uri = CreateRequestUri(this.Context.PublicEndpoint,"flavors");
+            client.Uri = CreateRequestUri(this.Context.PublicEndpoint, FlavorsUrlMoniker);
             client.Method = HttpMethod.Get;
 
             return await client.SendAsync();
@@ -51,10 +58,28 @@ namespace OpenStack.Compute
         {
             var client = this.GetHttpClient(this.Context);
 
-            client.Uri = CreateRequestUri(this.Context.PublicEndpoint,"flavors", flavorId);
+            client.Uri = CreateRequestUri(this.Context.PublicEndpoint, FlavorsUrlMoniker, flavorId);
             client.Method = HttpMethod.Get;
 
             return await client.SendAsync();
+        }
+
+        /// <inheritdoc/>
+        public async Task<IHttpResponseAbstraction> GetServerMetadata(string serverId)
+        {
+            return await GetItemMetadata(ServersUrlMoniker, serverId);
+        }
+
+        /// <inheritdoc/>
+        public async Task<IHttpResponseAbstraction> UpdateServerMetadata(string serverId, IDictionary<string, string> metadata)
+        {
+            return await UpdateItemMetadata(ServersUrlMoniker, serverId, metadata);
+        }
+
+        /// <inheritdoc/>
+        public async Task<IHttpResponseAbstraction> DeleteServerMetadata(string serverId, string key)
+        {
+            return await DeleteItemMetadata(ServersUrlMoniker, serverId, key);
         }
 
         /// <inheritdoc/>
@@ -62,7 +87,7 @@ namespace OpenStack.Compute
         {
             var client = this.GetHttpClient(this.Context);
 
-            client.Uri = CreateRequestUri(this.Context.PublicEndpoint, "images/detail");
+            client.Uri = CreateRequestUri(this.Context.PublicEndpoint, ImagesUrlMoniker, "detail");
             client.Method = HttpMethod.Get;
 
             return await client.SendAsync();
@@ -73,7 +98,7 @@ namespace OpenStack.Compute
         {
             var client = this.GetHttpClient(this.Context);
 
-            client.Uri = CreateRequestUri(this.Context.PublicEndpoint, "images", imageId);
+            client.Uri = CreateRequestUri(this.Context.PublicEndpoint, ImagesUrlMoniker, imageId);
             client.Method = HttpMethod.Get;
 
             return await client.SendAsync();
@@ -84,8 +109,62 @@ namespace OpenStack.Compute
         {
             var client = this.GetHttpClient(this.Context);
 
-            client.Uri = CreateRequestUri(this.Context.PublicEndpoint, "images", imageId);
+            client.Uri = CreateRequestUri(this.Context.PublicEndpoint, ImagesUrlMoniker, imageId);
             client.Method = HttpMethod.Delete;
+
+            return await client.SendAsync();
+        }
+
+        /// <inheritdoc/>
+        public async Task<IHttpResponseAbstraction> GetImageMetadata(string imageId)
+        {
+            return await GetItemMetadata(ImagesUrlMoniker, imageId);
+        }
+
+        /// <inheritdoc/>
+        public async Task<IHttpResponseAbstraction> UpdateImageMetadata(string imageId, IDictionary<string, string> metadata)
+        {
+            return await UpdateItemMetadata(ImagesUrlMoniker, imageId, metadata);
+        }
+
+        /// <inheritdoc/>
+        public async Task<IHttpResponseAbstraction> DeleteImageMetadata(string imageId, string key)
+        {
+            return await DeleteItemMetadata(ImagesUrlMoniker, imageId, key);
+        }
+
+        internal async Task<IHttpResponseAbstraction> DeleteItemMetadata(string itemType, string itemId, string key)
+        {
+            var client = this.GetHttpClient(this.Context);
+
+            client.Uri = CreateRequestUri(this.Context.PublicEndpoint, itemType, itemId, MetadataUrlMoniker, key);
+            client.Method = HttpMethod.Delete;
+
+            return await client.SendAsync();
+        }
+
+        internal async Task<IHttpResponseAbstraction> UpdateItemMetadata(string itemType, string itemId, IDictionary<string, string> metadata)
+        {
+            var client = this.GetHttpClient(this.Context);
+
+            client.Uri = CreateRequestUri(this.Context.PublicEndpoint, itemType, itemId, MetadataUrlMoniker);
+            client.ContentType = "application/json";
+            client.Method = HttpMethod.Post;
+
+            var converter = this.ServiceLocator.Locate<IComputeItemMetadataPayloadConverter>();
+            var payload = converter.Convert(metadata);
+
+            client.Content = payload.ConvertToStream();
+
+            return await client.SendAsync();
+        }
+
+        internal async Task<IHttpResponseAbstraction> GetItemMetadata(string itemType, string itemId)
+        {
+            var client = this.GetHttpClient(this.Context);
+
+            client.Uri = CreateRequestUri(this.Context.PublicEndpoint, itemType, itemId, MetadataUrlMoniker);
+            client.Method = HttpMethod.Get;
 
             return await client.SendAsync();
         }

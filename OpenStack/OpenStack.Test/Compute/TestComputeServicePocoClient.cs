@@ -34,9 +34,36 @@ namespace OpenStack.Test.Compute
 
         public Func<string, Task> DeleteImageDelegate { get; set; }
 
+        public Func<string, Task<IDictionary<string,string>>> GetImageMetadataDelegate { get; set; }
+
+        public Func<string, IDictionary<string, string>, Task> UpdateImageMetadataDelegate { get; set; }
+
+        public Func<string, string, Task> DeleteImageMetadataDelegate { get; set; }
+
+        public Func<string, Task<IDictionary<string, string>>> GetServerMetadataDelegate { get; set; }
+
+        public Func<string, IDictionary<string, string>, Task> UpdateServerMetadataDelegate { get; set; }
+
+        public Func<string, string, Task> DeleteServerMetadataDelegate { get; set; }
+
         public async Task<ComputeFlavor> GetFlavor(string flavorId)
         {
             return await this.GetFlavorDelegate(flavorId);
+        }
+
+        public async Task<IDictionary<string, string>> GetServerMetadata(string serverId)
+        {
+            return await this.GetServerMetadataDelegate(serverId);
+        }
+
+        public async Task UpdateServerMetadata(string serverId, IDictionary<string, string> metadata)
+        {
+            await this.UpdateServerMetadataDelegate(serverId, metadata);
+        }
+
+        public async Task DeleteServerMetadata(string serverId, string key)
+        {
+            await this.DeleteServerMetadataDelegate(serverId, key);
         }
 
         public async Task<IEnumerable<ComputeImage>> GetImages()
@@ -52,6 +79,21 @@ namespace OpenStack.Test.Compute
         public async Task DeleteImage(string imageId)
         {
             await this.DeleteImageDelegate(imageId);
+        }
+
+        public async Task<IDictionary<string, string>> GetImageMetadata(string flavorId)
+        {
+            return await this.GetImageMetadataDelegate(flavorId);
+        }
+
+        public async Task UpdateImageMetadata(string flavorId, IDictionary<string, string> metadata)
+        {
+            await this.UpdateImageMetadataDelegate(flavorId, metadata);
+        }
+
+        public async Task DeleteImageMetadata(string flavorId, string key)
+        {
+            await this.DeleteImageMetadataDelegate(flavorId, key);
         }
 
         public async Task<IEnumerable<ComputeFlavor>> GetFlavors()

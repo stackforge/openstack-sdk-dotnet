@@ -59,6 +59,8 @@
     <Compile Include="Compute\ComputeFlavorPayloadConverter.cs" />
     <Compile Include="Compute\ComputeImage.cs" />
     <Compile Include="Compute\ComputeItem.cs" />
+    <Compile Include="Compute\ComputeItemMetadataPayloadConverter.cs" />
+    <Compile Include="Compute\ComputeServer.cs" />
     <Compile Include="Compute\ComputeServiceClientDefinition.cs" />
     <Compile Include="Compute\ComputeServiceClient.cs" />
     <Compile Include="Compute\ComputeServicePocoClient.cs" />
@@ -67,11 +69,13 @@
     <Compile Include="Compute\ComputeServiceRestClientFactory.cs" />
     <Compile Include="Compute\IComputeImagePayloadConverter.cs" />
     <Compile Include="Compute\IComputeFlavorPayloadConverter.cs" />
+    <Compile Include="Compute\IComputeItemMetadataPayloadConverter.cs" />
     <Compile Include="Compute\IComputeServiceClient.cs" />
     <Compile Include="Compute\IComputeServicePocoClient.cs" />
     <Compile Include="Compute\IComputeServicePocoClientFactory.cs" />
     <Compile Include="Compute\IComputeServiceRestClient.cs" />
     <Compile Include="Compute\IComputeServiceRestClientFactory.cs" />
+    <Compile Include="Compute\MetadataComputeItem.cs" />
     <Compile Include="Identity\AccessTokenPayloadConverter.cs" />
     <Compile Include="Identity\IAccessTokenPayloadConverter.cs" />
     <Compile Include="Identity\ICredential.cs" />

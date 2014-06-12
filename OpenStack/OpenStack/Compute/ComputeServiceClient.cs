@@ -47,7 +47,7 @@ namespace OpenStack.Compute
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<ComputeFlavor>> ListFlavors()
+        public async Task<IEnumerable<ComputeFlavor>> GetFlavors()
         {
             var client = this.GetPocoClient();
             return await client.GetFlavors();
@@ -63,7 +63,36 @@ namespace OpenStack.Compute
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<ComputeImage>> ListImages()
+        public async Task<IDictionary<string, string>> GetServerMetadata(string flavorId)
+        {
+            flavorId.AssertIsNotNullOrEmpty("flavorId", "Cannot get compute flavor metadata with a null or empty id.");
+            
+            var client = this.GetPocoClient();
+            return await client.GetServerMetadata(flavorId);
+        }
+
+        /// <inheritdoc/>
+        public async Task UpdateServerMetadata(string flavorId, IDictionary<string, string> metadata)
+        {
+            flavorId.AssertIsNotNullOrEmpty("flavorId", "Cannot update compute flavor metadata with a null or empty id.");
+            metadata.AssertIsNotNull("metadata", "Cannot update compute flavor metadata with a null or empty metadata.");
+
+            var client = this.GetPocoClient();
+            await client.UpdateServerMetadata(flavorId, metadata);
+        }
+
+        /// <inheritdoc/>
+        public async Task DeleteServerMetadata(string flavorId, string key)
+        {
+            flavorId.AssertIsNotNullOrEmpty("flavorId", "Cannot delete a compute flavor metadata item with a null or empty id.");
+            key.AssertIsNotNullOrEmpty("key", "Cannot delete a compute flavor metadata item with a null or empty key.");
+
+            var client = this.GetPocoClient();
+            await client.DeleteServerMetadata(flavorId, key);
+        }
+
+        /// <inheritdoc/>
+        public async Task<IEnumerable<ComputeImage>> GetImages()
         {
             var client = this.GetPocoClient();
             return await client.GetImages();
@@ -85,6 +114,35 @@ namespace OpenStack.Compute
 
             var client = this.GetPocoClient();
             await client.DeleteImage(imageId);
+        }
+
+        /// <inheritdoc/>
+        public async Task<IDictionary<string, string>> GetImageMetadata(string imageId)
+        {
+            imageId.AssertIsNotNullOrEmpty("flavorId", "Cannot get compute image metadata with a null or empty id.");
+
+            var client = this.GetPocoClient();
+            return await client.GetImageMetadata(imageId);
+        }
+
+        /// <inheritdoc/>
+        public async Task UpdateImageMetadata(string imageId, IDictionary<string, string> metadata)
+        {
+            imageId.AssertIsNotNullOrEmpty("imageId", "Cannot update compute image metadata with a null or empty id.");
+            metadata.AssertIsNotNull("metadata", "Cannot update compute image metadata with a null or empty metadata.");
+
+            var client = this.GetPocoClient();
+            await client.UpdateImageMetadata(imageId, metadata);
+        }
+
+        /// <inheritdoc/>
+        public async Task DeleteImageMetadata(string imageId, string key)
+        {
+            imageId.AssertIsNotNullOrEmpty("imageId", "Cannot delete a compute image metadata item with a null or empty id.");
+            key.AssertIsNotNullOrEmpty("key", "Cannot delete a compute image metadata item with a null or empty key.");
+
+            var client = this.GetPocoClient();
+            await client.DeleteImageMetadata(imageId, key);
         }
 
         /// <summary>

@@ -15,11 +15,14 @@
 // ============================================================================ */
 
 using System;
+using System.Collections.Generic;
 
 namespace OpenStack.Compute
 {
-
-    public class ComputeImage : ComputeItem
+    /// <summary>
+    /// Represents an image on a remote OpenStack instance.
+    /// </summary>
+    public class ComputeImage : MetadataComputeItem
     {
         /// <summary>
         /// Gets the current status of the image.
@@ -58,13 +61,16 @@ namespace OpenStack.Compute
         /// <param name="name">The name of the image.</param>
         /// <param name="publicUri">The public Uri for the image.</param>
         /// <param name="permanentUri">The permanent Uri of the image.</param>
+        /// <param name="metadata">The metadata for the image.</param>
         /// <param name="status">The current status for the image.</param>
         /// <param name="created">The date and time when the image was created.</param>
         /// <param name="updated">The data and time when the image was last updated.</param>
         /// <param name="minDisk">The minimum disk size for the image.</param>
         /// <param name="minRam">The minimum ram size for the image.</param>
         /// <param name="progress">The upload progress for the image.</param>
-        internal ComputeImage(string id, string name, Uri publicUri, Uri permanentUri, string status, DateTime created, DateTime updated, int minDisk, int minRam, int progress) : base (id, name, publicUri, permanentUri)
+        internal ComputeImage(string id, string name, Uri publicUri, Uri permanentUri,
+            IDictionary<string, string> metadata, string status, DateTime created, DateTime updated, int minDisk,
+            int minRam, int progress) : base(id, name, publicUri, permanentUri, metadata)
         {
             this.Status = status;
             this.CreateDate = created;
