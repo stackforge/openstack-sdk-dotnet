@@ -138,6 +138,30 @@ namespace OpenStack.Test.HttpAbstraction
         [TestMethod]
         [TestCategory("Integration")]
         [TestCategory("LongRunning")]
+        public void CanMakePostRequestWithNullContent()
+        {
+            using (var client = new HttpAbstractionClientFactory().Create())
+            {
+                client.Uri = new Uri("http://httpbin.org/post");
+                client.Method = HttpMethod.Post;
+
+                var responseTask = client.SendAsync();
+                responseTask.Wait();
+                var response = responseTask.Result;
+
+                Assert.IsNotNull(response);
+                Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+
+                var stringContent = TestHelper.GetStringFromStream(response.Content);
+
+                Assert.IsTrue(stringContent.Contains("\"data\": \"\""));
+
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("Integration")]
+        [TestCategory("LongRunning")]
         public void CanMakeDeleteRequest()
         {
             using (var client = new HttpAbstractionClientFactory().Create())

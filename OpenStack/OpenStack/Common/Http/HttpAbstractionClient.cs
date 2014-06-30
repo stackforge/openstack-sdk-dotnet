@@ -79,10 +79,13 @@ namespace OpenStack.Common.Http
 
             if (this.Method == HttpMethod.Post || this.Method == HttpMethod.Put)
             {
-                requestMessage.Content = new StreamContent(this.Content);
-                if (this.ContentType != string.Empty)
+                if (this.Content != null)
                 {
-                    requestMessage.Content.Headers.ContentType = new MediaTypeHeaderValue(this.ContentType);
+                    requestMessage.Content = new StreamContent(this.Content);
+                    if (this.ContentType != string.Empty)
+                    {
+                        requestMessage.Content.Headers.ContentType = new MediaTypeHeaderValue(this.ContentType);
+                    }
                 }
             }
 
