@@ -51,6 +51,7 @@ namespace OpenStack.Test.Storage
             public void ProcessMetaDataFromHeaders(IDictionary<string, string> headers)
             {
                 headers.Keys.Where(k => k.ToLowerInvariant().StartsWith("x-object-meta-")).ToList().ForEach(i => this.MetaData.Add(i, headers[i]));
+                headers.Keys.Where(k => k.ToLowerInvariant().StartsWith("x-container-meta-")).ToList().ForEach(i => this.MetaData.Add(i, headers[i]));
             }
 
             public void LoadContent(Stream content)

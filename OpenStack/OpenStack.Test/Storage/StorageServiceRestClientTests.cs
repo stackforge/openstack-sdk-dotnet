@@ -490,10 +490,10 @@ namespace OpenStack.Test.Storage
             Assert.AreEqual(HttpStatusCode.Created, resp.StatusCode);
             Assert.IsTrue(this.simulator.Containers.ContainsKey(containerName));
 
-            Assert.IsTrue(this.simulator.Headers.ContainsKey("X-Object-Meta-Test1"));
-            Assert.IsTrue(this.simulator.Headers.ContainsKey("X-Object-Meta-Test2"));
-            Assert.AreEqual("Test1", this.simulator.Headers["X-Object-Meta-Test1"]);
-            Assert.AreEqual("Test2", this.simulator.Headers["X-Object-Meta-Test2"]);
+            Assert.IsTrue(this.simulator.Headers.ContainsKey("X-Container-Meta-Test1"));
+            Assert.IsTrue(this.simulator.Headers.ContainsKey("X-Container-Meta-Test2"));
+            Assert.AreEqual("Test1", this.simulator.Headers["X-Container-Meta-Test1"]);
+            Assert.AreEqual("Test2", this.simulator.Headers["X-Container-Meta-Test2"]);
         }
 
         [TestMethod]
@@ -515,7 +515,7 @@ namespace OpenStack.Test.Storage
 
             Assert.AreEqual(HttpStatusCode.Accepted, resp.StatusCode);
             Assert.IsTrue(this.simulator.Containers.ContainsKey(containerName));
-            Assert.IsTrue(this.simulator.Containers[containerName].MetaData.ContainsKey("X-Object-Meta-Test1"));
+            Assert.IsTrue(this.simulator.Containers[containerName].MetaData.ContainsKey("X-Container-Meta-Test1"));
         }
 
         #endregion
@@ -979,11 +979,12 @@ namespace OpenStack.Test.Storage
             Assert.AreEqual(HttpStatusCode.NotFound, resp.StatusCode);
         }
 
+        [TestMethod]
         public async Task CanUpdateAStorageContainer()
         {
             var containerName = "newContainer";
 
-            var origMetaData = new Dictionary<string, string> { { "X-Object-Meta-Test1", "Test1" } };
+            var origMetaData = new Dictionary<string, string> { { "X-Container-Meta-Test1", "Test1" } };
 
             this.simulator.Containers.Add(containerName, new StorageRestSimulator.StorageItem(containerName) { MetaData = origMetaData });
 
@@ -993,12 +994,13 @@ namespace OpenStack.Test.Storage
             var metadata = new Dictionary<string, string> { { "Test2", "Test2" } };
 
             var resp = await client.UpdateContainer(containerName, metadata);
-
             Assert.AreEqual(HttpStatusCode.Accepted, resp.StatusCode);
 
-            Assert.IsTrue(resp.Headers.Any(kvp => kvp.Key == "X-Object-Meta-Test2"));
-            Assert.IsFalse(resp.Headers.Any(kvp => kvp.Key == "X-Object-Meta-Test1"));
-            Assert.AreEqual("Test2", resp.Headers.First(kvp => kvp.Key == "X-Object-Meta-Test2").Value.First());
+            resp = await client.GetContainer(containerName);
+            
+            Assert.IsTrue(resp.Headers.Any(kvp => kvp.Key == "X-Container-Meta-Test2"));
+            Assert.IsFalse(resp.Headers.Any(kvp => kvp.Key == "X-Container-Meta-Test1"));
+            Assert.AreEqual("Test2", resp.Headers.First(kvp => kvp.Key == "X-Container-Meta-Test2").Value.First());
         }
 
         #endregion

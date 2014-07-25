@@ -51,7 +51,7 @@ namespace OpenStack.Storage
             client.Uri = CreateRequestUri(this.Context.PublicEndpoint, containerName, objectName);
             client.Method = HttpMethod.Put;
 
-            this.AddItemMetadata(metadata, client);
+            this.AddObjectMetadata(metadata, client);
 
             client.Content = content;
 
@@ -73,7 +73,7 @@ namespace OpenStack.Storage
             client.Content = new MemoryStream();
 
             client.Headers.Add("X-Object-Manifest", segmentsPath);
-            this.AddItemMetadata(metadata, client);
+            this.AddObjectMetadata(metadata, client);
 
             return await client.SendAsync();
         }
@@ -93,7 +93,7 @@ namespace OpenStack.Storage
             client.Method = HttpMethod.Put;
             client.Content = content;
 
-            this.AddItemMetadata(metadata, client);
+            this.AddObjectMetadata(metadata, client);
 
             return await client.SendAsync();
         }
@@ -109,7 +109,7 @@ namespace OpenStack.Storage
             client.Method = HttpMethod.Put;
             client.Content = new MemoryStream();
 
-            this.AddItemMetadata(metadata, client);
+            this.AddContainerMetadata(metadata, client);
 
             return await client.SendAsync();
         }
@@ -194,7 +194,7 @@ namespace OpenStack.Storage
 
             client.Uri = CreateRequestUri(this.Context.PublicEndpoint, containerName, objectName);
             client.Method = HttpMethod.Post;
-            AddItemMetadata(metadata,client);
+            AddObjectMetadata(metadata,client);
 
             return await client.SendAsync();
         }
@@ -208,7 +208,7 @@ namespace OpenStack.Storage
 
             client.Uri = CreateRequestUri(this.Context.PublicEndpoint, containerName);
             client.Method = HttpMethod.Post;
-            AddItemMetadata(metadata, client);
+            AddContainerMetadata(metadata, client);
 
             return await client.SendAsync();
         }
@@ -282,16 +282,37 @@ namespace OpenStack.Storage
         }
 
         /// <summary>
-        /// Adds the appropriate heads to the Http client for the given items metadata.
+        /// Adds the appropriate headers to the Http client for the given items metadata.
         /// </summary>
+        /// <param name="headerPrefix">The prefix for the header.</param>
         /// <param name="metadata">The items metadata.</param>
         /// <param name="client">The http client.</param>
-        internal void AddItemMetadata( IDictionary<string, string> metadata, IHttpAbstractionClient client)
+        internal void AddItemMetadata(string headerPrefix, IDictionary<string, string> metadata, IHttpAbstractionClient client)
         {
             foreach (var header in metadata)
             {
-                client.Headers.Add(string.Format("X-Object-Meta-{0}", header.Key), header.Value);
+                client.Headers.Add(string.Format("{0}-{1}", headerPrefix, header.Key), header.Value);
             }
+        }
+
+        /// <summary>
+        /// Adds the appropriate headers to the Http client for the given objects metadata.
+        /// </summary>
+        /// <param name="metadata">The items metadata.</param>
+        /// <param name="client">The http client.</param>
+        internal void AddObjectMetadata(IDictionary<string, string> metadata, IHttpAbstractionClient client)
+        {
+            AddItemMetadata("X-Object-Meta", metadata, client); 
+        }
+
+        /// <summary>
+        /// Adds the appropriate headers to the Http client for the given containers metadata.
+        /// </summary>
+        /// <param name="metadata">The items metadata.</param>
+        /// <param name="client">The http client.</param>
+        internal void AddContainerMetadata(IDictionary<string, string> metadata, IHttpAbstractionClient client)
+        {
+            AddItemMetadata("X-Container-Meta", metadata, client); 
         }
 
         /// <summary>

@@ -284,10 +284,13 @@ namespace OpenStack.Test.HttpAbstraction
                 client.Uri = new Uri("http://httpbin.org/get");
                 client.Headers.Add("X-Test-Header","TEST");
 
+                //Added in order to force httpbin not to cache the responses from any prior get requests/unit tests. 
+                client.Headers.Add("Cache-Control", "max-age=0");
+
                 var responseTask = client.SendAsync();
+                
                 responseTask.Wait();
                 var response = responseTask.Result;
-
                 Assert.IsNotNull(response);
                 Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
 
