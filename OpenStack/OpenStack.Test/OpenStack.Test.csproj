@@ -82,6 +82,13 @@
     <Compile Include="Identity\OpenStackServiceCatalogTests.cs" />
     <Compile Include="Identity\IdentityServiceClientDefinitionTests.cs" />
     <Compile Include="Identity\OpenStackRegionResolverTests.cs" />
+    <Compile Include="Network\NetworkServiceClientTests.cs" />
+    <Compile Include="Network\NetworkServicePocoClientTests.cs" />
+    <Compile Include="Network\NetworkPayloadConverterTests.cs" />
+    <Compile Include="Network\NetworkRestSimulator.cs" />
+    <Compile Include="Network\NetworkServiceRestClientTests.cs" />
+    <Compile Include="Network\TestNetworkServicePocoClient.cs" />
+    <Compile Include="Network\TestNetworkServiceRestClient.cs" />
     <Compile Include="RestSimulator.cs" />
     <Compile Include="ServiceLocation\ServiceLocationAssemblyScannerTests.cs" />
     <Compile Include="ServiceLocation\ServiceLocatorTests.cs" />

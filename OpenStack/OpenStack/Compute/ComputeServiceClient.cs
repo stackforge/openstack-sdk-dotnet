@@ -31,7 +31,7 @@ namespace OpenStack.Compute
         internal IServiceLocator ServiceLocator;
 
         /// <summary>
-        /// Creates a new instance of the StorageServiceClient class.
+        /// Creates a new instance of the ComputeServiceClient class.
         /// </summary>
         /// <param name="credentials">The credential to be used by this client.</param>
         /// <param name="token">The cancellation token to be used by this client.</param>

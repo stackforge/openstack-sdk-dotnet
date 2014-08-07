@@ -18,6 +18,7 @@ using OpenStack.Common.Http;
 using OpenStack.Common.ServiceLocation;
 using OpenStack.Compute;
 using OpenStack.Identity;
+using OpenStack.Network;
 using OpenStack.Storage;
 
 namespace OpenStack
@@ -42,6 +43,10 @@ namespace OpenStack
             manager.RegisterServiceInstance(typeof(IComputeServicePocoClientFactory), new ComputeServicePocoClientFactory());
             manager.RegisterServiceInstance(typeof(IComputeServiceRestClientFactory), new ComputeServiceRestClientFactory());
 
+            //Network related clients/services
+            manager.RegisterServiceInstance(typeof(INetworkServicePocoClientFactory), new NetworkServicePocoClientFactory());
+            manager.RegisterServiceInstance(typeof(INetworkServiceRestClientFactory), new NetworkServiceRestClientFactory());
+
             //Identity related clients/services
             manager.RegisterServiceInstance(typeof(IIdentityServicePocoClientFactory), new IdentityServicePocoClientFactory());
             manager.RegisterServiceInstance(typeof(IIdentityServiceRestClientFactory), new IdentityServiceRestClientFactory());
@@ -57,6 +62,7 @@ namespace OpenStack
             manager.RegisterServiceInstance(typeof(IOpenStackServiceDefinitionPayloadConverter), new OpenStackServiceDefinitionPayloadConverter(locator));
             manager.RegisterServiceInstance(typeof(IOpenStackServiceEndpointPayloadConverter), new OpenStackServiceEndpointPayloadConverter());
             manager.RegisterServiceInstance(typeof(IComputeFlavorPayloadConverter), new ComputeFlavorPayloadConverter());
+            manager.RegisterServiceInstance(typeof(INetworkPayloadConverter), new NetworkPayloadConverter());
             manager.RegisterServiceInstance(typeof(IComputeImagePayloadConverter), new ComputeImagePayloadConverter());
             manager.RegisterServiceInstance(typeof(IComputeItemMetadataPayloadConverter), new ComputeItemMetadataPayloadConverter());
 
@@ -70,6 +76,7 @@ namespace OpenStack
             serviceManager.RegisterServiceClient<StorageServiceClient>(new StorageServiceClientDefinition());
             serviceManager.RegisterServiceClient<IdentityServiceClient>(new IdentityServiceClientDefinition());
             serviceManager.RegisterServiceClient<ComputeServiceClient>(new ComputeServiceClientDefinition());
+            serviceManager.RegisterServiceClient<NetworkServiceClient>(new NetworkServiceClientDefinition());
             manager.RegisterServiceInstance(typeof(IOpenStackServiceClientManager), serviceManager);
         }
     }

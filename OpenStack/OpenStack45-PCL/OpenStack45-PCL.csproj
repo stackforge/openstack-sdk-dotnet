@@ -271,6 +271,51 @@
     <Compile Include="..\OpenStack\IOpenStackServiceClientManager.cs">
       <Link>IOpenStackServiceClientManager.cs</Link>
     </Compile>
+    <Compile Include="..\OpenStack\Network\INetworkPayloadConverter.cs">
+      <Link>Network\INetworkPayloadConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenStack\Network\INetworkServiceClient.cs">
+      <Link>Network\INetworkServiceClient.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenStack\Network\INetworkServicePocoClient.cs">
+      <Link>Network\INetworkServicePocoClient.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenStack\Network\INetworkServicePocoClientFactory.cs">
+      <Link>Network\INetworkServicePocoClientFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenStack\Network\INetworkServiceRestClient.cs">
+      <Link>Network\INetworkServiceRestClient.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenStack\Network\INetworkServiceRestClientFactory.cs">
+      <Link>Network\INetworkServiceRestClientFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenStack\Network\Network.cs">
+      <Link>Network\Network.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenStack\Network\NetworkPayloadConverter.cs">
+      <Link>Network\NetworkPayloadConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenStack\Network\NetworkServiceClient.cs">
+      <Link>Network\NetworkServiceClient.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenStack\Network\NetworkServiceClientDefinition.cs">
+      <Link>Network\NetworkServiceClientDefinition.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenStack\Network\NetworkServicePocoClient.cs">
+      <Link>Network\NetworkServicePocoClient.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenStack\Network\NetworkServicePocoClientFactory.cs">
+      <Link>Network\NetworkServicePocoClientFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenStack\Network\NetworkServiceRestClient.cs">
+      <Link>Network\NetworkServiceRestClient.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenStack\Network\NetworkServiceRestClientFactory.cs">
+      <Link>Network\NetworkServiceRestClientFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenStack\Network\NetworkStatus.cs">
+      <Link>Network\NetworkStatus.cs</Link>
+    </Compile>
     <Compile Include="..\OpenStack\OpenStackClient.cs">
       <Link>OpenStackClient.cs</Link>
     </Compile>
