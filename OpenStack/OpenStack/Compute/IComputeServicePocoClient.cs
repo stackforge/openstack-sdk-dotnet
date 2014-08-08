@@ -58,6 +58,24 @@ namespace OpenStack.Compute
         Task DeleteImage(string imageId);
 
         /// <summary>
+        /// Creates a new server on the remote OpenStack instance.
+        /// </summary>
+        /// <param name="name">The name of the server.</param>
+        /// <param name="imageId">The id for the image that this server will be based on.</param>
+        /// <param name="flavorId">The id of the flavor to use for this server.</param>
+        /// <param name="networkId">The network to connect this server to.</param>
+        /// <param name="securityGroups">A list of security group names to associate with this server.</param>
+        /// <returns>A server object.</returns>
+        Task<ComputeServer> CreateServer(string name, string imageId, string flavorId, string networkId, IEnumerable<string> securityGroups);
+
+        /// <summary>
+        /// Deletes the server with the given id from the remote OpenStack instance.
+        /// </summary>
+        /// <param name="serverId">The id of the server.</param>
+        /// <returns>An async task.</returns>
+        Task DeleteServer(string serverId);
+
+        /// <summary>
         /// Gets the associated metadata for a given compute image.
         /// </summary>
         /// <param name="imageId">The id for the image.</param>

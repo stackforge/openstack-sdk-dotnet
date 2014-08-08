@@ -127,6 +127,9 @@
     <Compile Include="..\OpenStack\Compute\ComputeServer.cs">
       <Link>Compute\ComputeServer.cs</Link>
     </Compile>
+    <Compile Include="..\OpenStack\Compute\ComputeServerPayloadConverter.cs">
+      <Link>Compute\ComputeServerPayloadConverter.cs</Link>
+    </Compile>
     <Compile Include="..\OpenStack\Compute\ComputeServiceClient.cs">
       <Link>Compute\ComputeServiceClient.cs</Link>
     </Compile>
@@ -153,6 +156,9 @@
     </Compile>
     <Compile Include="..\OpenStack\Compute\IComputeItemMetadataPayloadConverter.cs">
       <Link>Compute\IComputeItemMetadataPayloadConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenStack\Compute\IComputeServerPayloadConverter.cs">
+      <Link>Compute\IComputeServerPayloadConverter.cs</Link>
     </Compile>
     <Compile Include="..\OpenStack\Compute\IComputeServiceClient.cs">
       <Link>Compute\IComputeServiceClient.cs</Link>

@@ -239,6 +239,8 @@ namespace OpenStack.Test.Compute
         {
             switch (this.Uri.Segments.Count())
             {
+                case 4:
+                    return HandlePostNewServer();
                 case 6:
                     if (this.Uri.Segments[5].TrimEnd('/').ToLower() != "metadata")
                     {
@@ -260,6 +262,18 @@ namespace OpenStack.Test.Compute
             }
 
             return TestHelper.CreateResponse(HttpStatusCode.OK, new Dictionary<string, string>());
+        }
+
+        internal IHttpResponseAbstraction HandlePostNewServer()
+        {
+            var payload = TestHelper.GetStringFromStream(this.Content);
+            var obj = JObject.Parse(payload);
+            var name = (string)obj["server"]["name"];
+            var srv = new ComputeServer(Guid.NewGuid().ToString(), name, "12345", new Uri("http://test.com"), new Uri("http://test.com"), new Dictionary<string, string>());
+            this.Servers.Add(srv);
+            var responsePayload = GenerateCreateServeResponse(srv);
+
+            return TestHelper.CreateResponse(HttpStatusCode.Accepted, new Dictionary<string, string>(), responsePayload.ConvertToStream());
         }
 
         protected override IHttpResponseAbstraction HandleDelete()
@@ -332,6 +346,9 @@ namespace OpenStack.Test.Compute
 
             switch (this.Uri.Segments.Count())
             {
+                case 5:
+                    this.Servers.Remove(srv);
+                    return TestHelper.CreateResponse(HttpStatusCode.OK);
                 case 7:
                     var key = this.Uri.Segments[6].TrimEnd('/');
                     if (!srv.Metadata.ContainsKey(key))
@@ -447,6 +464,38 @@ namespace OpenStack.Test.Compute
             return string.Format(payloadFixture, image.Name, image.Status, image.CreateDate, image.LastUpdated,
                 image.MinimumDiskSize, image.UploadProgress, image.MinimumRamSize, image.PublicUri.AbsoluteUri,
                 image.PermanentUri.AbsoluteUri, image.Id);
+        }
+
+        internal string GenerateCreateServeResponse(ComputeServer server)
+        {
+            var payloadFixture = @"{{
+                ""server"": {{
+                    ""security_groups"": [
+                        {{
+                            ""name"": ""default""
+                        }},
+                        {{
+                            ""name"": ""MyGroup""
+                        }}
+                    ],
+                    ""OS-DCF:diskConfig"": ""MANUAL"",
+                    ""id"": ""{0}"",
+                    ""links"": [
+                        {{
+                            ""href"": ""{2}"",
+                            ""rel"": ""self""
+                        }},
+                        {{
+                            ""href"": ""{3}"",
+                            ""rel"": ""bookmark""
+                        }}
+                    ],
+                    ""adminPass"": ""{1}""
+                }}
+            }}";
+
+            return string.Format(payloadFixture, server.Id, server.AdminPassword,
+                server.PublicUri.AbsoluteUri, server.PermanentUri.AbsoluteUri);
         }
 
         private string GenerateServerPayload(ComputeServer server)

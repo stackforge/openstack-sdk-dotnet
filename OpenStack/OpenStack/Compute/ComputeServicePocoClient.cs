@@ -164,6 +164,35 @@ namespace OpenStack.Compute
         }
 
         /// <inheritdoc/>
+        public async Task<ComputeServer> CreateServer(string name, string imageId, string flavorId, string networkId, IEnumerable<string> securityGroups)
+        {
+            var client = this.GetRestClient();
+            var resp = await client.CreateServer(name, imageId, flavorId, networkId, securityGroups);
+
+            if (resp.StatusCode != HttpStatusCode.Accepted && resp.StatusCode != HttpStatusCode.OK)
+            {
+                throw new InvalidOperationException(string.Format("Failed to create compute server. The remote server returned the following status code: '{0}'.", resp.StatusCode));
+            }
+
+            var converter = this.ServiceLocator.Locate<IComputeServerPayloadConverter>();
+            var metadata = converter.ConvertSummary(await resp.ReadContentAsStringAsync());
+
+            return metadata;
+        }
+
+        /// <inheritdoc/>
+        public async Task DeleteServer(string serverId)
+        {
+            var client = this.GetRestClient();
+            var resp = await client.DeleteServer(serverId);
+
+            if (resp.StatusCode != HttpStatusCode.OK && resp.StatusCode != HttpStatusCode.NoContent)
+            {
+                throw new InvalidOperationException(string.Format("Failed to delete compute server. The remote server returned the following status code: '{0}'.", resp.StatusCode));
+            }
+        }
+
+        /// <inheritdoc/>
         public async Task<IDictionary<string, string>> GetImageMetadata(string imageId)
         {
             var client = this.GetRestClient();

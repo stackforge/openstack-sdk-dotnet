@@ -19,12 +19,65 @@ using System.Collections.Generic;
 
 namespace OpenStack.Compute
 {
+    /// <summary>
+    /// Represents a compute server on a remote instance of OpenStack.
+    /// </summary>
     public class ComputeServer : MetadataComputeItem
     {
-        public ComputeServer(string id, string name, Uri publicUri, Uri permanentUri,
+        /// <summary>
+        /// Gets the progress of the current server action.
+        /// </summary>
+        public int Progress { get; internal set; }
+
+        /// <summary>
+        /// Gets the administrative password for this server (only available after creating a new server).
+        /// </summary>
+        public string AdminPassword { get; internal set; }
+
+        /// <summary>
+        /// Creates a new instance of the ComputeServer class.
+        /// </summary>
+        /// <param name="id">The id of the compute server.</param>
+        /// <param name="name">The name of the compute server.</param>
+        /// <param name="publicUri">The public Uri for the compute server.</param>
+        /// <param name="permanentUri">The permanent Uri for the computer server.</param>
+        /// <param name="metadata">Metadata associated with the compute server.</param>
+        internal ComputeServer(string id, string name, Uri publicUri, Uri permanentUri,
             IDictionary<string, string> metadata) : base(id, name, publicUri, permanentUri, metadata)
         {
             
+        }
+
+        /// <summary>
+        /// Creates a new instance of the ComputeServer class.
+        /// </summary>
+        /// <param name="id">The id of the compute server.</param>
+        /// <param name="name">The name of the compute server.</param>
+        /// <param name="adminPassword">The administrative password for the compute instance.</param>
+        /// <param name="publicUri">The public Uri for the compute server.</param>
+        /// <param name="permanentUri">The permanent Uri for the computer server.</param>
+        /// <param name="metadata">Metadata associated with the compute server.</param>
+        internal ComputeServer(string id, string name, string adminPassword, Uri publicUri, Uri permanentUri,
+            IDictionary<string, string> metadata)
+            : base(id, name, publicUri, permanentUri, metadata)
+        {
+            this.AdminPassword = adminPassword;
+        }
+
+        /// <summary>
+        /// Creates a new instance of the ComputeServer class.
+        /// </summary>
+        /// <param name="id">The id of the compute server.</param>
+        /// <param name="name">The name of the compute server.</param>
+        /// <param name="progress">The progress of the current action.</param>
+        /// <param name="publicUri">The public Uri for the compute server.</param>
+        /// <param name="permanentUri">The permanent Uri for the computer server.</param>
+        /// <param name="metadata">Metadata associated with the compute server.</param>
+        internal ComputeServer(string id, string name, int progress, Uri publicUri, Uri permanentUri,
+            IDictionary<string, string> metadata)
+            : base(id, name, publicUri, permanentUri, metadata)
+        {
+            this.Progress = progress;
         }
     }
 

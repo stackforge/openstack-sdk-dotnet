@@ -396,6 +396,180 @@ namespace OpenStack.Test.Compute
 
         #endregion
 
+        #region Create Compute Server Tests
+
+        [TestMethod]
+        public async Task CanCreateComputeServerWithAcceptedResponse()
+        {
+            var serverId = "98765";
+            var publicUrl = "http://15.125.87.81:8774/v2/ffe683d1060449d09dac0bf9d7a371cd/servers/" + serverId;
+            var permUrl = "http://15.125.87.81:8774/ffe683d1060449d09dac0bf9d7a371cd/servers/" + serverId;
+            var adminPassword = "ABCDEF";
+            var serverFixture = @"{{
+                ""server"": {{
+                    ""security_groups"": [
+                        {{
+                            ""name"": ""default""
+                        }},
+                        {{
+                            ""name"": ""MyGroup""
+                        }}
+                    ],
+                    ""OS-DCF:diskConfig"": ""MANUAL"",
+                    ""id"": ""{0}"",
+                    ""links"": [
+                        {{
+                            ""href"": ""{1}"",
+                            ""rel"": ""self""
+                        }},
+                        {{
+                            ""href"": ""{2}"",
+                            ""rel"": ""bookmark""
+                        }}
+                    ],
+                    ""adminPass"": ""{3}""
+                }}
+            }}";
+
+            var payload = string.Format(serverFixture, serverId, publicUrl, permUrl, adminPassword);
+            var content = TestHelper.CreateStream(payload);
+
+            var restResp = new HttpResponseAbstraction(content, new HttpHeadersAbstraction(), HttpStatusCode.Accepted);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            var result = await client.CreateServer("MyServer", "12345", "1", "54321", new List<string>() { "MyGroup" });
+
+            Assert.IsNotNull(result);
+            
+            Assert.AreEqual(serverId, result.Id);
+            Assert.AreEqual(adminPassword, result.AdminPassword);
+            Assert.AreEqual(new Uri(publicUrl), result.PublicUri);
+            Assert.AreEqual(new Uri(permUrl), result.PermanentUri);
+        }
+
+        [TestMethod]
+        public async Task CanCreateComputeServerWithOkResponse()
+        {
+            var serverId = "98765";
+            var publicUrl = "http://15.125.87.81:8774/v2/ffe683d1060449d09dac0bf9d7a371cd/servers/" + serverId;
+            var permUrl = "http://15.125.87.81:8774/ffe683d1060449d09dac0bf9d7a371cd/servers/" + serverId;
+            var adminPassword = "ABCDEF";
+            var serverFixture = @"{{
+                ""server"": {{
+                    ""security_groups"": [
+                        {{
+                            ""name"": ""default""
+                        }},
+                        {{
+                            ""name"": ""MyGroup""
+                        }}
+                    ],
+                    ""OS-DCF:diskConfig"": ""MANUAL"",
+                    ""id"": ""{0}"",
+                    ""links"": [
+                        {{
+                            ""href"": ""{1}"",
+                            ""rel"": ""self""
+                        }},
+                        {{
+                            ""href"": ""{2}"",
+                            ""rel"": ""bookmark""
+                        }}
+                    ],
+                    ""adminPass"": ""{3}""
+                }}
+            }}";
+
+            var payload = string.Format(serverFixture, serverId, publicUrl, permUrl, adminPassword);
+            var content = TestHelper.CreateStream(payload);
+
+            var restResp = new HttpResponseAbstraction(content, new HttpHeadersAbstraction(), HttpStatusCode.OK);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            var result = await client.CreateServer("MyServer", "12345", "1", "54321", new List<string>() { "MyGroup" });
+
+            Assert.IsNotNull(result);
+
+            Assert.AreEqual(serverId, result.Id);
+            Assert.AreEqual(adminPassword, result.AdminPassword);
+            Assert.AreEqual(new Uri(publicUrl), result.PublicUri);
+            Assert.AreEqual(new Uri(permUrl), result.PermanentUri);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionthrownWhenCreatingAComputeServerAndNotAuthed()
+        {
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.Unauthorized);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.CreateServer("MyServer", "12345", "1", "54321", new List<string>() { "MyGroup" });
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionthrownWhenCreatingAComputeServerAndServerError()
+        {
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.InternalServerError);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.CreateServer("MyServer", "12345", "1", "54321", new List<string>() { "MyGroup"});
+        }
+
+        #endregion
+
+        #region Delete Compute Server Tests
+
+        [TestMethod]
+        public async Task CanDeleteComputeServerWithOkResponse()
+        {
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(),
+                HttpStatusCode.OK);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.DeleteServer("12345");
+        }
+
+        [TestMethod]
+        public async Task CanDeleteComputeServerWithNoContentResponse()
+        {
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(),
+                HttpStatusCode.NoContent);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.DeleteServer("12345");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionthrownWhenDeletingAComputeServerAndNotAuthed()
+        {
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.Unauthorized);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.DeleteServer("12345");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionthrownWhenDeletingAComputeServerAndServerError()
+        {
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.InternalServerError);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.DeleteServer("12345");
+        }
+
+        #endregion
+
         #region Update Compute Server Metadata Tests
 
         [TestMethod]

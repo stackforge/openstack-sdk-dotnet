@@ -34,6 +34,10 @@ namespace OpenStack.Test.Compute
 
         public Func<string, Task> DeleteImageDelegate { get; set; }
 
+        public Func<string, string, string, string, IEnumerable<string>,  Task<ComputeServer>> CreateServerDelegate { get; set; }
+
+        public Func<string, Task> DeleteServerDelegate { get; set; }
+
         public Func<string, Task<IDictionary<string,string>>> GetImageMetadataDelegate { get; set; }
 
         public Func<string, IDictionary<string, string>, Task> UpdateImageMetadataDelegate { get; set; }
@@ -79,6 +83,16 @@ namespace OpenStack.Test.Compute
         public async Task DeleteImage(string imageId)
         {
             await this.DeleteImageDelegate(imageId);
+        }
+
+        public async Task<ComputeServer> CreateServer(string name, string imageId, string flavorId, string networkId, IEnumerable<string> securityGroups)
+        {
+            return await this.CreateServerDelegate(name, imageId, flavorId, networkId, securityGroups);
+        }
+
+        public async Task DeleteServer(string serverId)
+        {
+            await this.DeleteServerDelegate(serverId);
         }
 
         public async Task<IDictionary<string, string>> GetImageMetadata(string flavorId)

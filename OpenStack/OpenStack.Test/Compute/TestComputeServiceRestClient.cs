@@ -85,6 +85,18 @@ namespace OpenStack.Test.Compute
         {
             return Task.Factory.StartNew(() => Responses.Dequeue());
         }
+
+        /// <inheritdoc/>
+        public Task<IHttpResponseAbstraction> CreateServer(string name, string imageId, string flavorId, string networkId, IEnumerable<string> securityGroups)
+        {
+            return Task.Factory.StartNew(() => Responses.Dequeue());
+        }
+
+        /// <inheritdoc/>
+        public Task<IHttpResponseAbstraction> DeleteServer(string serverId)
+        {
+            return Task.Factory.StartNew(() => Responses.Dequeue());
+        }
     }
 
     public class TestComputeServiceRestClientFactory : IComputeServiceRestClientFactory

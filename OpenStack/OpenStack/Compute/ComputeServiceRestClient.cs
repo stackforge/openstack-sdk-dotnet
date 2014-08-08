@@ -15,6 +15,8 @@
 // ============================================================================ */
 
 using System.Collections.Generic;
+using System.Linq;
+using Newtonsoft.Json.Linq;
 
 namespace OpenStack.Compute
 {
@@ -38,7 +40,8 @@ namespace OpenStack.Compute
         /// </summary>
         /// <param name="context">The current service client context to use.</param>
         /// <param name="serviceLocator">A service locator to be used to locate/inject dependent services.</param>
-        internal ComputeServiceRestClient(ServiceClientContext context, IServiceLocator serviceLocator) : base(context, serviceLocator)
+        internal ComputeServiceRestClient(ServiceClientContext context, IServiceLocator serviceLocator)
+            : base(context, serviceLocator)
         {
         }
 
@@ -65,13 +68,25 @@ namespace OpenStack.Compute
         }
 
         /// <inheritdoc/>
+        public async Task<IHttpResponseAbstraction> DeleteServer(string serverId)
+        {
+            var client = this.GetHttpClient(this.Context);
+
+            client.Uri = CreateRequestUri(this.Context.PublicEndpoint, ServersUrlMoniker, serverId);
+            client.Method = HttpMethod.Delete;
+
+            return await client.SendAsync();
+        }
+
+        /// <inheritdoc/>
         public async Task<IHttpResponseAbstraction> GetServerMetadata(string serverId)
         {
             return await GetItemMetadata(ServersUrlMoniker, serverId);
         }
 
         /// <inheritdoc/>
-        public async Task<IHttpResponseAbstraction> UpdateServerMetadata(string serverId, IDictionary<string, string> metadata)
+        public async Task<IHttpResponseAbstraction> UpdateServerMetadata(string serverId,
+            IDictionary<string, string> metadata)
         {
             return await UpdateItemMetadata(ServersUrlMoniker, serverId, metadata);
         }
@@ -122,7 +137,8 @@ namespace OpenStack.Compute
         }
 
         /// <inheritdoc/>
-        public async Task<IHttpResponseAbstraction> UpdateImageMetadata(string imageId, IDictionary<string, string> metadata)
+        public async Task<IHttpResponseAbstraction> UpdateImageMetadata(string imageId,
+            IDictionary<string, string> metadata)
         {
             return await UpdateItemMetadata(ImagesUrlMoniker, imageId, metadata);
         }
@@ -133,6 +149,23 @@ namespace OpenStack.Compute
             return await DeleteItemMetadata(ImagesUrlMoniker, imageId, key);
         }
 
+        /// <inheritdoc/>
+        public async Task<IHttpResponseAbstraction> CreateServer(string name, string imageId, string flavorId,
+            string networkId, IEnumerable<string> securityGroups)
+        {
+            var client = this.GetHttpClient(this.Context);
+
+            client.Uri = CreateRequestUri(this.Context.PublicEndpoint, ServersUrlMoniker);
+            client.Method = HttpMethod.Post;
+            
+            var requestBody = GenerateCreateServerRequestBody(name, imageId, flavorId, networkId, securityGroups);
+            client.Content = requestBody.ConvertToStream();
+            client.ContentType = "application/json";
+
+            return await client.SendAsync();
+        }
+
+        /// <inheritdoc/>
         internal async Task<IHttpResponseAbstraction> DeleteItemMetadata(string itemType, string itemId, string key)
         {
             var client = this.GetHttpClient(this.Context);
@@ -143,6 +176,7 @@ namespace OpenStack.Compute
             return await client.SendAsync();
         }
 
+        /// <inheritdoc/>
         internal async Task<IHttpResponseAbstraction> UpdateItemMetadata(string itemType, string itemId, IDictionary<string, string> metadata)
         {
             var client = this.GetHttpClient(this.Context);
@@ -159,6 +193,7 @@ namespace OpenStack.Compute
             return await client.SendAsync();
         }
 
+        /// <inheritdoc/>
         internal async Task<IHttpResponseAbstraction> GetItemMetadata(string itemType, string itemId)
         {
             var client = this.GetHttpClient(this.Context);
@@ -167,6 +202,42 @@ namespace OpenStack.Compute
             client.Method = HttpMethod.Get;
 
             return await client.SendAsync();
+        }
+
+        /// <summary>
+        /// Generates a request body for creating compute servers.
+        /// </summary>
+        /// <param name="name">The name of the server.</param>
+        /// <param name="imageId">The id of the image to use.</param>
+        /// <param name="flavorId">The id of the flavor to use.</param>
+        /// <param name="networkId">The id of the network to attach the server to.</param>
+        /// <param name="securityGroups">A list of security groups to associate the server with.</param>
+        /// <returns>A json encoded request body.</returns>
+        internal string GenerateCreateServerRequestBody(string name, string imageId, string flavorId, string networkId, IEnumerable<string> securityGroups)
+        {
+            var secGroups = new List<dynamic>();
+            foreach (var g in securityGroups)
+            {
+                dynamic group = new System.Dynamic.ExpandoObject();
+                group.name = g;
+                secGroups.Add(group);
+            }
+
+            dynamic network = new System.Dynamic.ExpandoObject();
+            network.uuid = networkId;
+
+            dynamic server = new System.Dynamic.ExpandoObject();
+            server.name = name;
+            server.imageRef = imageId;
+            server.flavorRef = flavorId;
+            server.max_count = "1";
+            server.min_count = "1";
+            server.networks = new List<dynamic>() { network };
+            server.security_groups = secGroups;
+
+            dynamic body = new System.Dynamic.ExpandoObject();
+            body.server = server;
+            return JToken.FromObject(body).ToString();
         }
     }
 }
