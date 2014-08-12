@@ -63,6 +63,15 @@ namespace OpenStack.Compute
         }
 
         /// <inheritdoc/>
+        public async Task DeleteServer(string serverId)
+        {
+            serverId.AssertIsNotNullOrEmpty("serverId", "Cannot delete a compute server with a null or empty id.");
+
+            var client = this.GetPocoClient();
+            await client.DeleteServer(serverId);
+        }
+
+        /// <inheritdoc/>
         public async Task<IDictionary<string, string>> GetServerMetadata(string flavorId)
         {
             flavorId.AssertIsNotNullOrEmpty("flavorId", "Cannot get compute flavor metadata with a null or empty id.");
@@ -143,6 +152,18 @@ namespace OpenStack.Compute
 
             var client = this.GetPocoClient();
             await client.DeleteImageMetadata(imageId, key);
+        }
+
+        /// <inheritdoc/>
+        public async Task<ComputeServer> CreateServer(string name, string imageId, string flavorId, string networkId, IEnumerable<string> securityGroups)
+        {
+            name.AssertIsNotNullOrEmpty("name", "Cannot create a server with a null or empty name.");
+            imageId.AssertIsNotNullOrEmpty("imageId", "Cannot create a server with a null or empty image id.");
+            flavorId.AssertIsNotNullOrEmpty("flavorId", "Cannot create a server with a null or empty flavor id.");
+            networkId.AssertIsNotNullOrEmpty("networkId", "Cannot create a server with a null or empty network id.");
+
+            var client = this.GetPocoClient();
+            return await client.CreateServer(name, imageId, flavorId, networkId, securityGroups);
         }
 
         /// <summary>

@@ -84,6 +84,24 @@ namespace OpenStack.Compute
         Task<IHttpResponseAbstraction> DeleteImageMetadata(string imageId, string key);
 
         /// <summary>
+        /// Creates a new server on the remote OpenStack instance.
+        /// </summary>
+        /// <param name="name">The name of the server.</param>
+        /// <param name="imageId">The id for the image that this server will be based on.</param>
+        /// <param name="flavorId">The id of the flavor to use for this server.</param>
+        /// <param name="networkId">The network to connect this server to.</param>
+        /// <param name="securityGroups">A list of security group names to associate with this server.</param>
+        /// <returns>An HTTP response from the remote server.</returns>
+        Task<IHttpResponseAbstraction> CreateServer(string name, string imageId, string flavorId, string networkId, IEnumerable<string> securityGroups);
+
+        /// <summary>
+        /// Deletes a server on the remote OpenStack instance.
+        /// </summary>
+        /// <param name="serverId">The id of the server to delete.</param>
+        /// <returns>An HTTP response from the remote server.</returns>
+        Task<IHttpResponseAbstraction> DeleteServer(string serverId);
+
+        /// <summary>
         /// Gets the associated metadata for a given compute flavor.
         /// </summary>
         /// <param name="flavorId">The id for the flavor.</param>

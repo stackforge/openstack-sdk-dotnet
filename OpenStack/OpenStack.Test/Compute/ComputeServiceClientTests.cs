@@ -124,6 +124,127 @@ namespace OpenStack.Test.Compute
         }
 
         [TestMethod]
+        public async Task CanCreateServer()
+        {
+            var serverName = "MyServer";
+            var imageId = "56789";
+            var flavorId = "2";
+            var networkId = "98765";
+            var adminPassword = "ABCDE";
+            var expServer = new ComputeServer("1235", serverName, adminPassword, new Uri("http://someuri.com/v2/servers/12345"),
+                new Uri("http://someuri.com/servers/12345"), new Dictionary<string, string>());
+
+            this.ServicePocoClient.CreateServerDelegate = (name, imgId, flvId, ntwId, groups) =>
+            {
+                Assert.AreEqual(serverName, name);
+                Assert.AreEqual(imageId, imgId);
+                Assert.AreEqual(flavorId, flvId);
+                Assert.AreEqual(networkId, ntwId);
+                Assert.IsTrue(groups.Any(g => g == "default"));
+                return Task.Factory.StartNew(() => expServer);
+            };
+
+            var client = new ComputeServiceClient(GetValidCreds(), "Nova", CancellationToken.None, this.ServiceLocator);
+            var server = await client.CreateServer(serverName, imageId, flavorId, networkId, new List<string>() { "default" });
+
+            Assert.IsNotNull(server);
+            Assert.AreEqual("1235", server.Id);
+            Assert.AreEqual(adminPassword, server.AdminPassword);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task CreateServerWithNullNameThrows()
+        {
+            var client = new ComputeServiceClient(GetValidCreds(), "Nova", CancellationToken.None, this.ServiceLocator);
+            await client.CreateServer(null, "12345", "2", "54321", new List<string>() { "default" });
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task CreateServerWithEmptyNameThrows()
+        {
+            var client = new ComputeServiceClient(GetValidCreds(), "Nova", CancellationToken.None, this.ServiceLocator);
+            await client.CreateServer(string.Empty, "12345", "2", "54321", new List<string>() { "default" });
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task CreateServerWithNullImageIdThrows()
+        {
+            var client = new ComputeServiceClient(GetValidCreds(), "Nova", CancellationToken.None, this.ServiceLocator);
+            await client.CreateServer("MyServer", null, "2", "54321", new List<string>() { "default" });
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task CreateServerWithEmptyImageIdThrows()
+        {
+            var client = new ComputeServiceClient(GetValidCreds(), "Nova", CancellationToken.None, this.ServiceLocator);
+            await client.CreateServer("MyServer", string.Empty, "2", "54321", new List<string>() { "default" });
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task CreateServerWithNullFlavorIdThrows()
+        {
+            var client = new ComputeServiceClient(GetValidCreds(), "Nova", CancellationToken.None, this.ServiceLocator);
+            await client.CreateServer("MyServer", "12345", null, "54321", new List<string>() { "default" });
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task CreateServerWithEmptyFlavorIdThrows()
+        {
+            var client = new ComputeServiceClient(GetValidCreds(), "Nova", CancellationToken.None, this.ServiceLocator);
+            await client.CreateServer("MyServer", "12345", string.Empty, "54321", new List<string>() { "default" });
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task CreateServerWithNullNetworkIdThrows()
+        {
+            var client = new ComputeServiceClient(GetValidCreds(), "Nova", CancellationToken.None, this.ServiceLocator);
+            await client.CreateServer("MyServer", "12345", "2", null, new List<string>() { "default" });
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task CreateServerWithEmptyNetworkIdThrows()
+        {
+            var client = new ComputeServiceClient(GetValidCreds(), "Nova", CancellationToken.None, this.ServiceLocator);
+            await client.CreateServer("MyServer", "12345", "2", string.Empty, new List<string>() { "default" });
+        }
+
+        [TestMethod]
+        public async Task CanDeleteServer()
+        {
+            this.ServicePocoClient.DeleteServerDelegate = async (serverId) =>
+            {
+                await Task.Run(() => Assert.AreEqual(serverId, "12345"));
+            };
+
+            var client = new ComputeServiceClient(GetValidCreds(), "Nova", CancellationToken.None, this.ServiceLocator);
+            await client.DeleteServer("12345");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task DeleteServerWithNullServerIdThrows()
+        {
+            var client = new ComputeServiceClient(GetValidCreds(), "Nova", CancellationToken.None, this.ServiceLocator);
+            await client.DeleteServer(null);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task DeleteServerWithEmptyServerIdThrows()
+        {
+            var client = new ComputeServiceClient(GetValidCreds(), "Nova", CancellationToken.None, this.ServiceLocator);
+            await client.DeleteServer(string.Empty);
+        }
+
+        [TestMethod]
         public async Task CanGetServerMetadata()
         {
             var meta = new Dictionary<string, string>() { { "item1", "value1" } };

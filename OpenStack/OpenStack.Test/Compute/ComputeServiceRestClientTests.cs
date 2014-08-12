@@ -218,6 +218,158 @@ namespace OpenStack.Test.Compute
 
         #endregion
 
+        #region Create Server Test
+
+        [TestMethod]
+        public async Task CreateComputeServerIncludesAuthHeader()
+        {
+            var client =
+                new ComputeServiceRestClient(GetValidContext(), this.ServiceLocator);
+
+            await client.CreateServer("MyServer", "1245", "2", "54321", new List<string>() {"MyGroup"});
+
+            Assert.IsTrue(this.simulator.Headers.ContainsKey("X-Auth-Token"));
+            Assert.AreEqual(this.authId, this.simulator.Headers["X-Auth-Token"]);
+        }
+
+        [TestMethod]
+        public async Task CreateComputeServerIncludesContentTypeHeader()
+        {
+            var client =
+                new ComputeServiceRestClient(GetValidContext(), this.ServiceLocator);
+
+            await client.CreateServer("MyServer", "1245", "2", "54321", new List<string>() { "MyGroup" });
+
+            Assert.IsTrue(this.simulator.ContentType != string.Empty);
+            Assert.AreEqual("application/json", this.simulator.ContentType);
+        }
+
+        [TestMethod]
+        public async Task CreateComputeServerFormsCorrectUrlAndMethod()
+        {
+            var client =
+                new ComputeServiceRestClient(GetValidContext(), this.ServiceLocator);
+
+            await client.CreateServer("MyServer", "1245", "2", "54321", new List<string>() { "MyGroup" });
+
+            Assert.AreEqual(string.Format("{0}/servers", endpoint), this.simulator.Uri.ToString());
+            Assert.AreEqual(HttpMethod.Post, this.simulator.Method);
+        }
+
+        [TestMethod]
+        public async Task CanCreateComputeServer()
+        {
+
+            var srvName = "MyServer";
+
+            var client = new ComputeServiceRestClient(GetValidContext(), this.ServiceLocator);
+
+            var resp = await client.CreateServer(srvName, "1245", "2", "54321", new List<string>() { "MyGroup" });
+
+            Assert.AreEqual(HttpStatusCode.Accepted, resp.StatusCode);
+
+            var respContent = TestHelper.GetStringFromStream(resp.Content);
+            Assert.IsTrue(respContent.Length > 0);
+
+            Assert.IsTrue(this.simulator.Servers.Count == 1);
+
+            var resSrv = this.simulator.Servers.First();
+            Assert.AreEqual(srvName, resSrv.Name);
+        }
+
+        [TestMethod]
+        public async Task CreateComputeServerFormsCorrectBody()
+        {
+            var client =
+                new ComputeServiceRestClient(GetValidContext(), this.ServiceLocator);
+
+            var serverName = "MyServer";
+            var imageId = "12345";
+            var flavorId = "2";
+            var networkId = "54321";
+            var secGroupName = "MyGroup";
+
+            await client.CreateServer(serverName, imageId, flavorId, networkId, new List<string>() { secGroupName });
+
+            this.simulator.Content.Position = 0;
+            var reqContent = TestHelper.GetStringFromStream(this.simulator.Content);
+            
+            var srvObj = JObject.Parse(reqContent);
+            Assert.IsNotNull(srvObj["server"]);
+            Assert.IsNotNull(srvObj["server"]["name"]);
+            Assert.AreEqual(serverName, (string)srvObj["server"]["name"]);
+
+            Assert.IsNotNull(srvObj["server"]["imageRef"]);
+            Assert.AreEqual(imageId, (string)srvObj["server"]["imageRef"]);
+
+            Assert.IsNotNull(srvObj["server"]["flavorRef"]);
+            Assert.AreEqual(flavorId, (string)srvObj["server"]["flavorRef"]);
+
+            Assert.IsNotNull(srvObj["server"]["max_count"]);
+            Assert.AreEqual(1, (int)srvObj["server"]["max_count"]);
+
+            Assert.IsNotNull(srvObj["server"]["min_count"]);
+            Assert.AreEqual(1, (int)srvObj["server"]["min_count"]);
+
+            Assert.IsNotNull(srvObj["server"]["networks"]);
+            Assert.IsNotNull(srvObj["server"]["networks"][0]);
+            Assert.IsNotNull(srvObj["server"]["networks"][0]["uuid"]);
+            Assert.AreEqual(networkId, (string)srvObj["server"]["networks"][0]["uuid"]);
+
+            Assert.IsNotNull(srvObj["server"]["security_groups"]);
+            Assert.IsNotNull(srvObj["server"]["security_groups"][0]);
+            Assert.IsNotNull(srvObj["server"]["security_groups"][0]["name"]);
+            Assert.AreEqual(secGroupName, (string)srvObj["server"]["security_groups"][0]["name"]);
+        }
+
+        #endregion
+
+        #region Delete Server Test
+
+        [TestMethod]
+        public async Task DeleteComputeServerIncludesAuthHeader()
+        {
+            var client =
+                new ComputeServiceRestClient(GetValidContext(), this.ServiceLocator);
+
+            await client.DeleteServer("12345");
+
+            Assert.IsTrue(this.simulator.Headers.ContainsKey("X-Auth-Token"));
+            Assert.AreEqual(this.authId, this.simulator.Headers["X-Auth-Token"]);
+        }
+
+        [TestMethod]
+        public async Task DeleteComputeServerFormsCorrectUrlAndMethod()
+        {
+            var serverId = "1";
+            var client =
+                new ComputeServiceRestClient(GetValidContext(), this.ServiceLocator);
+
+            await client.DeleteServer(serverId);
+
+            Assert.AreEqual(string.Format("{0}/servers/{1}", endpoint, serverId), this.simulator.Uri.ToString());
+            Assert.AreEqual(HttpMethod.Delete, this.simulator.Method);
+        }
+
+        [TestMethod]
+        public async Task CanDeleteServer()
+        {
+            var serverId = "12345";
+            var server = new ComputeServer(serverId, "tiny",
+                new Uri("http://testcomputeendpoint.com/v2/1234567890/servers/1"),
+                new Uri("http://testcomputeendpoint.com/1234567890/servers/1"), new Dictionary<string, string>());
+            this.simulator.Servers.Add(server);
+
+            var client = new ComputeServiceRestClient(GetValidContext(), this.ServiceLocator);
+
+            var resp = await client.DeleteServer(serverId);
+
+            Assert.AreEqual(HttpStatusCode.OK, resp.StatusCode);
+            Assert.AreEqual(0, this.simulator.Servers.Count);
+        }
+
+        #endregion
+
         #region Update Server Metadata Test
 
         [TestMethod]
