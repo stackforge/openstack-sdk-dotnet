@@ -15,6 +15,7 @@
 // ============================================================================ */
 
 using System;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -34,9 +35,12 @@ namespace OpenStack.Test.Network
     {
         internal ICollection<OpenStack.Network.Network> Networks { get; private set; }
 
+        internal ICollection<FloatingIp> FloatingIps { get; private set; }
+
         public NetworkRestSimulator() : base()
         {
             this.Networks = new List<OpenStack.Network.Network>();
+            this.FloatingIps = new List<OpenStack.Network.FloatingIp>();
         }
 
         public NetworkRestSimulator(CancellationToken token)
@@ -46,12 +50,14 @@ namespace OpenStack.Test.Network
 
         protected override IHttpResponseAbstraction HandleGet()
         {
-            if (this.Uri.Segments.Count() >= 4)
+            if (this.Uri.Segments.Count() >= 3)
             {
-                switch (this.Uri.Segments[3].TrimEnd('/').ToLower())
+                switch (this.Uri.Segments[2].TrimEnd('/').ToLower())
                 {
                     case "networks":
                         return HandleGetNetworks();
+                    case "floatingips":
+                        return HandleGetFloatingIps();
                 }
             }
             throw new NotImplementedException();
@@ -62,9 +68,9 @@ namespace OpenStack.Test.Network
             Stream networkContent;
             switch (this.Uri.Segments.Count())
             {
-                case 4:
+                case 3:
                     //no flavor id given, list all flavors
-                    networkContent = TestHelper.CreateStream(GenerateNetworksPayload(this.Networks));
+                    networkContent = TestHelper.CreateStream(GenerateCollectionPayload(this.Networks, this.GenerateNetworkPayload, "networks"));
                     break;
                 default:
                     //Unknown Uri format
@@ -74,9 +80,64 @@ namespace OpenStack.Test.Network
             return TestHelper.CreateResponse(HttpStatusCode.OK, new Dictionary<string, string>(), networkContent);
         }
 
+        internal IHttpResponseAbstraction HandleGetFloatingIps()
+        {
+            Stream floatingIpContent;
+            switch (this.Uri.Segments.Count())
+            {
+                case 3:
+                    floatingIpContent = TestHelper.CreateStream(GenerateCollectionPayload(this.FloatingIps, this.GenerateFloatingIpPayload, "floatingips"));
+                    break;
+                case 4:
+                    var floatId = this.Uri.Segments[3].TrimEnd('/').ToLower();
+                    return HandleGetFloatingIp(floatId);
+                default:
+                    //Unknown Uri format
+                    throw new NotImplementedException();
+            }
+
+            return TestHelper.CreateResponse(HttpStatusCode.OK, new Dictionary<string, string>(), floatingIpContent);
+        }
+
+        internal IHttpResponseAbstraction HandleGetFloatingIp(string floatingIpId)
+        {
+            var payloadFixture = @"{{
+                ""floatingip"": {0}
+            }}";
+
+            var floatIp = this.FloatingIps.FirstOrDefault(ip => ip.Id == floatingIpId);
+            if (floatIp == null)
+            {
+                return TestHelper.CreateResponse(HttpStatusCode.NotFound);
+            }
+
+            var floatIpContent = string.Format(payloadFixture, GenerateFloatingIpPayload(floatIp)).ConvertToStream();
+            return TestHelper.CreateResponse(HttpStatusCode.OK, new Dictionary<string, string>(), floatIpContent);
+        }
+
         protected override IHttpResponseAbstraction HandlePost()
         {
+            if (this.Uri.Segments.Count() >= 3)
+            {
+                switch (this.Uri.Segments[2].TrimEnd('/').ToLower())
+                {
+                    case "floatingips":
+                        return HandleCreateFloatingIp();
+                }
+            }
             throw new NotImplementedException();
+        }
+
+        internal IHttpResponseAbstraction HandleCreateFloatingIp()
+        {
+            var payloadFixture = @"{{
+                ""floatingip"": {0}
+            }}";
+
+            var ip = new FloatingIp(Guid.NewGuid().ToString(), "172.0.0." +(this.FloatingIps.Count +1), FloatingIpStatus.Active);
+            this.FloatingIps.Add(ip);
+            var floatIpContent = string.Format(payloadFixture, GenerateFloatingIpPayload(ip)).ConvertToStream();
+            return TestHelper.CreateResponse(HttpStatusCode.OK, new Dictionary<string, string>(), floatIpContent);
         }
 
         protected override IHttpResponseAbstraction HandlePut()
@@ -99,19 +160,20 @@ namespace OpenStack.Test.Network
             throw new NotImplementedException();
         }
 
-        private string GenerateNetworksPayload(IEnumerable<OpenStack.Network.Network> networks)
+        private string GenerateCollectionPayload<T>(IEnumerable<T> collection, Func<T, string> genFunc,
+            string collectionName)
         {
             var payload = new StringBuilder();
-            payload.Append("{{ \"networks\": [");
+            payload.Append(string.Format("{{ \"{0}\": [", collectionName));
             var first = true;
-            foreach (var item in networks)
+            foreach (var item in collection)
             {
                 if (!first)
                 {
                     payload.Append(",");
                 }
 
-                payload.Append(GenerateNetworkPayload(item));
+                payload.Append(genFunc(item));
                 first = false;
             }
             payload.Append("] }");
@@ -133,6 +195,21 @@ namespace OpenStack.Test.Network
                 ""id"": ""{1}""
             }}";
             return string.Format(payloadFixture, network.Name, network.Id, network.Status.ToString().ToUpper());
+        }
+
+        private string GenerateFloatingIpPayload(FloatingIp floatingIp)
+        {
+            var payloadFixture = @"{{
+                    ""router_id"": ""fafac59b-a94a-4525-8700-f4f448e0ac97"",
+                    ""status"": ""{1}"",
+                    ""tenant_id"": ""ffe683d1060449d09dac0bf9d7a371cd"",
+                    ""floating_network_id"": ""3eaab3f7-d3f2-430f-aa73-d07f39aae8f4"",
+                    ""fixed_ip_address"": ""10.0.0.2"",
+                    ""floating_ip_address"": ""{2}"",
+                    ""port_id"": ""9da94672-6e6b-446c-9579-3dd5484b31fd"",
+                    ""id"": ""{0}""
+                }}";
+            return string.Format(payloadFixture, floatingIp.Id, floatingIp.Status.ToString().ToUpper(), floatingIp.FloatingIpAddress);
         }
     }
 

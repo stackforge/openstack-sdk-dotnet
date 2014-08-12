@@ -63,6 +63,7 @@ namespace OpenStack
             manager.RegisterServiceInstance(typeof(IOpenStackServiceEndpointPayloadConverter), new OpenStackServiceEndpointPayloadConverter());
             manager.RegisterServiceInstance(typeof(IComputeFlavorPayloadConverter), new ComputeFlavorPayloadConverter());
             manager.RegisterServiceInstance(typeof(INetworkPayloadConverter), new NetworkPayloadConverter());
+            manager.RegisterServiceInstance(typeof(IFloatingIpPayloadConverter), new FloatingIpPayloadConverter());
             manager.RegisterServiceInstance(typeof(IComputeImagePayloadConverter), new ComputeImagePayloadConverter());
             manager.RegisterServiceInstance(typeof(IComputeItemMetadataPayloadConverter), new ComputeItemMetadataPayloadConverter());
             manager.RegisterServiceInstance(typeof(IComputeServerPayloadConverter), new ComputeServerPayloadConverter());

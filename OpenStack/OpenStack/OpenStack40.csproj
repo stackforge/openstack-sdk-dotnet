@@ -111,9 +111,12 @@
     <Compile Include="IOpenStackServiceClient.cs" />
     <Compile Include="IOpenStackServiceClientDefinition.cs" />
     <Compile Include="IOpenStackServiceClientManager.cs" />
+    <Compile Include="Network\FloatingIp.cs" />
+    <Compile Include="Network\IFloatingIpPayloadConverter.cs" />
     <Compile Include="Network\INetworkServiceClient.cs" />
     <Compile Include="Network\INetworkServicePocoClient.cs" />
     <Compile Include="Network\INetworkServicePocoClientFactory.cs" />
+    <Compile Include="Network\FloatingIpPayloadConverter.cs" />
     <Compile Include="Network\NetworkPayloadConverter.cs" />
     <Compile Include="Network\INetworkPayloadConverter.cs" />
     <Compile Include="Network\INetworkServiceRestClient.cs" />
@@ -125,6 +128,7 @@
     <Compile Include="Network\NetworkServicePocoClientFactory.cs" />
     <Compile Include="Network\NetworkServiceRestClient.cs" />
     <Compile Include="Network\NetworkServiceRestClientFactory.cs" />
+    <Compile Include="Network\FloatingIpStatus.cs" />
     <Compile Include="Network\NetworkStatus.cs" />
     <Compile Include="OpenStackClient.cs" />
     <Compile Include="OpenStackClientFactory.cs" />

@@ -17,35 +17,35 @@
 namespace OpenStack.Network
 {
     /// <summary>
-    /// Represents a network on a remote OpenStack instance.
+    /// Represents a Floating IP address on the remote OpenStack instance.
     /// </summary>
-    public class Network
+    public class FloatingIp
     {
         /// <summary>
-        /// Gets the name of the Network.
-        /// </summary>
-        public string Name { get; internal set; }
-
-        /// <summary>
-        /// Gets the id of the Network.
+        /// Gets the id of the FloatingIp.
         /// </summary>
         public string Id { get; internal set; }
 
         /// <summary>
-        /// Gets the status of the Network.
+        /// Gets the status of the FloatingIp.
         /// </summary>
-        public NetworkStatus Status { get; internal set; }
+        public FloatingIpStatus Status { get; internal set; }
 
         /// <summary>
-        /// Create a new instance of the Network class.
+        /// Gets the floating ip address of the FloatingIp.
         /// </summary>
-        /// <param name="id">The Id of the network.</param>
-        /// <param name="name">The name of the network.</param>
-        /// <param name="status">The status of the network.</param>
-        internal Network(string id, string name, NetworkStatus status)
+        public string FloatingIpAddress { get; internal set; }
+
+        /// <summary>
+        /// Create a new instance of the FloatingIp class.
+        /// </summary>
+        /// <param name="id">The Id of the floating ip.</param>
+        /// <param name="FloatingIpAddress">The floating ip address of the floating ip.</param>
+        /// <param name="status">The status of the floating ip.</param>
+        internal FloatingIp(string id, string FloatingIpAddress, FloatingIpStatus status)
         {
             this.Id = id;
-            this.Name = name;
+            this.FloatingIpAddress = FloatingIpAddress;
             this.Status = status;
         }
     }

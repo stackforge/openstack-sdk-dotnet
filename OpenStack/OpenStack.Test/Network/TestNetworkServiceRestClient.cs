@@ -35,6 +35,21 @@ namespace OpenStack.Test.Network
         {
             return Task.Factory.StartNew(() => Responses.Dequeue());
         }
+
+        public Task<IHttpResponseAbstraction> GetFloatingIps()
+        {
+            return Task.Factory.StartNew(() => Responses.Dequeue());
+        }
+
+        public Task<IHttpResponseAbstraction> GetFloatingIp(string floatingIpId)
+        {
+            return Task.Factory.StartNew(() => Responses.Dequeue());
+        }
+
+        public Task<IHttpResponseAbstraction> CreateFloatingIp(string networkId)
+        {
+            return Task.Factory.StartNew(() => Responses.Dequeue());
+        }
     }
 
     public class TestNetworkServiceRestClientFactory : INetworkServiceRestClientFactory

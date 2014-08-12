@@ -26,10 +26,30 @@ namespace OpenStack.Test.Network
     {
         public Func<Task<IEnumerable<OpenStack.Network.Network>>> GetNetworksDelegate { get; set; }
 
+        public Func<Task<IEnumerable<OpenStack.Network.FloatingIp>>> GetFloatingIpsDelegate { get; set; }
+
+        public Func<string, Task<OpenStack.Network.FloatingIp>> GetFloatingIpDelegate { get; set; }
+
+        public Func<string, Task<OpenStack.Network.FloatingIp>> CreateFloatingIpDelegate { get; set; }
 
         public async Task<IEnumerable<OpenStack.Network.Network>> GetNetworks()
         {
             return await this.GetNetworksDelegate();
+        }
+
+        public async Task<IEnumerable<FloatingIp>> GetFloatingIps()
+        {
+            return await GetFloatingIpsDelegate();
+        }
+
+        public async Task<FloatingIp> GetFloatingIp(string floatingIpId)
+        {
+            return await GetFloatingIpDelegate(floatingIpId);
+        }
+
+        public async Task<FloatingIp> CreateFloatingIp(string networkId)
+        {
+            return await CreateFloatingIpDelegate(networkId);
         }
     }
 

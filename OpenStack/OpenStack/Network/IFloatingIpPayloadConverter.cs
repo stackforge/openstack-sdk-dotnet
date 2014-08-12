@@ -14,39 +14,27 @@
 // limitations under the License.
 // ============================================================================ */
 
+using System.Collections.Generic;
+
 namespace OpenStack.Network
 {
     /// <summary>
-    /// Represents a network on a remote OpenStack instance.
+    /// Converter that can be used to convert an HTTP payload into a FloatingIp Poco object.
     /// </summary>
-    public class Network
+    public interface IFloatingIpPayloadConverter
     {
         /// <summary>
-        /// Gets the name of the Network.
+        /// Converts an HTTP payload into a FloatingIp object.
         /// </summary>
-        public string Name { get; internal set; }
+        /// <param name="payload">The HTTP payload to convert. </param>
+        /// <returns>A FloatingIp object.</returns>
+        FloatingIp Convert(string payload);
 
         /// <summary>
-        /// Gets the id of the Network.
+        /// Converts an HTTP payload into a list of FloatingIp objects.
         /// </summary>
-        public string Id { get; internal set; }
-
-        /// <summary>
-        /// Gets the status of the Network.
-        /// </summary>
-        public NetworkStatus Status { get; internal set; }
-
-        /// <summary>
-        /// Create a new instance of the Network class.
-        /// </summary>
-        /// <param name="id">The Id of the network.</param>
-        /// <param name="name">The name of the network.</param>
-        /// <param name="status">The status of the network.</param>
-        internal Network(string id, string name, NetworkStatus status)
-        {
-            this.Id = id;
-            this.Name = name;
-            this.Status = status;
-        }
+        /// <param name="payload">The HTTP payload to convert.</param>
+        /// <returns>An enumerable list of FloatingIp objects.</returns>
+        IEnumerable<FloatingIp> ConvertFloatingIps(string payload);
     }
 }

@@ -68,7 +68,7 @@ namespace OpenStack.Test.Network
         }
 
         [TestMethod]
-        public async Task CanGetFlavors()
+        public async Task CanGetNetworks()
         {
             var ntw1 = new OpenStack.Network.Network("12345","MyNetwork", NetworkStatus.Active);
             var ntw2 = new OpenStack.Network.Network("54321", "NetworkMy", NetworkStatus.Down);
@@ -84,6 +84,83 @@ namespace OpenStack.Test.Network
             Assert.AreEqual(2, respNetworks.Count());
             Assert.AreEqual(ntw1, respNetworks[0]);
             Assert.AreEqual(ntw2, respNetworks[1]);
+        }
+
+        [TestMethod]
+        public async Task CanGetFloatingIps()
+        {
+            var ip1 = new OpenStack.Network.FloatingIp("12345", "172.0.0.1", FloatingIpStatus.Active);
+            var ip2 = new OpenStack.Network.FloatingIp("54321", "172.0.0.2", FloatingIpStatus.Down);
+            var ips = new List<OpenStack.Network.FloatingIp>() { ip1, ip2 };
+
+            this.ServicePocoClient.GetFloatingIpsDelegate = () => Task.Factory.StartNew(() => (IEnumerable<OpenStack.Network.FloatingIp>)ips);
+
+            var client = new NetworkServiceClient(GetValidCreds(), "Neutron", CancellationToken.None, this.ServiceLocator);
+            var resp = await client.GetFloatingIps();
+            Assert.IsNotNull(resp);
+
+            var respIps = resp.ToList();
+            Assert.AreEqual(2, respIps.Count());
+            Assert.AreEqual(ip1, respIps[0]);
+            Assert.AreEqual(ip2, respIps[1]);
+        }
+
+        [TestMethod]
+        public async Task CanGetFloatingIp()
+        {
+            var ip1 = new OpenStack.Network.FloatingIp("12345", "172.0.0.1", FloatingIpStatus.Active);
+
+            this.ServicePocoClient.GetFloatingIpDelegate = (ip) => Task.Factory.StartNew(() => ip1);
+
+            var client = new NetworkServiceClient(GetValidCreds(), "Neutron", CancellationToken.None, this.ServiceLocator);
+            var resp = await client.GetFloatingIp("12345");
+            Assert.IsNotNull(resp);
+            Assert.AreEqual(ip1, resp);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task GetFloatingIpWithNullFloatingIpIdThrows()
+        {
+            var client = new NetworkServiceClient(GetValidCreds(), "Neutron", CancellationToken.None, this.ServiceLocator);
+            await client.GetFloatingIp(null);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task GetFloatingIpWithEmptyFloatingIpIdThrows()
+        {
+            var client = new NetworkServiceClient(GetValidCreds(), "Neutron", CancellationToken.None, this.ServiceLocator);
+            await client.GetFloatingIp(string.Empty);
+        }
+
+        [TestMethod]
+        public async Task CanCreateFloatingIp()
+        {
+            var ip1 = new OpenStack.Network.FloatingIp("12345", "172.0.0.1", FloatingIpStatus.Active);
+
+            this.ServicePocoClient.CreateFloatingIpDelegate = (ip) => Task.Factory.StartNew(() => ip1);
+
+            var client = new NetworkServiceClient(GetValidCreds(), "Neutron", CancellationToken.None, this.ServiceLocator);
+            var resp = await client.CreateFloatingIp("12345");
+            Assert.IsNotNull(resp);
+            Assert.AreEqual(ip1, resp);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task CreateFloatingIpWithNullNetworkIdThrows()
+        {
+            var client = new NetworkServiceClient(GetValidCreds(), "Neutron", CancellationToken.None, this.ServiceLocator);
+            await client.CreateFloatingIp(null);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task CreateFloatingIpWithEmptyNetworkIdThrows()
+        {
+            var client = new NetworkServiceClient(GetValidCreds(), "Neutron", CancellationToken.None, this.ServiceLocator);
+            await client.CreateFloatingIp(string.Empty);
         }
     }
 }

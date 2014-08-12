@@ -277,6 +277,18 @@
     <Compile Include="..\OpenStack\IOpenStackServiceClientManager.cs">
       <Link>IOpenStackServiceClientManager.cs</Link>
     </Compile>
+    <Compile Include="..\OpenStack\Network\FloatingIp.cs">
+      <Link>Network\FloatingIp.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenStack\Network\FloatingIpPayloadConverter.cs">
+      <Link>Network\FloatingIpPayloadConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenStack\Network\FloatingIpStatus.cs">
+      <Link>Network\FloatingIpStatus.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenStack\Network\IFloatingIpPayloadConverter.cs">
+      <Link>Network\IFloatingIpPayloadConverter.cs</Link>
+    </Compile>
     <Compile Include="..\OpenStack\Network\INetworkPayloadConverter.cs">
       <Link>Network\INetworkPayloadConverter.cs</Link>
     </Compile>

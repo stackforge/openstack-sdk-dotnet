@@ -83,6 +83,7 @@
     <Compile Include="Identity\OpenStackServiceCatalogTests.cs" />
     <Compile Include="Identity\IdentityServiceClientDefinitionTests.cs" />
     <Compile Include="Identity\OpenStackRegionResolverTests.cs" />
+    <Compile Include="Network\FloatingIpPayloadConverterTests.cs" />
     <Compile Include="Network\NetworkServiceClientTests.cs" />
     <Compile Include="Network\NetworkServicePocoClientTests.cs" />
     <Compile Include="Network\NetworkPayloadConverterTests.cs" />

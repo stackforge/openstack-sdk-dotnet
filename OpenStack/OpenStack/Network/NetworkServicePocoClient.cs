@@ -59,6 +59,57 @@ namespace OpenStack.Network
             return networks;
         }
 
+        /// <inheritdoc/>
+        public async Task<IEnumerable<FloatingIp>> GetFloatingIps()
+        {
+            var client = this.GetRestClient();
+            var resp = await client.GetFloatingIps();
+
+            if (resp.StatusCode != HttpStatusCode.OK)
+            {
+                throw new InvalidOperationException(string.Format("Failed to get floating ips. The remote server returned the following status code: '{0}'.", resp.StatusCode));
+            }
+
+            var converter = this.ServiceLocator.Locate<IFloatingIpPayloadConverter>();
+            var floatingIps = converter.ConvertFloatingIps(await resp.ReadContentAsStringAsync());
+
+            return floatingIps;
+        }
+
+        /// <inheritdoc/>
+        public async Task<FloatingIp> GetFloatingIp(string floatingIpId)
+        {
+            var client = this.GetRestClient();
+            var resp = await client.GetFloatingIp(floatingIpId);
+
+            if (resp.StatusCode != HttpStatusCode.OK)
+            {
+                throw new InvalidOperationException(string.Format("Failed to get floating ip. The remote server returned the following status code: '{0}'.", resp.StatusCode));
+            }
+
+            var converter = this.ServiceLocator.Locate<IFloatingIpPayloadConverter>();
+            var floatingIp = converter.Convert(await resp.ReadContentAsStringAsync());
+
+            return floatingIp;
+        }
+
+        /// <inheritdoc/>
+        public async Task<FloatingIp> CreateFloatingIp(string networkId)
+        {
+            var client = this.GetRestClient();
+            var resp = await client.CreateFloatingIp(networkId);
+
+            if (resp.StatusCode != HttpStatusCode.OK)
+            {
+                throw new InvalidOperationException(string.Format("Failed to create floating ip. The remote server returned the following status code: '{0}'.", resp.StatusCode));
+            }
+
+            var converter = this.ServiceLocator.Locate<IFloatingIpPayloadConverter>();
+            var floatingIp = converter.Convert(await resp.ReadContentAsStringAsync());
+
+            return floatingIp;
+        }
+
         /// <summary>
         /// Gets a client that can be used to connect to the REST endpoints of an OpenStack network service.
         /// </summary>
