@@ -29,5 +29,25 @@ namespace OpenStack.Network
         /// </summary>
         /// <returns>An enumerable list of networks.</returns>
         Task<IEnumerable<Network>> GetNetworks();
+
+        /// <summary>
+        /// Gets a list of Floating IPs from the remote OpenStack instance.
+        /// </summary>
+        /// <returns>An enumerable list of floating ips.</returns>
+        Task<IEnumerable<FloatingIp>> GetFloatingIps();
+
+        /// <summary>
+        /// Gets the details of a Floating IP from the remote OpenStack instance.
+        /// </summary>
+        /// <param name="floatingIpId">The id of the target floating ip.</param>
+        /// <returns>A FloatingIp object.</returns>
+        Task<FloatingIp> GetFloatingIp(string floatingIpId);
+
+        /// <summary>
+        /// Creates a Floating IP on the remote OpenStack instance.
+        /// </summary>
+        /// <param name="networkId">The network id to use when creating the new ip address.</param>
+        /// <returns>A FloatingIp object.</returns>
+        Task<FloatingIp> CreateFloatingIp(string networkId);
     }
 }

@@ -36,7 +36,7 @@ namespace OpenStack.Test.Network
     {
         internal NetworkRestSimulator simulator;
         internal string authId = "12345";
-        internal Uri endpoint = new Uri("http://testnetworkendpoint.com/v2/1234567890");
+        internal Uri endpoint = new Uri("http://testnetworkendpoint.com");
         internal IServiceLocator ServiceLocator;
 
         [TestInitialize]
@@ -91,7 +91,7 @@ namespace OpenStack.Test.Network
 
             await client.GetNetworks();
 
-            Assert.AreEqual(string.Format("{0}/networks", endpoint), this.simulator.Uri.ToString());
+            Assert.AreEqual(string.Format("{0}/networks", endpoint +"v2.0"), this.simulator.Uri.ToString());
             Assert.AreEqual(HttpMethod.Get, this.simulator.Method);
         }
 
@@ -109,6 +109,155 @@ namespace OpenStack.Test.Network
 
             var respContent = TestHelper.GetStringFromStream(resp.Content);
             Assert.IsTrue(respContent.Length > 0);
+        }
+
+        #endregion
+
+        #region Get FloatingIps Tests
+
+        [TestMethod]
+        public async Task GetFloatingIpsIncludesAuthHeader()
+        {
+            var client =
+                new NetworkServiceRestClient(GetValidContext(), this.ServiceLocator);
+
+            await client.GetFloatingIps();
+
+            Assert.IsTrue(this.simulator.Headers.ContainsKey("X-Auth-Token"));
+            Assert.AreEqual(this.authId, this.simulator.Headers["X-Auth-Token"]);
+        }
+
+        [TestMethod]
+        public async Task GetFloatingIpsFormsCorrectUrlAndMethod()
+        {
+            var client =
+                new NetworkServiceRestClient(GetValidContext(), this.ServiceLocator);
+
+            await client.GetFloatingIps();
+
+            Assert.AreEqual(string.Format("{0}/floatingips", endpoint + "v2.0"), this.simulator.Uri.ToString());
+            Assert.AreEqual(HttpMethod.Get, this.simulator.Method);
+        }
+
+        [TestMethod]
+        public async Task CanGetFloatingIps()
+        {
+            this.simulator.FloatingIps.Add(new OpenStack.Network.FloatingIp("12345", "172.0.0.1", FloatingIpStatus.Active));
+
+            var client =
+               new NetworkServiceRestClient(GetValidContext(), this.ServiceLocator);
+
+            var resp = await client.GetFloatingIps();
+
+            Assert.AreEqual(HttpStatusCode.OK, resp.StatusCode);
+
+            var respContent = TestHelper.GetStringFromStream(resp.Content);
+            Assert.IsTrue(respContent.Length > 0);
+        }
+
+        #endregion
+
+        #region Get FloatingIp Tests
+
+        [TestMethod]
+        public async Task GetFloatingIpIncludesAuthHeader()
+        {
+            var client =
+                new NetworkServiceRestClient(GetValidContext(), this.ServiceLocator);
+
+            await client.GetNetworks();
+
+            Assert.IsTrue(this.simulator.Headers.ContainsKey("X-Auth-Token"));
+            Assert.AreEqual(this.authId, this.simulator.Headers["X-Auth-Token"]);
+        }
+
+        [TestMethod]
+        public async Task GetFloatingIpFormsCorrectUrlAndMethod()
+        {
+            var client =
+                new NetworkServiceRestClient(GetValidContext(), this.ServiceLocator);
+
+            await client.GetFloatingIp("12345");
+
+            Assert.AreEqual(string.Format("{0}/floatingips/12345", endpoint + "v2.0"), this.simulator.Uri.ToString());
+            Assert.AreEqual(HttpMethod.Get, this.simulator.Method);
+        }
+
+        [TestMethod]
+        public async Task CanGetFloatinIp()
+        {
+            this.simulator.FloatingIps.Add(new OpenStack.Network.FloatingIp("12345", "172.0.0.1", FloatingIpStatus.Active));
+
+            var client =
+               new NetworkServiceRestClient(GetValidContext(), this.ServiceLocator);
+
+            var resp = await client.GetFloatingIp("12345");
+
+            Assert.AreEqual(HttpStatusCode.OK, resp.StatusCode);
+
+            var respContent = TestHelper.GetStringFromStream(resp.Content);
+            Assert.IsTrue(respContent.Length > 0);
+        }
+
+        #endregion
+
+        #region Create FloatingIp Tests
+
+        [TestMethod]
+        public async Task CreateFloatingIpIncludesAuthHeader()
+        {
+            var client =
+                new NetworkServiceRestClient(GetValidContext(), this.ServiceLocator);
+
+            await client.CreateFloatingIp("12345");
+
+            Assert.IsTrue(this.simulator.Headers.ContainsKey("X-Auth-Token"));
+            Assert.AreEqual(this.authId, this.simulator.Headers["X-Auth-Token"]);
+        }
+
+        [TestMethod]
+        public async Task CreateFloatingIpFormsCorrectUrlAndMethod()
+        {
+            var client =
+                new NetworkServiceRestClient(GetValidContext(), this.ServiceLocator);
+
+            await client.CreateFloatingIp("12345");
+
+            Assert.AreEqual(string.Format("{0}/floatingips", endpoint + "v2.0"), this.simulator.Uri.ToString());
+            Assert.AreEqual(HttpMethod.Post, this.simulator.Method);
+        }
+
+        [TestMethod]
+        public async Task CanCreateFloatinIp()
+        {
+            var client =
+               new NetworkServiceRestClient(GetValidContext(), this.ServiceLocator);
+
+            var resp = await client.CreateFloatingIp("12345");
+
+            Assert.AreEqual(HttpStatusCode.OK, resp.StatusCode);
+
+            var respContent = TestHelper.GetStringFromStream(resp.Content);
+            Assert.IsTrue(respContent.Length > 0);
+        }
+
+        [TestMethod]
+        public async Task CreateFloatinIpFormCorrectBody()
+        {
+            var client =
+               new NetworkServiceRestClient(GetValidContext(), this.ServiceLocator);
+
+            var resp = await client.CreateFloatingIp("12345");
+
+            Assert.AreEqual(HttpStatusCode.OK, resp.StatusCode);
+
+            this.simulator.Content.Position = 0;
+            var body = TestHelper.GetStringFromStream(this.simulator.Content);
+            var ipObj = JObject.Parse(body);
+            Assert.IsNotNull(ipObj);
+            Assert.IsNotNull(ipObj["floatingip"]);
+            Assert.IsNotNull(ipObj["floatingip"]["floating_network_id"]);
+            Assert.AreEqual("12345", (string)ipObj["floatingip"]["floating_network_id"]);
         }
 
         #endregion

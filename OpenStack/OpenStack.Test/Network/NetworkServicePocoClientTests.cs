@@ -142,5 +142,184 @@ namespace OpenStack.Test.Network
         }
 
         #endregion
+
+        #region Get Floating IPs Tests
+
+        [TestMethod]
+        public async Task CanGetFloatingIpsWithOkResponse()
+        {
+            var payload = @"{
+                ""floatingips"": [
+                    {
+                        ""router_id"": ""fafac59b-a94a-4525-8700-f4f448e0ac97"",
+                        ""status"": ""ACTIVE"",
+                        ""tenant_id"": ""ffe683d1060449d09dac0bf9d7a371cd"",
+                        ""floating_network_id"": ""3eaab3f7-d3f2-430f-aa73-d07f39aae8f4"",
+                        ""fixed_ip_address"": ""10.0.0.2"",
+                        ""floating_ip_address"": ""172.0.0.1"",
+                        ""port_id"": ""9da94672-6e6b-446c-9579-3dd5484b31fd"",
+                        ""id"": ""12345""
+                    }
+                ]
+            }";
+
+            var content = TestHelper.CreateStream(payload);
+
+            var restResp = new HttpResponseAbstraction(content, new HttpHeadersAbstraction(), HttpStatusCode.OK);
+            this.NetworkServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new NetworkServicePocoClient(GetValidContext(), this.ServiceLocator);
+            var result = await client.GetFloatingIps();
+
+            Assert.IsNotNull(result);
+
+            var floatingIps = result.ToList();
+            Assert.AreEqual(1, floatingIps.Count());
+
+            var floatingIp = floatingIps.First();
+            Assert.AreEqual("12345", floatingIp.Id);
+            Assert.AreEqual("172.0.0.1", floatingIp.FloatingIpAddress);
+            Assert.AreEqual(FloatingIpStatus.Active, floatingIp.Status);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionthrownWhenGettingFloatingIpsAndNotAuthed()
+        {
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.Unauthorized);
+            this.NetworkServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new NetworkServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.GetFloatingIps();
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionthrownWhenGettingFloatingIpsAndServerError()
+        {
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.InternalServerError);
+            this.NetworkServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new NetworkServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.GetFloatingIps();
+        }
+
+        #endregion
+
+        #region Get Floating IP Tests
+
+        [TestMethod]
+        public async Task CanGetFloatingIpWithOkResponse()
+        {
+            var payload = @"{
+                ""floatingip"":
+                    {
+                        ""router_id"": ""fafac59b-a94a-4525-8700-f4f448e0ac97"",
+                        ""status"": ""ACTIVE"",
+                        ""tenant_id"": ""ffe683d1060449d09dac0bf9d7a371cd"",
+                        ""floating_network_id"": ""3eaab3f7-d3f2-430f-aa73-d07f39aae8f4"",
+                        ""fixed_ip_address"": ""10.0.0.2"",
+                        ""floating_ip_address"": ""172.0.0.1"",
+                        ""port_id"": ""9da94672-6e6b-446c-9579-3dd5484b31fd"",
+                        ""id"": ""12345""
+                    }
+            }";
+
+            var content = TestHelper.CreateStream(payload);
+
+            var restResp = new HttpResponseAbstraction(content, new HttpHeadersAbstraction(), HttpStatusCode.OK);
+            this.NetworkServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new NetworkServicePocoClient(GetValidContext(), this.ServiceLocator);
+            var result = await client.GetFloatingIp("12345");
+
+            Assert.IsNotNull(result);
+
+            Assert.AreEqual("12345", result.Id);
+            Assert.AreEqual("172.0.0.1", result.FloatingIpAddress);
+            Assert.AreEqual(FloatingIpStatus.Active, result.Status);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionthrownWhenGettingFloatingIpAndNotAuthed()
+        {
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.Unauthorized);
+            this.NetworkServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new NetworkServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.GetFloatingIp("12345");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionthrownWhenGettingFloatingIpAndServerError()
+        {
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.InternalServerError);
+            this.NetworkServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new NetworkServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.GetFloatingIp("12345");
+        }
+
+        #endregion
+
+        #region Create Floating IP Tests
+
+        [TestMethod]
+        public async Task CanCreateFloatingIpWithOkResponse()
+        {
+            var payload = @"{
+                ""floatingip"":
+                    {
+                        ""router_id"": ""fafac59b-a94a-4525-8700-f4f448e0ac97"",
+                        ""status"": ""ACTIVE"",
+                        ""tenant_id"": ""ffe683d1060449d09dac0bf9d7a371cd"",
+                        ""floating_network_id"": ""3eaab3f7-d3f2-430f-aa73-d07f39aae8f4"",
+                        ""fixed_ip_address"": ""10.0.0.2"",
+                        ""floating_ip_address"": ""172.0.0.1"",
+                        ""port_id"": ""9da94672-6e6b-446c-9579-3dd5484b31fd"",
+                        ""id"": ""12345""
+                    }
+            }";
+
+            var content = TestHelper.CreateStream(payload);
+
+            var restResp = new HttpResponseAbstraction(content, new HttpHeadersAbstraction(), HttpStatusCode.OK);
+            this.NetworkServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new NetworkServicePocoClient(GetValidContext(), this.ServiceLocator);
+            var result = await client.CreateFloatingIp("12345");
+
+            Assert.IsNotNull(result);
+
+            Assert.AreEqual("12345", result.Id);
+            Assert.AreEqual("172.0.0.1", result.FloatingIpAddress);
+            Assert.AreEqual(FloatingIpStatus.Active, result.Status);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionthrownWhenCreatingFloatingIpAndNotAuthed()
+        {
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.Unauthorized);
+            this.NetworkServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new NetworkServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.CreateFloatingIp("12345");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionthrownWhenCreatingFloatingIpAndServerError()
+        {
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.InternalServerError);
+            this.NetworkServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new NetworkServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.CreateFloatingIp("12345");
+        }
+
+        #endregion
     }
 }

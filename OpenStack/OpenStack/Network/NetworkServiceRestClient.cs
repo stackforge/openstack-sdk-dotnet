@@ -14,8 +14,10 @@
 // limitations under the License.
 // ============================================================================ */
 
+using System.Dynamic;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 using OpenStack.Common;
 using OpenStack.Common.Http;
 using OpenStack.Common.ServiceLocation;
@@ -26,6 +28,7 @@ namespace OpenStack.Network
     internal class NetworkServiceRestClient : OpenStackServiceRestClientBase, INetworkServiceRestClient
     {
         internal const string NetworksUrlMoniker = "networks";
+        internal const string FloatingIpsUrlMoniker = "floatingips";
         internal const string NetworkVersionMoniker = "v2.0";
 
         /// <summary>
@@ -44,6 +47,50 @@ namespace OpenStack.Network
 
             client.Uri = CreateRequestUri(this.Context.PublicEndpoint, NetworkVersionMoniker, NetworksUrlMoniker);
             client.Method = HttpMethod.Get;
+
+            return await client.SendAsync();
+        }
+
+        /// <inheritdoc/>
+        public async Task<IHttpResponseAbstraction> GetFloatingIps()
+        {
+            var client = this.GetHttpClient(this.Context);
+
+            client.Uri = CreateRequestUri(this.Context.PublicEndpoint, NetworkVersionMoniker, FloatingIpsUrlMoniker);
+            client.Method = HttpMethod.Get;
+
+            return await client.SendAsync();
+        }
+
+        /// <inheritdoc/>
+        public async Task<IHttpResponseAbstraction> GetFloatingIp(string floatingIpId)
+        {
+            floatingIpId.AssertIsNotNullOrEmpty("floatingIpId", "Cannot get a floating ip with a null or empty id.");
+            
+            var client = this.GetHttpClient(this.Context);
+
+            client.Uri = CreateRequestUri(this.Context.PublicEndpoint, NetworkVersionMoniker, FloatingIpsUrlMoniker, floatingIpId);
+            client.Method = HttpMethod.Get;
+
+            return await client.SendAsync();
+        }
+
+        /// <inheritdoc/>
+        public async Task<IHttpResponseAbstraction> CreateFloatingIp(string networkId)
+        {
+            var client = this.GetHttpClient(this.Context);
+
+            client.Uri = CreateRequestUri(this.Context.PublicEndpoint, NetworkVersionMoniker, FloatingIpsUrlMoniker);
+            client.Method = HttpMethod.Post;
+            client.ContentType = "application/json";
+
+            dynamic body = new ExpandoObject();
+            dynamic networkIdProp = new ExpandoObject();
+            networkIdProp.floating_network_id = networkId;
+            body.floatingip = networkIdProp;
+            string requestBody = JToken.FromObject(body).ToString();
+
+            client.Content = requestBody.ConvertToStream();
 
             return await client.SendAsync();
         }

@@ -53,6 +53,31 @@ namespace OpenStack.Network
             return await client.GetNetworks();
         }
 
+        /// <inheritdoc/>
+        public async Task<IEnumerable<FloatingIp>> GetFloatingIps()
+        {
+            var client = this.GetPocoClient();
+            return await client.GetFloatingIps();
+        }
+
+        /// <inheritdoc/>
+        public async Task<FloatingIp> GetFloatingIp(string floatingIpId)
+        {
+            floatingIpId.AssertIsNotNullOrEmpty("floatingIpId", "Cannot get a floating ip with a null or empty id.");
+
+            var client = this.GetPocoClient();
+            return await client.GetFloatingIp(floatingIpId);
+        }
+
+        /// <inheritdoc/>
+        public async Task<FloatingIp> CreateFloatingIp(string networkId)
+        {
+            networkId.AssertIsNotNullOrEmpty("networkId", "Cannot create a floating ip with a null or empty network id.");
+
+            var client = this.GetPocoClient();
+            return await client.CreateFloatingIp(networkId);
+        }
+
         /// <summary>
         /// Gets a client to interact with the remote OpenStack instance.
         /// </summary>

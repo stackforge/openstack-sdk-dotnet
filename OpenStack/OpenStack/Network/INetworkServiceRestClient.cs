@@ -29,5 +29,25 @@ namespace OpenStack.Network
         /// </summary>
         /// <returns>An HTTP response from the remote server.</returns>
         Task<IHttpResponseAbstraction> GetNetworks();
+
+        /// <summary>
+        /// Gets a list of Floating IPs from the remote OpenStack instance.
+        /// </summary>
+        /// <returns>An HTTP response from the remote server.</returns>
+        Task<IHttpResponseAbstraction> GetFloatingIps();
+
+        /// <summary>
+        /// Gets the details of a Floating IP from the remote OpenStack instance.
+        /// </summary>
+        /// <param name="floatingIpId">The id of the target floating ip.</param>
+        /// <returns>An HTTP response from the remote server.</returns>
+        Task<IHttpResponseAbstraction> GetFloatingIp(string floatingIpId);
+
+        /// <summary>
+        /// Creates a Floating IP on the remote OpenStack instance.
+        /// </summary>
+        /// <param name="networkId">The network id to use when creating the new ip address.</param>
+        /// <returns>An HTTP response from the remote server.</returns>
+        Task<IHttpResponseAbstraction> CreateFloatingIp(string networkId);
     }
 }

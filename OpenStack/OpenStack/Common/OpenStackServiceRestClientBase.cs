@@ -63,7 +63,7 @@ namespace OpenStack.Common
         /// <returns>A complete request Uri.</returns>
         internal Uri CreateRequestUri(Uri endpoint, params string[] values)
         {
-            var temp = new List<string> { endpoint.AbsoluteUri };
+            var temp = new List<string> { endpoint.AbsoluteUri.TrimEnd('/') };
             temp.AddRange(values);
             return new Uri(string.Join("/", temp.ToArray()));
         }
