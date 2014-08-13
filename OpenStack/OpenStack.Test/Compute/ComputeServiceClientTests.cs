@@ -217,6 +217,67 @@ namespace OpenStack.Test.Compute
         }
 
         [TestMethod]
+        public async Task CanGetServers()
+        {
+            var expServer1 = new ComputeServer("1", "srv1",
+                new Uri("http://testcomputeendpoint.com/v2/1234567890/servers/1"),
+                new Uri("http://testcomputeendpoint.com/1234567890/servers/1"), new Dictionary<string, string>());
+
+            var expServer2 = new ComputeServer("2", "srv2",
+                new Uri("http://testcomputeendpoint.com/v2/1234567890/servers/1"),
+                new Uri("http://testcomputeendpoint.com/1234567890/servers/1"), new Dictionary<string, string>());
+            var servers = new List<ComputeServer>() { expServer1, expServer2 };
+
+            this.ServicePocoClient.GetServersDelegate = () => Task.Factory.StartNew(() => (IEnumerable<ComputeServer>)servers);
+
+            var client = new ComputeServiceClient(GetValidCreds(), "Nova", CancellationToken.None, this.ServiceLocator);
+            var resp = await client.GetServers();
+            Assert.IsNotNull(resp);
+
+            var respFlavors = resp.ToList();
+            Assert.AreEqual(2, respFlavors.Count());
+            Assert.AreEqual(expServer1, respFlavors[0]);
+            Assert.AreEqual(expServer2, respFlavors[1]);
+        }
+
+        [TestMethod]
+        public async Task CanGetServer()
+        {
+            var serverId = "12345";
+            var expServer = new ComputeServer(serverId, "tiny",
+                new Uri("http://testcomputeendpoint.com/v2/1234567890/servers/1"),
+                new Uri("http://testcomputeendpoint.com/1234567890/servers/1"), new Dictionary<string, string>());
+
+            this.ServicePocoClient.GetServerDelegate = (id) =>
+            {
+                Assert.AreEqual(serverId, id);
+                return Task.Factory.StartNew(() => expServer);
+            };
+
+            var client = new ComputeServiceClient(GetValidCreds(), "Nova", CancellationToken.None, this.ServiceLocator);
+            var server = await client.GetServer(serverId);
+
+            Assert.IsNotNull(server);
+            Assert.AreEqual(expServer, server);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task GetServerWithNullIdThrows()
+        {
+            var client = new ComputeServiceClient(GetValidCreds(), "Nova", CancellationToken.None, this.ServiceLocator);
+            await client.GetServer(null);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task GetServerWithEmptyIdThrows()
+        {
+            var client = new ComputeServiceClient(GetValidCreds(), "Nova", CancellationToken.None, this.ServiceLocator);
+            await client.GetServer(string.Empty);
+        }
+
+        [TestMethod]
         public async Task CanDeleteServer()
         {
             this.ServicePocoClient.DeleteServerDelegate = async (serverId) =>
@@ -242,6 +303,54 @@ namespace OpenStack.Test.Compute
         {
             var client = new ComputeServiceClient(GetValidCreds(), "Nova", CancellationToken.None, this.ServiceLocator);
             await client.DeleteServer(string.Empty);
+        }
+
+        [TestMethod]
+        public async Task CanAssignFloatingIp()
+        {
+            this.ServicePocoClient.AssignFloatingIpDelegate = async (serverId, ipAddress) =>
+            {
+                await Task.Run(() =>
+                {
+                    Assert.AreEqual(serverId, "12345");
+                    Assert.AreEqual(ipAddress, "172.0.0.1");
+                });
+            };
+
+            var client = new ComputeServiceClient(GetValidCreds(), "Nova", CancellationToken.None, this.ServiceLocator);
+            await client.AssignFloatingIp("12345", "172.0.0.1");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task AssignFloatingIpWithNullServerIdThrows()
+        {
+            var client = new ComputeServiceClient(GetValidCreds(), "Nova", CancellationToken.None, this.ServiceLocator);
+            await client.AssignFloatingIp(null, "172.0.0.1");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task AssignFloatingIpWithEmptyServerIdThrows()
+        {
+            var client = new ComputeServiceClient(GetValidCreds(), "Nova", CancellationToken.None, this.ServiceLocator);
+            await client.AssignFloatingIp(string.Empty, "172.0.0.1");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task AssignFloatingIpWithNullIpAddressThrows()
+        {
+            var client = new ComputeServiceClient(GetValidCreds(), "Nova", CancellationToken.None, this.ServiceLocator);
+            await client.AssignFloatingIp("12345", null);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task AssignFloatingIpWithEmptyIpAddressThrows()
+        {
+            var client = new ComputeServiceClient(GetValidCreds(), "Nova", CancellationToken.None, this.ServiceLocator);
+            await client.AssignFloatingIp("12345", string.Empty);
         }
 
         [TestMethod]

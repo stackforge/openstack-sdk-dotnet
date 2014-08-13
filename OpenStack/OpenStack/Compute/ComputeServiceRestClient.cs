@@ -34,6 +34,7 @@ namespace OpenStack.Compute
         internal const string ImagesUrlMoniker = "images";
         internal const string FlavorsUrlMoniker = "flavors";
         internal const string ServersUrlMoniker = "servers";
+        internal const string ActionUrlMoniker = "action";
 
         /// <summary>
         /// Creates a new instance of the ComputeServiceRestClient class.
@@ -68,12 +69,49 @@ namespace OpenStack.Compute
         }
 
         /// <inheritdoc/>
+        public async Task<IHttpResponseAbstraction> GetServers()
+        {
+            var client = this.GetHttpClient(this.Context);
+
+            client.Uri = CreateRequestUri(this.Context.PublicEndpoint, ServersUrlMoniker);
+            client.Method = HttpMethod.Get;
+
+            return await client.SendAsync();
+        }
+
+        /// <inheritdoc/>
+        public async Task<IHttpResponseAbstraction> GetServer(string serverId)
+        {
+            var client = this.GetHttpClient(this.Context);
+
+            client.Uri = CreateRequestUri(this.Context.PublicEndpoint, ServersUrlMoniker, serverId);
+            client.Method = HttpMethod.Get;
+
+            return await client.SendAsync();
+        }
+
+        /// <inheritdoc/>
         public async Task<IHttpResponseAbstraction> DeleteServer(string serverId)
         {
             var client = this.GetHttpClient(this.Context);
 
             client.Uri = CreateRequestUri(this.Context.PublicEndpoint, ServersUrlMoniker, serverId);
             client.Method = HttpMethod.Delete;
+
+            return await client.SendAsync();
+        }
+
+        /// <inheritdoc/>
+        public async Task<IHttpResponseAbstraction> AssignFloatingIp(string serverId, string ipAddress)
+        {
+            var client = this.GetHttpClient(this.Context);
+
+            client.Uri = CreateRequestUri(this.Context.PublicEndpoint, ServersUrlMoniker, serverId, ActionUrlMoniker);
+            client.Method = HttpMethod.Post;
+
+            var requestBody = this.GenerateAssignFloatingIpRequestBody(ipAddress);
+            client.Content = requestBody.ConvertToStream();
+            client.ContentType = "application/json";
 
             return await client.SendAsync();
         }
@@ -158,7 +196,7 @@ namespace OpenStack.Compute
             client.Uri = CreateRequestUri(this.Context.PublicEndpoint, ServersUrlMoniker);
             client.Method = HttpMethod.Post;
             
-            var requestBody = GenerateCreateServerRequestBody(name, imageId, flavorId, networkId, securityGroups);
+            var requestBody = this.GenerateCreateServerRequestBody(name, imageId, flavorId, networkId, securityGroups);
             client.Content = requestBody.ConvertToStream();
             client.ContentType = "application/json";
 
@@ -237,6 +275,21 @@ namespace OpenStack.Compute
 
             dynamic body = new System.Dynamic.ExpandoObject();
             body.server = server;
+            return JToken.FromObject(body).ToString();
+        }
+
+        /// <summary>
+        /// Generates a request body for creating compute servers.
+        /// </summary>
+        /// <param name="ipAddress">The ip address to assign.</param>
+        /// <returns>A json encoded request body.</returns>
+        internal string GenerateAssignFloatingIpRequestBody(string ipAddress)
+        {
+            dynamic addIpAddress = new System.Dynamic.ExpandoObject();
+            addIpAddress.address = ipAddress;
+
+            dynamic body = new System.Dynamic.ExpandoObject();
+            body.addFloatingIp = addIpAddress;
             return JToken.FromObject(body).ToString();
         }
     }

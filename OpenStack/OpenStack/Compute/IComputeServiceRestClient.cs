@@ -95,11 +95,32 @@ namespace OpenStack.Compute
         Task<IHttpResponseAbstraction> CreateServer(string name, string imageId, string flavorId, string networkId, IEnumerable<string> securityGroups);
 
         /// <summary>
+        /// Gets a list of servers from the remote OpenStack instance.
+        /// </summary>
+        /// <returns>An HTTP response from the remote server.</returns>
+        Task<IHttpResponseAbstraction> GetServers();
+
+        /// <summary>
+        /// Gets a server from the remote OpenStack instance.
+        /// </summary>
+        /// <param name="serverId">The id of the server to get.</param>
+        /// <returns>An HTTP response from the remote server.</returns>
+        Task<IHttpResponseAbstraction> GetServer(string serverId);
+
+        /// <summary>
         /// Deletes a server on the remote OpenStack instance.
         /// </summary>
         /// <param name="serverId">The id of the server to delete.</param>
         /// <returns>An HTTP response from the remote server.</returns>
         Task<IHttpResponseAbstraction> DeleteServer(string serverId);
+
+        /// <summary>
+        /// Assigns the given floating ip address to the specified compute server.
+        /// </summary>
+        /// <param name="serverId">The id for the compute server.</param>
+        /// <param name="ipAddress">The ip address of the floating ip.</param>
+        /// <returns>An HTTP response from the remote server.</returns>
+        Task<IHttpResponseAbstraction> AssignFloatingIp(string serverId, string ipAddress);
 
         /// <summary>
         /// Gets the associated metadata for a given compute flavor.

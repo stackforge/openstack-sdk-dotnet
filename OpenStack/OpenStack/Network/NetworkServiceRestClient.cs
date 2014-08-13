@@ -94,5 +94,18 @@ namespace OpenStack.Network
 
             return await client.SendAsync();
         }
+
+        /// <inheritdoc/>
+        public async Task<IHttpResponseAbstraction> DeleteFloatingIp(string floatingIpId)
+        {
+            floatingIpId.AssertIsNotNullOrEmpty("floatingIpId", "Cannot delete a floating ip with a null or empty id.");
+
+            var client = this.GetHttpClient(this.Context);
+
+            client.Uri = CreateRequestUri(this.Context.PublicEndpoint, NetworkVersionMoniker, FloatingIpsUrlMoniker, floatingIpId);
+            client.Method = HttpMethod.Delete;
+
+            return await client.SendAsync();
+        }
     }
 }

@@ -50,6 +50,12 @@ namespace OpenStack.Test.Compute
 
         public Func<string, string, Task> DeleteServerMetadataDelegate { get; set; }
 
+        public Func<string, string, Task> AssignFloatingIpDelegate { get; set; }
+
+        public Func<string, Task<ComputeServer>> GetServerDelegate { get; set; }
+
+        public Func<Task<IEnumerable<ComputeServer>>> GetServersDelegate { get; set; } 
+
         public async Task<ComputeFlavor> GetFlavor(string flavorId)
         {
             return await this.GetFlavorDelegate(flavorId);
@@ -93,6 +99,21 @@ namespace OpenStack.Test.Compute
         public async Task DeleteServer(string serverId)
         {
             await this.DeleteServerDelegate(serverId);
+        }
+
+        public async Task<IEnumerable<ComputeServer>> GetServers()
+        {
+            return await this.GetServersDelegate();
+        }
+
+        public async Task<ComputeServer> GetServer(string serverId)
+        {
+            return await this.GetServerDelegate(serverId);
+        }
+
+        public async Task AssignFloatingIp(string serverId, string ipAddress)
+        {
+            await this.AssignFloatingIpDelegate(serverId, ipAddress);
         }
 
         public async Task<IDictionary<string, string>> GetImageMetadata(string flavorId)

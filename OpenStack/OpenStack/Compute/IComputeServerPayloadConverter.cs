@@ -14,6 +14,8 @@
 // limitations under the License.
 // ============================================================================ */
 
+using System.Collections.Generic;
+
 namespace OpenStack.Compute
 {
     /// <summary>
@@ -27,5 +29,19 @@ namespace OpenStack.Compute
         /// <param name="payload">The summary payload.</param>
         /// <returns>A ComputeServer object.</returns>
         ComputeServer ConvertSummary(string payload);
+
+        /// <summary>
+        /// Converts a json payload into a ComputeServer object.
+        /// </summary>
+        /// <param name="payload">The payload.</param>
+        /// <returns>A ComputeServer object.</returns>
+        ComputeServer Convert(string payload);
+
+        /// <summary>
+        /// Converts a json payload into a list of ComputeServer objects.
+        /// </summary>
+        /// <param name="payload">The payload to convert.</param>
+        /// <returns>A list of ComputeServer objects.</returns>
+        IEnumerable<ComputeServer> ConvertServers(string payload);
     }
 }

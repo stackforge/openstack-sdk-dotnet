@@ -570,6 +570,312 @@ namespace OpenStack.Test.Compute
 
         #endregion
 
+        #region Get Compute Servers Tests
+
+        public string ServersPayload = @"{
+                            ""servers"": [
+                                {
+                                    ""id"": ""1"",
+                                    ""links"": [
+                                        {
+                                            ""href"": ""http://someuri.com/v2/servers/1"",
+                                            ""rel"": ""self""
+                                        },
+                                        {
+                                            ""href"": ""http://someuri.com/servers/1"",
+                                            ""rel"": ""bookmark""
+                                        }
+                                    ],
+                                    ""name"": ""server1""
+                                }
+                            ]
+                        }";
+
+        [TestMethod]
+        public async Task CanGetComputeServersWithOkResponse()
+        {
+            var content = TestHelper.CreateStream(ServersPayload);
+
+            var restResp = new HttpResponseAbstraction(content, new HttpHeadersAbstraction(), HttpStatusCode.OK);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            var result = await client.GetServers();
+
+            Assert.IsNotNull(result);
+
+            var servers = result.ToList();
+            Assert.AreEqual(1, servers.Count());
+
+            var server = servers.First();
+            Assert.AreEqual("server1", server.Name);
+            Assert.AreEqual("1", server.Id);
+            Assert.AreEqual(new Uri("http://someuri.com/v2/servers/1"), server.PublicUri);
+            Assert.AreEqual(new Uri("http://someuri.com/servers/1"), server.PermanentUri);
+        }
+
+        [TestMethod]
+        public async Task CanGetComputeServersWithNonAuthoritativeResponse()
+        {
+            var content = TestHelper.CreateStream(ServersPayload);
+
+            var restResp = new HttpResponseAbstraction(content, new HttpHeadersAbstraction(), HttpStatusCode.NonAuthoritativeInformation);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            var result = await client.GetServers();
+
+            Assert.IsNotNull(result);
+
+            var servers = result.ToList();
+            Assert.AreEqual(1, servers.Count());
+
+            var server = servers.First();
+            Assert.AreEqual("server1", server.Name);
+            Assert.AreEqual("1", server.Id);
+            Assert.AreEqual(new Uri("http://someuri.com/v2/servers/1"), server.PublicUri);
+            Assert.AreEqual(new Uri("http://someuri.com/servers/1"), server.PermanentUri);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task CannotGetComputeServersWithNoContent()
+        {
+
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.NoContent);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.GetServers();
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionthrownWhenGettingComputeServersAndNotAuthed()
+        {
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.Unauthorized);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.GetServers();
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionthrownWhenGettingComputeServersAndServerError()
+        {
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.InternalServerError);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.GetServers();
+        }
+
+        #endregion
+
+        #region Get Compute Server Tests
+
+            public string ServerPayload = @"{
+            ""server"": {
+                ""status"": ""ACTIVE"",
+                ""updated"": ""2014-06-11T18:04:46Z"",
+                ""hostId"": ""bd5417ccb076908f6e0d639c37c053b0b6b9681db3464d19908dd4d9"",
+                ""addresses"": {
+                    ""private"": [
+                        {
+                            ""OS-EXT-IPS-MAC:mac_addr"": ""fa:16:3e:34:da:44"",
+                            ""version"": 4,
+                            ""addr"": ""10.0.0.2"",
+                            ""OS-EXT-IPS:type"": ""fixed""
+                        },
+                        {
+                            ""OS-EXT-IPS-MAC:mac_addr"": ""fa:16:3e:34:da:44"",
+                            ""version"": 4,
+                            ""addr"": ""172.24.4.3"",
+                            ""OS-EXT-IPS:type"": ""floating""
+                        }
+                    ]
+                },
+                ""links"": [
+                    {
+                        ""href"": ""http://someuri.com/v2/servers/1"",
+                        ""rel"": ""self""
+                    },
+                    {
+                        ""href"": ""http://someuri.com/servers/1"",
+                        ""rel"": ""bookmark""
+                    }
+                ],
+                ""key_name"": null,
+                ""image"": {
+                    ""id"": ""c650e788-3c46-4efc-bfa6-1d94a14d6405"",
+                    ""links"": [
+                        {
+                            ""href"": ""http://15.125.87.81:8774/ffe683d1060449d09dac0bf9d7a371cd/images/c650e788-3c46-4efc-bfa6-1d94a14d6405"",
+                            ""rel"": ""bookmark""
+                        }
+                    ]
+                },
+                ""OS-EXT-STS:task_state"": null,
+                ""OS-EXT-STS:vm_state"": ""active"",
+                ""OS-SRV-USG:launched_at"": ""2014-06-11T18:04:45.000000"",
+                ""flavor"": {
+                    ""id"": ""1"",
+                    ""links"": [
+                        {
+                            ""href"": ""http://15.125.87.81:8774/ffe683d1060449d09dac0bf9d7a371cd/flavors/1"",
+                            ""rel"": ""bookmark""
+                        }
+                    ]
+                },
+                ""id"": ""1"",
+                ""security_groups"": [
+                    {
+                        ""name"": ""MyGroup""
+                    },
+                    {
+                        ""name"": ""default""
+                    }
+                ],
+                ""OS-SRV-USG:terminated_at"": null,
+                ""OS-EXT-AZ:availability_zone"": ""nova"",
+                ""user_id"": ""70d48d344b494a1cbe8adbf7c02be7b5"",
+                ""name"": ""wfoley1"",
+                ""created"": ""2014-06-11T18:04:25Z"",
+                ""tenant_id"": ""ffe683d1060449d09dac0bf9d7a371cd"",
+                ""OS-DCF:diskConfig"": ""AUTO"",
+                ""os-extended-volumes:volumes_attached"": [],
+                ""accessIPv4"": """",
+                ""accessIPv6"": """",
+                ""progress"": 0,
+                ""OS-EXT-STS:power_state"": 1,
+                ""config_drive"": """",
+                ""metadata"": {}
+            }
+        }";
+
+        [TestMethod]
+        public async Task CanGetComputeServerWithOkResponse()
+        {
+            var content = TestHelper.CreateStream(ServerPayload);
+
+            var restResp = new HttpResponseAbstraction(content, new HttpHeadersAbstraction(), HttpStatusCode.OK);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            var result = await client.GetServer("1");
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual("wfoley1", result.Name);
+            Assert.AreEqual("1", result.Id);
+            Assert.AreEqual(ComputeServerStatus.Active, result.Status);
+            Assert.AreEqual(0, result.Progress);
+            Assert.AreEqual(new Uri("http://someuri.com/v2/servers/1"), result.PublicUri);
+            Assert.AreEqual(new Uri("http://someuri.com/servers/1"), result.PermanentUri);
+        }
+
+        [TestMethod]
+        public async Task CanGetComputeServerWithNonAuthoritativeResponse()
+        {
+            var content = TestHelper.CreateStream(ServerPayload);
+
+            var restResp = new HttpResponseAbstraction(content, new HttpHeadersAbstraction(), HttpStatusCode.NonAuthoritativeInformation);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            var result = await client.GetServer("1");
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual("wfoley1", result.Name);
+            Assert.AreEqual("1", result.Id);
+            Assert.AreEqual(ComputeServerStatus.Active, result.Status);
+            Assert.AreEqual(0, result.Progress);
+            Assert.AreEqual(new Uri("http://someuri.com/v2/servers/1"), result.PublicUri);
+            Assert.AreEqual(new Uri("http://someuri.com/servers/1"), result.PermanentUri);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task CannotGetComputeServerWithNoContent()
+        {
+
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.NoContent);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.GetServer("1");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionthrownWhenGettingAComputeServerAndNotAuthed()
+        {
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.Unauthorized);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.GetServer("1");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionthrownWhenGettingAComputeServerAndServerError()
+        {
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.InternalServerError);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.GetServer("1");
+        }
+
+        #endregion
+
+        #region Assign Floating IP Tests
+
+        [TestMethod]
+        public async Task CanAssignFloatingIpWithOkResponse()
+        {
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.OK);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.AssignFloatingIp("12345", "172.0.0.1");
+        }
+
+        [TestMethod]
+        public async Task CanDAssignFloatingIpWithAcceptedResponse()
+        {
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.Accepted);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.AssignFloatingIp("12345", "172.0.0.1");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionthrownWhenAssigningAFloatingIpAndNotAuthed()
+        {
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.Unauthorized);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.AssignFloatingIp("12345", "172.0.0.1");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionthrownWhennAssigningAFloatingIpAndServerError()
+        {
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.InternalServerError);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.AssignFloatingIp("12345", "172.0.0.1");
+        }
+
+        #endregion
+
         #region Update Compute Server Metadata Tests
 
         [TestMethod]

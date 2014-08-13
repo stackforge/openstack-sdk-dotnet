@@ -25,6 +25,11 @@ namespace OpenStack.Compute
     public class ComputeServer : MetadataComputeItem
     {
         /// <summary>
+        /// Gets the current status of the compute server.
+        /// </summary>
+        public ComputeServerStatus Status { get; internal set; }
+
+        /// <summary>
         /// Gets the progress of the current server action.
         /// </summary>
         public int Progress { get; internal set; }
@@ -45,7 +50,7 @@ namespace OpenStack.Compute
         internal ComputeServer(string id, string name, Uri publicUri, Uri permanentUri,
             IDictionary<string, string> metadata) : base(id, name, publicUri, permanentUri, metadata)
         {
-            
+            this.Status = ComputeServerStatus.Unknown;
         }
 
         /// <summary>
@@ -61,6 +66,7 @@ namespace OpenStack.Compute
             IDictionary<string, string> metadata)
             : base(id, name, publicUri, permanentUri, metadata)
         {
+            this.Status = ComputeServerStatus.Unknown;
             this.AdminPassword = adminPassword;
         }
 
@@ -73,10 +79,11 @@ namespace OpenStack.Compute
         /// <param name="publicUri">The public Uri for the compute server.</param>
         /// <param name="permanentUri">The permanent Uri for the computer server.</param>
         /// <param name="metadata">Metadata associated with the compute server.</param>
-        internal ComputeServer(string id, string name, int progress, Uri publicUri, Uri permanentUri,
+        internal ComputeServer(string id, string name, ComputeServerStatus status, int progress, Uri publicUri, Uri permanentUri,
             IDictionary<string, string> metadata)
             : base(id, name, publicUri, permanentUri, metadata)
         {
+            this.Status = status;
             this.Progress = progress;
         }
     }

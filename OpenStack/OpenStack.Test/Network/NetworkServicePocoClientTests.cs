@@ -267,7 +267,7 @@ namespace OpenStack.Test.Network
         #region Create Floating IP Tests
 
         [TestMethod]
-        public async Task CanCreateFloatingIpWithOkResponse()
+        public async Task CanCreateFloatingIpWithCreatedResponse()
         {
             var payload = @"{
                 ""floatingip"":
@@ -285,7 +285,7 @@ namespace OpenStack.Test.Network
 
             var content = TestHelper.CreateStream(payload);
 
-            var restResp = new HttpResponseAbstraction(content, new HttpHeadersAbstraction(), HttpStatusCode.OK);
+            var restResp = new HttpResponseAbstraction(content, new HttpHeadersAbstraction(), HttpStatusCode.Created);
             this.NetworkServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new NetworkServicePocoClient(GetValidContext(), this.ServiceLocator);
@@ -321,5 +321,43 @@ namespace OpenStack.Test.Network
         }
 
         #endregion
+
+        #region Delete Floating IP Tests
+
+        [TestMethod]
+        public async Task CanDeleteFloatingIpWithNoContentResponse()
+        {
+            
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.NoContent);
+            this.NetworkServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new NetworkServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.DeleteFloatingIp("12345");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionthrownWhenDeletingFloatingIpAndNotAuthed()
+        {
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.Unauthorized);
+            this.NetworkServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new NetworkServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.DeleteFloatingIp("12345");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionthrownWhenDeletingFloatingIpAndServerError()
+        {
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.InternalServerError);
+            this.NetworkServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new NetworkServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.DeleteFloatingIp("12345");
+        }
+
+        #endregion
+
     }
 }

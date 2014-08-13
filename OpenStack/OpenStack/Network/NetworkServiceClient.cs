@@ -78,6 +78,15 @@ namespace OpenStack.Network
             return await client.CreateFloatingIp(networkId);
         }
 
+        /// <inheritdoc/>
+        public async Task DeleteFloatingIp(string floatingIpId)
+        {
+            floatingIpId.AssertIsNotNullOrEmpty("floatingIpId", "Cannot delete a floating ip with a null or empty id.");
+
+            var client = this.GetPocoClient();
+            await client.DeleteFloatingIp(floatingIpId);
+        }
+
         /// <summary>
         /// Gets a client to interact with the remote OpenStack instance.
         /// </summary>

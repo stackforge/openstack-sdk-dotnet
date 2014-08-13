@@ -146,9 +146,9 @@ namespace OpenStack.Compute
             }
 
             var converter = this.ServiceLocator.Locate<IComputeImagePayloadConverter>();
-            var flavor = converter.ConvertImage(await resp.ReadContentAsStringAsync());
+            var image = converter.ConvertImage(await resp.ReadContentAsStringAsync());
 
-            return flavor;
+            return image;
         }
 
         /// <inheritdoc/>
@@ -189,6 +189,52 @@ namespace OpenStack.Compute
             if (resp.StatusCode != HttpStatusCode.OK && resp.StatusCode != HttpStatusCode.NoContent)
             {
                 throw new InvalidOperationException(string.Format("Failed to delete compute server. The remote server returned the following status code: '{0}'.", resp.StatusCode));
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task<IEnumerable<ComputeServer>> GetServers()
+        {
+            var client = this.GetRestClient();
+            var resp = await client.GetServers();
+
+            if (resp.StatusCode != HttpStatusCode.OK && resp.StatusCode != HttpStatusCode.NonAuthoritativeInformation)
+            {
+                throw new InvalidOperationException(string.Format("Failed to get compute images. The remote server returned the following status code: '{0}'.", resp.StatusCode));
+            }
+
+            var converter = this.ServiceLocator.Locate<IComputeServerPayloadConverter>();
+            var servers = converter.ConvertServers(await resp.ReadContentAsStringAsync());
+
+            return servers;
+        }
+
+        /// <inheritdoc/>
+        public async Task<ComputeServer> GetServer(string serverId)
+        {
+            var client = this.GetRestClient();
+            var resp = await client.GetServer(serverId);
+
+            if (resp.StatusCode != HttpStatusCode.OK && resp.StatusCode != HttpStatusCode.NonAuthoritativeInformation)
+            {
+                throw new InvalidOperationException(string.Format("Failed to get compute server. The remote server returned the following status code: '{0}'.", resp.StatusCode));
+            }
+
+            var converter = this.ServiceLocator.Locate<IComputeServerPayloadConverter>();
+            var flavor = converter.Convert(await resp.ReadContentAsStringAsync());
+
+            return flavor;
+        }
+
+        /// <inheritdoc/>
+        public async Task AssignFloatingIp(string serverId, string ipAddress)
+        {
+            var client = this.GetRestClient();
+            var resp = await client.AssignFloatingIp(serverId, ipAddress);
+
+            if (resp.StatusCode != HttpStatusCode.OK && resp.StatusCode != HttpStatusCode.Accepted)
+            {
+                throw new InvalidOperationException(string.Format("Failed to assign floating ip. The remote server returned the following status code: '{0}'.", resp.StatusCode));
             }
         }
 

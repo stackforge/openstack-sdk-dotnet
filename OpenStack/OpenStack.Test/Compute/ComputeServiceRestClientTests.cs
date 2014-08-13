@@ -324,6 +324,175 @@ namespace OpenStack.Test.Compute
 
         #endregion
 
+        #region Get Servers Test
+
+        [TestMethod]
+        public async Task GetComputeServersIncludesAuthHeader()
+        {
+            var client =
+                new ComputeServiceRestClient(GetValidContext(), this.ServiceLocator);
+
+            await client.GetServers();
+
+            Assert.IsTrue(this.simulator.Headers.ContainsKey("X-Auth-Token"));
+            Assert.AreEqual(this.authId, this.simulator.Headers["X-Auth-Token"]);
+        }
+
+        [TestMethod]
+        public async Task GetComputeServersFormsCorrectUrlAndMethod()
+        {
+            var client =
+                new ComputeServiceRestClient(GetValidContext(), this.ServiceLocator);
+
+            await client.GetServers();
+
+            Assert.AreEqual(string.Format("{0}/servers", endpoint), this.simulator.Uri.ToString());
+            Assert.AreEqual(HttpMethod.Get, this.simulator.Method);
+        }
+
+        [TestMethod]
+        public async Task CanGetServers()
+        {
+            var serverId = "12345";
+            var server = new ComputeServer(serverId, "tiny",
+                new Uri("http://testcomputeendpoint.com/v2/1234567890/servers/1"),
+                new Uri("http://testcomputeendpoint.com/1234567890/servers/1"), new Dictionary<string, string>());
+            this.simulator.Servers.Add(server);
+            
+            var client = new ComputeServiceRestClient(GetValidContext(), this.ServiceLocator);
+
+            var resp = await client.GetServers();
+
+            Assert.AreEqual(HttpStatusCode.OK, resp.StatusCode);
+
+            var respContent = TestHelper.GetStringFromStream(resp.Content);
+            Assert.IsTrue(respContent.Length > 0);
+        }
+
+        #endregion
+
+        #region Get Server Test
+
+        [TestMethod]
+        public async Task GetComputeServerIncludesAuthHeader()
+        {
+            var client =
+                new ComputeServiceRestClient(GetValidContext(), this.ServiceLocator);
+
+            await client.GetServer("12345");
+
+            Assert.IsTrue(this.simulator.Headers.ContainsKey("X-Auth-Token"));
+            Assert.AreEqual(this.authId, this.simulator.Headers["X-Auth-Token"]);
+        }
+
+        [TestMethod]
+        public async Task GetComputeServerFormsCorrectUrlAndMethod()
+        {
+            var serverId = "1";
+            var client =
+                new ComputeServiceRestClient(GetValidContext(), this.ServiceLocator);
+
+            await client.GetServer(serverId);
+
+            Assert.AreEqual(string.Format("{0}/servers/{1}", endpoint, serverId), this.simulator.Uri.ToString());
+            Assert.AreEqual(HttpMethod.Get, this.simulator.Method);
+        }
+
+        [TestMethod]
+        public async Task CanGetServer()
+        {
+            var serverId = "12345";
+            var server = new ComputeServer(serverId, "tiny",
+                new Uri("http://testcomputeendpoint.com/v2/1234567890/servers/1"),
+                new Uri("http://testcomputeendpoint.com/1234567890/servers/1"), new Dictionary<string, string>());
+            this.simulator.Servers.Add(server);
+
+            var client = new ComputeServiceRestClient(GetValidContext(), this.ServiceLocator);
+
+            var resp = await client.GetServer(serverId);
+            Assert.AreEqual(HttpStatusCode.OK, resp.StatusCode);
+
+            var respContent = TestHelper.GetStringFromStream(resp.Content);
+            Assert.IsTrue(respContent.Length > 0);
+        }
+
+        #endregion
+
+        #region Assign Floating Ip Test
+
+        [TestMethod]
+        public async Task AssignFloatingIpIncludesAuthHeader()
+        {
+            var client =
+                new ComputeServiceRestClient(GetValidContext(), this.ServiceLocator);
+
+            await client.AssignFloatingIp("12345", "172.0.0.1");
+
+            Assert.IsTrue(this.simulator.Headers.ContainsKey("X-Auth-Token"));
+            Assert.AreEqual(this.authId, this.simulator.Headers["X-Auth-Token"]);
+        }
+
+        [TestMethod]
+        public async Task AssignFloatingIpIncludesContentTypeHeader()
+        {
+            var client =
+                new ComputeServiceRestClient(GetValidContext(), this.ServiceLocator);
+
+            await client.AssignFloatingIp("12345", "172.0.0.1");
+
+            Assert.IsTrue(this.simulator.ContentType != string.Empty);
+            Assert.AreEqual("application/json", this.simulator.ContentType);
+        }
+
+        [TestMethod]
+        public async Task AssignFloatingIpFormsCorrectUrlAndMethod()
+        {
+            var client =
+                new ComputeServiceRestClient(GetValidContext(), this.ServiceLocator);
+            var serverId = "12345";
+            await client.AssignFloatingIp(serverId, "172.0.0.1");
+
+            Assert.AreEqual(string.Format("{0}/servers/{1}/action", endpoint, serverId), this.simulator.Uri.ToString());
+            Assert.AreEqual(HttpMethod.Post, this.simulator.Method);
+        }
+
+        [TestMethod]
+        public async Task CanAssignFloatingIp()
+        {
+            var serverId = "12345";
+            var server = new ComputeServer(serverId, "tiny",
+                new Uri("http://testcomputeendpoint.com/v2/1234567890/servers/1"),
+                new Uri("http://testcomputeendpoint.com/1234567890/servers/1"), new Dictionary<string, string>());
+            this.simulator.Servers.Add(server);
+            var client = new ComputeServiceRestClient(GetValidContext(), this.ServiceLocator);
+
+            var resp = await client.AssignFloatingIp(serverId, "172.0.0.1");
+
+            Assert.AreEqual(HttpStatusCode.Accepted, resp.StatusCode);
+        }
+
+        [TestMethod]
+        public async Task AssignFloatingIpFormsCorrectBody()
+        {
+            var client =
+                new ComputeServiceRestClient(GetValidContext(), this.ServiceLocator);
+
+            var serverId = "12345";
+            var ipAddress = "172.0.0.1";
+
+            await client.AssignFloatingIp(serverId, ipAddress);
+
+            this.simulator.Content.Position = 0;
+            var reqContent = TestHelper.GetStringFromStream(this.simulator.Content);
+
+            var body = JObject.Parse(reqContent);
+            Assert.IsNotNull(body["addFloatingIp"]);
+            Assert.IsNotNull(body["addFloatingIp"]["address"]);
+            Assert.AreEqual(ipAddress, (string)body["addFloatingIp"]["address"]);
+        }
+
+        #endregion
+
         #region Delete Server Test
 
         [TestMethod]

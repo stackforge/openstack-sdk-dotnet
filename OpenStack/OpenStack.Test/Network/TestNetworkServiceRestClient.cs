@@ -50,6 +50,11 @@ namespace OpenStack.Test.Network
         {
             return Task.Factory.StartNew(() => Responses.Dequeue());
         }
+
+        public Task<IHttpResponseAbstraction> DeleteFloatingIp(string floatingIpId)
+        {
+            return Task.Factory.StartNew(() => Responses.Dequeue());
+        }
     }
 
     public class TestNetworkServiceRestClientFactory : INetworkServiceRestClientFactory

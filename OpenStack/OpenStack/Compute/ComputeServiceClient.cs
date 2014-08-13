@@ -72,22 +72,48 @@ namespace OpenStack.Compute
         }
 
         /// <inheritdoc/>
-        public async Task<IDictionary<string, string>> GetServerMetadata(string flavorId)
+        public async Task<IEnumerable<ComputeServer>> GetServers()
         {
-            flavorId.AssertIsNotNullOrEmpty("flavorId", "Cannot get compute flavor metadata with a null or empty id.");
-            
             var client = this.GetPocoClient();
-            return await client.GetServerMetadata(flavorId);
+            return await client.GetServers();
         }
 
         /// <inheritdoc/>
-        public async Task UpdateServerMetadata(string flavorId, IDictionary<string, string> metadata)
+        public async Task<ComputeServer> GetServer(string serverId)
         {
-            flavorId.AssertIsNotNullOrEmpty("flavorId", "Cannot update compute flavor metadata with a null or empty id.");
-            metadata.AssertIsNotNull("metadata", "Cannot update compute flavor metadata with a null or empty metadata.");
+            serverId.AssertIsNotNullOrEmpty("serverId", "Cannot get compute server with a null or empty id.");
 
             var client = this.GetPocoClient();
-            await client.UpdateServerMetadata(flavorId, metadata);
+            return await client.GetServer(serverId);
+        }
+
+        /// <inheritdoc/>
+        public async Task AssignFloatingIp(string serverId, string ipAddress)
+        {
+            serverId.AssertIsNotNullOrEmpty("serverId", "Cannot assign a floating ip to a compute server with a null or empty id.");
+            ipAddress.AssertIsNotNullOrEmpty("ipAddress", "Cannot assign a floating ip to a compute server with a null or empty ip address.");
+
+            var client = this.GetPocoClient();
+            await client.AssignFloatingIp(serverId, ipAddress);
+        }
+
+        /// <inheritdoc/>
+        public async Task<IDictionary<string, string>> GetServerMetadata(string serverId)
+        {
+            serverId.AssertIsNotNullOrEmpty("serverId", "Cannot get compute server metadata with a null or empty id.");
+            
+            var client = this.GetPocoClient();
+            return await client.GetServerMetadata(serverId);
+        }
+
+        /// <inheritdoc/>
+        public async Task UpdateServerMetadata(string serverId, IDictionary<string, string> metadata)
+        {
+            serverId.AssertIsNotNullOrEmpty("flavorId", "Cannot update compute server metadata with a null or empty id.");
+            metadata.AssertIsNotNull("metadata", "Cannot update compute server metadata with a null or empty metadata.");
+
+            var client = this.GetPocoClient();
+            await client.UpdateServerMetadata(serverId, metadata);
         }
 
         /// <inheritdoc/>

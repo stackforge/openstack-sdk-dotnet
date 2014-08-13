@@ -41,6 +41,11 @@ namespace OpenStack.Test.Compute
             return Task.Factory.StartNew(() => Responses.Dequeue());
         }
 
+        public Task<IHttpResponseAbstraction> AssignFloatingIp(string serverId, string ipAddress)
+        {
+            return Task.Factory.StartNew(() => Responses.Dequeue());
+        }
+
         public Task<IHttpResponseAbstraction> GetServerMetadata(string serverId)
         {
             return Task.Factory.StartNew(() => Responses.Dequeue());
@@ -88,6 +93,16 @@ namespace OpenStack.Test.Compute
 
         /// <inheritdoc/>
         public Task<IHttpResponseAbstraction> CreateServer(string name, string imageId, string flavorId, string networkId, IEnumerable<string> securityGroups)
+        {
+            return Task.Factory.StartNew(() => Responses.Dequeue());
+        }
+
+        public Task<IHttpResponseAbstraction> GetServers()
+        {
+            return Task.Factory.StartNew(() => Responses.Dequeue());
+        }
+
+        public Task<IHttpResponseAbstraction> GetServer(string serverId)
         {
             return Task.Factory.StartNew(() => Responses.Dequeue());
         }

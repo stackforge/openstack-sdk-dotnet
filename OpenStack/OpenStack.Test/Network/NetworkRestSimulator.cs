@@ -137,7 +137,7 @@ namespace OpenStack.Test.Network
             var ip = new FloatingIp(Guid.NewGuid().ToString(), "172.0.0." +(this.FloatingIps.Count +1), FloatingIpStatus.Active);
             this.FloatingIps.Add(ip);
             var floatIpContent = string.Format(payloadFixture, GenerateFloatingIpPayload(ip)).ConvertToStream();
-            return TestHelper.CreateResponse(HttpStatusCode.OK, new Dictionary<string, string>(), floatIpContent);
+            return TestHelper.CreateResponse(HttpStatusCode.Created, new Dictionary<string, string>(), floatIpContent);
         }
 
         protected override IHttpResponseAbstraction HandlePut()
@@ -147,8 +147,36 @@ namespace OpenStack.Test.Network
 
         protected override IHttpResponseAbstraction HandleDelete()
         {
+            if (this.Uri.Segments.Count() >= 3)
+            {
+                switch (this.Uri.Segments[2].TrimEnd('/').ToLower())
+                {
+                    case "floatingips":
+                        if (this.Uri.Segments.Count() == 4)
+                        {
+                            var floatId = this.Uri.Segments[3].TrimEnd('/').ToLower();
+                            return HandleDeleteFloatingIps(floatId);
+                        }
+                        break;
+                    default:
+                        throw new NotImplementedException();
+                }
+            }
             throw new NotImplementedException();
         }
+
+        internal IHttpResponseAbstraction HandleDeleteFloatingIps(string floatingIpId)
+        {
+            var floatIp = this.FloatingIps.FirstOrDefault(ip => ip.Id == floatingIpId);
+            if (floatIp == null)
+            {
+                return TestHelper.CreateResponse(HttpStatusCode.NotFound);
+            }
+
+            this.FloatingIps.Remove(floatIp);
+            return TestHelper.CreateResponse(HttpStatusCode.NoContent, new Dictionary<string, string>());
+        }
+
 
         protected override IHttpResponseAbstraction HandleHead()
         {

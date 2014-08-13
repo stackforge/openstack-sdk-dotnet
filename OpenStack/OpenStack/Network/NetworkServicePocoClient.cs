@@ -99,7 +99,7 @@ namespace OpenStack.Network
             var client = this.GetRestClient();
             var resp = await client.CreateFloatingIp(networkId);
 
-            if (resp.StatusCode != HttpStatusCode.OK)
+            if (resp.StatusCode != HttpStatusCode.Created && resp.StatusCode != HttpStatusCode.OK)
             {
                 throw new InvalidOperationException(string.Format("Failed to create floating ip. The remote server returned the following status code: '{0}'.", resp.StatusCode));
             }
@@ -108,6 +108,18 @@ namespace OpenStack.Network
             var floatingIp = converter.Convert(await resp.ReadContentAsStringAsync());
 
             return floatingIp;
+        }
+
+        /// <inheritdoc/>
+        public async Task DeleteFloatingIp(string floatingIpId)
+        {
+            var client = this.GetRestClient();
+            var resp = await client.DeleteFloatingIp(floatingIpId);
+
+            if (resp.StatusCode != HttpStatusCode.NoContent && resp.StatusCode != HttpStatusCode.OK)
+            {
+                throw new InvalidOperationException(string.Format("Failed to delete floating ip. The remote server returned the following status code: '{0}'.", resp.StatusCode));
+            }
         }
 
         /// <summary>

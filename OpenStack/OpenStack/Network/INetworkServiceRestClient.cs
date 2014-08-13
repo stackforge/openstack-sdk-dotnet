@@ -49,5 +49,12 @@ namespace OpenStack.Network
         /// <param name="networkId">The network id to use when creating the new ip address.</param>
         /// <returns>An HTTP response from the remote server.</returns>
         Task<IHttpResponseAbstraction> CreateFloatingIp(string networkId);
+
+        /// <summary>
+        /// Deletes a Floating IP on the remote OpenStack instance.
+        /// </summary>
+        /// <param name="floatingIpId">The id of the floating ip to delete.</param>
+        /// <returns>An HTTP response from the remote server.</returns>
+        Task<IHttpResponseAbstraction> DeleteFloatingIp(string floatingIpId);
     }
 }

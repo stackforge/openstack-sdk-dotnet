@@ -76,6 +76,27 @@ namespace OpenStack.Compute
         Task DeleteServer(string serverId);
 
         /// <summary>
+        /// Gets a list of servers that are available on the remote OpenStack instance.
+        /// </summary>
+        /// <returns>An enumerable list of servers.</returns>
+        Task<IEnumerable<ComputeServer>> GetServers();
+
+        /// <summary>
+        /// Get the server with the given id from the remote OpenStack instance.
+        /// </summary>
+        /// <param name="serverId">The id of the server.</param>
+        /// <returns>An async task.</returns>
+        Task<ComputeServer> GetServer(string serverId);
+
+        /// <summary>
+        /// Assigns a floating ip address to a compute server on the remote OpenStack instance.
+        /// </summary>
+        /// <param name="serverId">The id of the server.</param>
+        /// <param name="ipAddress">The ip address of the floating ip to assign.</param>
+        /// <returns>An async task.</returns>
+        Task AssignFloatingIp(string serverId, string ipAddress);
+
+        /// <summary>
         /// Gets the associated metadata for a given compute image.
         /// </summary>
         /// <param name="imageId">The id for the image.</param>

@@ -235,7 +235,7 @@ namespace OpenStack.Test.Network
 
             var resp = await client.CreateFloatingIp("12345");
 
-            Assert.AreEqual(HttpStatusCode.OK, resp.StatusCode);
+            Assert.AreEqual(HttpStatusCode.Created, resp.StatusCode);
 
             var respContent = TestHelper.GetStringFromStream(resp.Content);
             Assert.IsTrue(respContent.Length > 0);
@@ -249,7 +249,7 @@ namespace OpenStack.Test.Network
 
             var resp = await client.CreateFloatingIp("12345");
 
-            Assert.AreEqual(HttpStatusCode.OK, resp.StatusCode);
+            Assert.AreEqual(HttpStatusCode.Created, resp.StatusCode);
 
             this.simulator.Content.Position = 0;
             var body = TestHelper.GetStringFromStream(this.simulator.Content);
@@ -258,6 +258,49 @@ namespace OpenStack.Test.Network
             Assert.IsNotNull(ipObj["floatingip"]);
             Assert.IsNotNull(ipObj["floatingip"]["floating_network_id"]);
             Assert.AreEqual("12345", (string)ipObj["floatingip"]["floating_network_id"]);
+        }
+
+        #endregion
+
+        #region Delete Floating Ip Tests
+
+        [TestMethod]
+        public async Task DeleteFloatingIpIncludesAuthHeader()
+        {
+            var client =
+                new NetworkServiceRestClient(GetValidContext(), this.ServiceLocator);
+
+            await client.DeleteFloatingIp("12345");
+
+            Assert.IsTrue(this.simulator.Headers.ContainsKey("X-Auth-Token"));
+            Assert.AreEqual(this.authId, this.simulator.Headers["X-Auth-Token"]);
+        }
+
+        [TestMethod]
+        public async Task DeleteFloatingIpFormsCorrectUrlAndMethod()
+        {
+            var floatingIpId = "12345";
+            var client =
+                new NetworkServiceRestClient(GetValidContext(), this.ServiceLocator);
+
+            await client.DeleteFloatingIp(floatingIpId);
+
+            Assert.AreEqual(string.Format("{0}/floatingips/{1}", endpoint + "v2.0", floatingIpId), this.simulator.Uri.ToString());
+            Assert.AreEqual(HttpMethod.Delete, this.simulator.Method);
+        }
+
+        [TestMethod]
+        public async Task CanDeleteFloatinIp()
+        {
+            this.simulator.FloatingIps.Add(new FloatingIp("12345", "172.0.0.1", FloatingIpStatus.Active));
+            var client =
+               new NetworkServiceRestClient(GetValidContext(), this.ServiceLocator);
+
+            var resp = await client.DeleteFloatingIp("12345");
+
+            Assert.AreEqual(HttpStatusCode.NoContent, resp.StatusCode);
+
+            Assert.AreEqual(0, this.simulator.FloatingIps.Count);
         }
 
         #endregion

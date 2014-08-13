@@ -162,5 +162,31 @@ namespace OpenStack.Test.Network
             var client = new NetworkServiceClient(GetValidCreds(), "Neutron", CancellationToken.None, this.ServiceLocator);
             await client.CreateFloatingIp(string.Empty);
         }
+
+        [TestMethod]
+        public async Task CanDeleteFloatingIp()
+        {
+            var ipId = "12345";
+            this.ServicePocoClient.DeleteFloatingIpDelegate = (ip) => Task.Factory.StartNew(() => Assert.AreEqual(ipId, ip));
+
+            var client = new NetworkServiceClient(GetValidCreds(), "Neutron", CancellationToken.None, this.ServiceLocator);
+            await client.DeleteFloatingIp(ipId);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task DeleteFloatingIpWithNullFloatingIpIdThrows()
+        {
+            var client = new NetworkServiceClient(GetValidCreds(), "Neutron", CancellationToken.None, this.ServiceLocator);
+            await client.DeleteFloatingIp(null);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task DeleteFloatingIpWithEmptyFloatingIpIdThrows()
+        {
+            var client = new NetworkServiceClient(GetValidCreds(), "Neutron", CancellationToken.None, this.ServiceLocator);
+            await client.DeleteFloatingIp(string.Empty);
+        }
     }
 }

@@ -151,7 +151,8 @@ namespace OpenStack.Test.Compute
             {
                 if (this.Uri.Segments.Count() == 4)
                 {
-                    serverContent = TestHelper.CreateStream(GenerateItemsPayload(this.Flavors, "flavors"));
+                    serverContent = TestHelper.CreateStream(GenerateItemsPayload(this.Flavors, "servers"));
+                    return TestHelper.CreateResponse(HttpStatusCode.OK, new Dictionary<string, string>(), serverContent);
                 }
                 throw new NotImplementedException();
             }
@@ -242,25 +243,46 @@ namespace OpenStack.Test.Compute
                 case 4:
                     return HandlePostNewServer();
                 case 6:
-                    if (this.Uri.Segments[5].TrimEnd('/').ToLower() != "metadata")
-                    {
-                        return TestHelper.CreateResponse(HttpStatusCode.NotFound);
-                    }
                     var srvId = this.Uri.Segments[4].TrimEnd('/');
-                    var srv =
-                        this.Servers.FirstOrDefault(
-                            s => string.Equals(s.Id, srvId, StringComparison.OrdinalIgnoreCase));
-                    if (srv == null)
+                    var action = this.Uri.Segments[5].TrimEnd('/').ToLower();
+                    switch (action)
                     {
-                        return TestHelper.CreateResponse(HttpStatusCode.NotFound);
+                        case "metadata":
+                            return HandlePostServerMetadata(srvId);
+                        case "action":
+                            return HandlePostServerAction(srvId);
+                        default:
+                            throw new NotImplementedException();
                     }
-
-                    ParseAndStoreMetadata(srv, GetPayload(this.Content));
-                    break;
                 default:
                     throw new NotImplementedException();
             }
+        }
 
+        internal IHttpResponseAbstraction HandlePostServerAction(string serverId)
+        {
+            this.Content.Position = 0;
+            var reqBody = TestHelper.GetStringFromStream(this.Content);
+            var body = JObject.Parse(reqBody);
+            if (body["addFloatingIp"] != null && body["addFloatingIp"]["address"] != null)
+            {
+                return TestHelper.CreateResponse(HttpStatusCode.Accepted, new Dictionary<string, string>());
+            }
+
+            throw new NotImplementedException();
+        }
+
+        internal IHttpResponseAbstraction HandlePostServerMetadata(string serverId)
+        {
+            var srv =
+                        this.Servers.FirstOrDefault(
+                            s => string.Equals(s.Id, serverId, StringComparison.OrdinalIgnoreCase));
+            if (srv == null)
+            {
+                return TestHelper.CreateResponse(HttpStatusCode.NotFound);
+            }
+
+            ParseAndStoreMetadata(srv, GetPayload(this.Content));
             return TestHelper.CreateResponse(HttpStatusCode.OK, new Dictionary<string, string>());
         }
 
@@ -500,7 +522,85 @@ namespace OpenStack.Test.Compute
 
         private string GenerateServerPayload(ComputeServer server)
         {
-            throw new NotImplementedException();
+            var payloadFixture = @"{{
+                ""server"": {{
+                    ""status"": ""{2}"",
+                    ""updated"": ""2014-06-11T18:04:46Z"",
+                    ""hostId"": ""bd5417ccb076908f6e0d639c37c053b0b6b9681db3464d19908dd4d9"",
+                    ""addresses"": {{
+                        ""private"": [
+                            {{
+                                ""OS-EXT-IPS-MAC:mac_addr"": ""fa:16:3e:34:da:44"",
+                                ""version"": 4,
+                                ""addr"": ""10.0.0.2"",
+                                ""OS-EXT-IPS:type"": ""fixed""
+                            }},
+                            {{
+                                ""OS-EXT-IPS-MAC:mac_addr"": ""fa:16:3e:34:da:44"",
+                                ""version"": 4,
+                                ""addr"": ""172.24.4.3"",
+                                ""OS-EXT-IPS:type"": ""floating""
+                            }}
+                        ]
+                    }},
+                    ""links"": [
+                        {{
+                            ""href"": ""{4}"",
+                            ""rel"": ""self""
+                        }},
+                        {{
+                            ""href"": ""{5}"",
+                            ""rel"": ""bookmark""
+                        }}
+                    ],
+                    ""key_name"": null,
+                    ""image"": {{
+                        ""id"": ""c650e788-3c46-4efc-bfa6-1d94a14d6405"",
+                        ""links"": [
+                            {{
+                                ""href"": ""http://15.125.87.81:8774/ffe683d1060449d09dac0bf9d7a371cd/images/c650e788-3c46-4efc-bfa6-1d94a14d6405"",
+                                ""rel"": ""bookmark""
+                            }}
+                        ]
+                    }},
+                    ""OS-EXT-STS:task_state"": null,
+                    ""OS-EXT-STS:vm_state"": ""active"",
+                    ""OS-SRV-USG:launched_at"": ""2014-06-11T18:04:45.000000"",
+                    ""flavor"": {{
+                        ""id"": ""1"",
+                        ""links"": [
+                            {{
+                                ""href"": ""http://15.125.87.81:8774/ffe683d1060449d09dac0bf9d7a371cd/flavors/1"",
+                                ""rel"": ""bookmark""
+                            }}
+                        ]
+                    }},
+                    ""id"": ""{0}"",
+                    ""security_groups"": [
+                        {{
+                            ""name"": ""MyGroup""
+                        }},
+                        {{
+                            ""name"": ""default""
+                        }}
+                    ],
+                    ""OS-SRV-USG:terminated_at"": null,
+                    ""OS-EXT-AZ:availability_zone"": ""nova"",
+                    ""user_id"": ""70d48d344b494a1cbe8adbf7c02be7b5"",
+                    ""name"": ""{1}"",
+                    ""created"": ""2014-06-11T18:04:25Z"",
+                    ""tenant_id"": ""ffe683d1060449d09dac0bf9d7a371cd"",
+                    ""OS-DCF:diskConfig"": ""AUTO"",
+                    ""os-extended-volumes:volumes_attached"": [],
+                    ""accessIPv4"": """",
+                    ""accessIPv6"": """",
+                    ""progress"": {3},
+                    ""OS-EXT-STS:power_state"": 1,
+                    ""config_drive"": """",
+                    ""metadata"": {{}}
+                }}
+            }}";
+            return string.Format(payloadFixture, server.Id, server.Name, server.Status, server.Progress, server.PublicUri.AbsoluteUri, server.PermanentUri.AbsoluteUri);
         }
 
         private string GenerateMetadataPayload(IDictionary<string, string> metadata)

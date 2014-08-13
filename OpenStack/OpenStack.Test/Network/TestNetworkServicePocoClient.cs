@@ -32,6 +32,8 @@ namespace OpenStack.Test.Network
 
         public Func<string, Task<OpenStack.Network.FloatingIp>> CreateFloatingIpDelegate { get; set; }
 
+        public Func<string, Task> DeleteFloatingIpDelegate { get; set; }
+
         public async Task<IEnumerable<OpenStack.Network.Network>> GetNetworks()
         {
             return await this.GetNetworksDelegate();
@@ -50,6 +52,11 @@ namespace OpenStack.Test.Network
         public async Task<FloatingIp> CreateFloatingIp(string networkId)
         {
             return await CreateFloatingIpDelegate(networkId);
+        }
+
+        public async Task DeleteFloatingIp(string floatingIpId)
+        {
+            await DeleteFloatingIpDelegate(floatingIpId);
         }
     }
 

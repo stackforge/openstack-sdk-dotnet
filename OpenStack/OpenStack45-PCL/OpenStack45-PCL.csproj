@@ -124,6 +124,9 @@
     <Compile Include="..\OpenStack\Compute\ComputeItemMetadataPayloadConverter.cs">
       <Link>Compute\ComputeItemMetadataPayloadConverter.cs</Link>
     </Compile>
+    <Compile Include="..\OpenStack\Compute\ComputerServerStatus.cs">
+      <Link>Compute\ComputerServerStatus.cs</Link>
+    </Compile>
     <Compile Include="..\OpenStack\Compute\ComputeServer.cs">
       <Link>Compute\ComputeServer.cs</Link>
     </Compile>

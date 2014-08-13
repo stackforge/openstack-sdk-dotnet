@@ -60,6 +60,7 @@
     <Compile Include="Compute\ComputeImage.cs" />
     <Compile Include="Compute\ComputeItem.cs" />
     <Compile Include="Compute\ComputeItemMetadataPayloadConverter.cs" />
+    <Compile Include="Compute\ComputerServerStatus.cs" />
     <Compile Include="Compute\ComputeServer.cs" />
     <Compile Include="Compute\ComputeServerPayloadConverter.cs" />
     <Compile Include="Compute\ComputeServiceClientDefinition.cs" />
