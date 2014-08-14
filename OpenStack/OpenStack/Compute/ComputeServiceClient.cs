@@ -127,6 +127,22 @@ namespace OpenStack.Compute
         }
 
         /// <inheritdoc/>
+        public async Task<IEnumerable<ComputeKeyPair>> GetKeyPairs()
+        {
+            var client = this.GetPocoClient();
+            return await client.GetKeyPairs();
+        }
+
+        /// <inheritdoc/>
+        public async Task<ComputeKeyPair> GetKeyPair(string keyPairName)
+        {
+            keyPairName.AssertIsNotNullOrEmpty("keyPairName", "Cannot get compute key pair with a null or empty name.");
+
+            var client = this.GetPocoClient();
+            return await client.GetKeyPair(keyPairName);
+        }
+
+        /// <inheritdoc/>
         public async Task<IEnumerable<ComputeImage>> GetImages()
         {
             var client = this.GetPocoClient();
@@ -189,7 +205,20 @@ namespace OpenStack.Compute
             networkId.AssertIsNotNullOrEmpty("networkId", "Cannot create a server with a null or empty network id.");
 
             var client = this.GetPocoClient();
-            return await client.CreateServer(name, imageId, flavorId, networkId, securityGroups);
+            return await client.CreateServer(name, imageId, flavorId, networkId, string.Empty, securityGroups);
+        }
+
+        /// <inheritdoc/>
+        public async Task<ComputeServer> CreateServer(string name, string imageId, string flavorId, string networkId, string keyName, IEnumerable<string> securityGroups)
+        {
+            name.AssertIsNotNullOrEmpty("name", "Cannot create a server with a null or empty name.");
+            imageId.AssertIsNotNullOrEmpty("imageId", "Cannot create a server with a null or empty image id.");
+            flavorId.AssertIsNotNullOrEmpty("flavorId", "Cannot create a server with a null or empty flavor id.");
+            networkId.AssertIsNotNullOrEmpty("networkId", "Cannot create a server with a null or empty network id.");
+            keyName.AssertIsNotNull("keyName", "Cannot create a server with a null key name.");
+
+            var client = this.GetPocoClient();
+            return await client.CreateServer(name, imageId, flavorId, networkId, keyName, securityGroups);
         }
 
         /// <summary>

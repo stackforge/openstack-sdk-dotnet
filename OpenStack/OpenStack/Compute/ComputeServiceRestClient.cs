@@ -15,7 +15,6 @@
 // ============================================================================ */
 
 using System.Collections.Generic;
-using System.Linq;
 using Newtonsoft.Json.Linq;
 
 namespace OpenStack.Compute
@@ -35,6 +34,7 @@ namespace OpenStack.Compute
         internal const string FlavorsUrlMoniker = "flavors";
         internal const string ServersUrlMoniker = "servers";
         internal const string ActionUrlMoniker = "action";
+        internal const string KeyPairUrlMoniker = "os-keypairs";
 
         /// <summary>
         /// Creates a new instance of the ComputeServiceRestClient class.
@@ -136,6 +136,28 @@ namespace OpenStack.Compute
         }
 
         /// <inheritdoc/>
+        public async Task<IHttpResponseAbstraction> GetKeyPairs()
+        {
+            var client = this.GetHttpClient(this.Context);
+
+            client.Uri = CreateRequestUri(this.Context.PublicEndpoint, KeyPairUrlMoniker);
+            client.Method = HttpMethod.Get;
+
+            return await client.SendAsync();
+        }
+
+        /// <inheritdoc/>
+        public async Task<IHttpResponseAbstraction> GetKeyPair(string keyPairName)
+        {
+            var client = this.GetHttpClient(this.Context);
+
+            client.Uri = CreateRequestUri(this.Context.PublicEndpoint, KeyPairUrlMoniker, keyPairName);
+            client.Method = HttpMethod.Get;
+
+            return await client.SendAsync();
+        }
+
+        /// <inheritdoc/>
         public async Task<IHttpResponseAbstraction> GetImages()
         {
             var client = this.GetHttpClient(this.Context);
@@ -188,15 +210,15 @@ namespace OpenStack.Compute
         }
 
         /// <inheritdoc/>
-        public async Task<IHttpResponseAbstraction> CreateServer(string name, string imageId, string flavorId,
-            string networkId, IEnumerable<string> securityGroups)
+        public async Task<IHttpResponseAbstraction> CreateServer(string name, string imageId, string flavorId, string networkId, string keyName,
+            IEnumerable<string> securityGroups)
         {
             var client = this.GetHttpClient(this.Context);
 
             client.Uri = CreateRequestUri(this.Context.PublicEndpoint, ServersUrlMoniker);
             client.Method = HttpMethod.Post;
-            
-            var requestBody = this.GenerateCreateServerRequestBody(name, imageId, flavorId, networkId, securityGroups);
+
+            var requestBody = this.GenerateCreateServerRequestBody(name, imageId, flavorId, networkId, keyName, securityGroups);
             client.Content = requestBody.ConvertToStream();
             client.ContentType = "application/json";
 
@@ -249,9 +271,10 @@ namespace OpenStack.Compute
         /// <param name="imageId">The id of the image to use.</param>
         /// <param name="flavorId">The id of the flavor to use.</param>
         /// <param name="networkId">The id of the network to attach the server to.</param>
+        /// <param name="keyName">The name of the key to associate this server with.</param>
         /// <param name="securityGroups">A list of security groups to associate the server with.</param>
         /// <returns>A json encoded request body.</returns>
-        internal string GenerateCreateServerRequestBody(string name, string imageId, string flavorId, string networkId, IEnumerable<string> securityGroups)
+        internal string GenerateCreateServerRequestBody(string name, string imageId, string flavorId, string networkId, string keyName, IEnumerable<string> securityGroups)
         {
             var secGroups = new List<dynamic>();
             foreach (var g in securityGroups)
@@ -270,6 +293,12 @@ namespace OpenStack.Compute
             server.flavorRef = flavorId;
             server.max_count = "1";
             server.min_count = "1";
+            
+            if (!string.IsNullOrEmpty(keyName))
+            {
+                server.key_name = keyName;
+            }
+
             server.networks = new List<dynamic>() { network };
             server.security_groups = secGroups;
 

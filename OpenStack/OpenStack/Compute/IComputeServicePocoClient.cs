@@ -64,9 +64,10 @@ namespace OpenStack.Compute
         /// <param name="imageId">The id for the image that this server will be based on.</param>
         /// <param name="flavorId">The id of the flavor to use for this server.</param>
         /// <param name="networkId">The network to connect this server to.</param>
+        /// <param name="keyName">The name of the key to associate with this server.</param>
         /// <param name="securityGroups">A list of security group names to associate with this server.</param>
         /// <returns>A server object.</returns>
-        Task<ComputeServer> CreateServer(string name, string imageId, string flavorId, string networkId, IEnumerable<string> securityGroups);
+        Task<ComputeServer> CreateServer(string name, string imageId, string flavorId, string networkId, string keyName, IEnumerable<string> securityGroups);
 
         /// <summary>
         /// Deletes the server with the given id from the remote OpenStack instance.
@@ -143,5 +144,18 @@ namespace OpenStack.Compute
         /// <param name="key">The metadata key to remove.</param>
         /// <returns>An async task.</returns>
         Task DeleteServerMetadata(string serverId, string key);
+
+        /// <summary>
+        /// Gets a list of key pairs that are available on the remote OpenStack instance.
+        /// </summary>
+        /// <returns>An enumerable list of key pairs.</returns>
+        Task<IEnumerable<ComputeKeyPair>> GetKeyPairs();
+
+        /// <summary>
+        /// Gets the key pair with the given name from the remote OpenStack instance.
+        /// </summary>
+        /// <param name="keyPairName">The name of the key pair.</param>
+        /// <returns>An async task.</returns>
+        Task<ComputeKeyPair> GetKeyPair(string keyPairName);
     }
 }

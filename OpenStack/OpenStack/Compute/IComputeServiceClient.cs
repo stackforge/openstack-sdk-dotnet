@@ -143,5 +143,18 @@ namespace OpenStack.Compute
         /// <param name="key">The metadata key to remove.</param>
         /// <returns>An async task.</returns>
         Task DeleteServerMetadata(string serverId, string key);
+
+        /// <summary>
+        /// Gets a list of key pairs that are available on the remote OpenStack instance.
+        /// </summary>
+        /// <returns>An enumerable list of key pairs.</returns>
+        Task<IEnumerable<ComputeKeyPair>> GetKeyPairs();
+
+        /// <summary>
+        /// Gets the key pair with the given name from the remote OpenStack instance.
+        /// </summary>
+        /// <param name="keyPairName">The name of the key pair.</param>
+        /// <returns>An async task.</returns>
+        Task<ComputeKeyPair> GetKeyPair(string keyPairName);
     }
 }

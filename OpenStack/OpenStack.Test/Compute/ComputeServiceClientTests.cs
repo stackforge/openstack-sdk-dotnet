@@ -128,18 +128,50 @@ namespace OpenStack.Test.Compute
         {
             var serverName = "MyServer";
             var imageId = "56789";
+            var keyName = "MyKey";
             var flavorId = "2";
             var networkId = "98765";
             var adminPassword = "ABCDE";
             var expServer = new ComputeServer("1235", serverName, adminPassword, new Uri("http://someuri.com/v2/servers/12345"),
                 new Uri("http://someuri.com/servers/12345"), new Dictionary<string, string>());
 
-            this.ServicePocoClient.CreateServerDelegate = (name, imgId, flvId, ntwId, groups) =>
+            this.ServicePocoClient.CreateServerDelegate = (name, imgId, flvId, ntwId, key, groups) =>
             {
                 Assert.AreEqual(serverName, name);
                 Assert.AreEqual(imageId, imgId);
                 Assert.AreEqual(flavorId, flvId);
                 Assert.AreEqual(networkId, ntwId);
+                Assert.AreEqual(keyName, key);
+                Assert.IsTrue(groups.Any(g => g == "default"));
+                return Task.Factory.StartNew(() => expServer);
+            };
+
+            var client = new ComputeServiceClient(GetValidCreds(), "Nova", CancellationToken.None, this.ServiceLocator);
+            var server = await client.CreateServer(serverName, imageId, flavorId, networkId, keyName, new List<string>() { "default" });
+
+            Assert.IsNotNull(server);
+            Assert.AreEqual("1235", server.Id);
+            Assert.AreEqual(adminPassword, server.AdminPassword);
+        }
+
+        [TestMethod]
+        public async Task CanCreateServerWithoutKeyName()
+        {
+            var serverName = "MyServer";
+            var imageId = "56789";
+            var flavorId = "2";
+            var networkId = "98765";
+            var adminPassword = "ABCDE";
+            var expServer = new ComputeServer("1235", serverName, adminPassword, new Uri("http://someuri.com/v2/servers/12345"),
+                new Uri("http://someuri.com/servers/12345"), new Dictionary<string, string>());
+
+            this.ServicePocoClient.CreateServerDelegate = (name, imgId, flvId, ntwId, key, groups) =>
+            {
+                Assert.AreEqual(serverName, name);
+                Assert.AreEqual(imageId, imgId);
+                Assert.AreEqual(flavorId, flvId);
+                Assert.AreEqual(networkId, ntwId);
+                Assert.AreEqual(string.Empty, key);
                 Assert.IsTrue(groups.Any(g => g == "default"));
                 return Task.Factory.StartNew(() => expServer);
             };
@@ -682,6 +714,60 @@ namespace OpenStack.Test.Compute
         {
             var client = new ComputeServiceClient(GetValidCreds(), "Nova", CancellationToken.None, this.ServiceLocator);
             await client.UpdateImageMetadata("12345", null);
+        }
+
+        [TestMethod]
+        public async Task CanGetKeyPairs()
+        {
+            var expKeyPair1 = new ComputeKeyPair("1", "ABCDEF","12345");
+            var expKeyPair2 = new ComputeKeyPair("2", "FEDCBA", "54321");
+            var pairs = new List<ComputeKeyPair>() { expKeyPair1, expKeyPair2 };
+
+            this.ServicePocoClient.GetKeyPairsDelegate = () => Task.Factory.StartNew(() => (IEnumerable<ComputeKeyPair>)pairs);
+
+            var client = new ComputeServiceClient(GetValidCreds(), "Nova", CancellationToken.None, this.ServiceLocator);
+            var resp = await client.GetKeyPairs();
+            Assert.IsNotNull(resp);
+
+            var respPairs = resp.ToList();
+            Assert.AreEqual(2, respPairs.Count());
+            Assert.AreEqual(expKeyPair1, respPairs[0]);
+            Assert.AreEqual(expKeyPair2, respPairs[1]);
+        }
+
+        [TestMethod]
+        public async Task CanGetKeyPair()
+        {
+            var keyName = "1";
+            var expKeyPair1 = new ComputeKeyPair(keyName, "ABCDEF", "12345");
+
+            this.ServicePocoClient.GetKeyPairDelegate = (name) =>
+            {
+                Assert.AreEqual(keyName, name);
+                return Task.Factory.StartNew(() => expKeyPair1);
+            };
+
+            var client = new ComputeServiceClient(GetValidCreds(), "Nova", CancellationToken.None, this.ServiceLocator);
+            var keyPair = await client.GetKeyPair(keyName);
+
+            Assert.IsNotNull(keyPair);
+            Assert.AreEqual(expKeyPair1, keyPair);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task GetKeyPairWithNullNameThrows()
+        {
+            var client = new ComputeServiceClient(GetValidCreds(), "Nova", CancellationToken.None, this.ServiceLocator);
+            await client.GetKeyPair(null);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task GetKeyPairWithEmptyNameThrows()
+        {
+            var client = new ComputeServiceClient(GetValidCreds(), "Nova", CancellationToken.None, this.ServiceLocator);
+            await client.GetKeyPair(string.Empty);
         }
     }
 }

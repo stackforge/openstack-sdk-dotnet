@@ -226,7 +226,7 @@ namespace OpenStack.Test.Compute
             var client =
                 new ComputeServiceRestClient(GetValidContext(), this.ServiceLocator);
 
-            await client.CreateServer("MyServer", "1245", "2", "54321", new List<string>() {"MyGroup"});
+            await client.CreateServer("MyServer", "1245", "2", "54321", "key", new List<string>() { "MyGroup" });
 
             Assert.IsTrue(this.simulator.Headers.ContainsKey("X-Auth-Token"));
             Assert.AreEqual(this.authId, this.simulator.Headers["X-Auth-Token"]);
@@ -238,7 +238,7 @@ namespace OpenStack.Test.Compute
             var client =
                 new ComputeServiceRestClient(GetValidContext(), this.ServiceLocator);
 
-            await client.CreateServer("MyServer", "1245", "2", "54321", new List<string>() { "MyGroup" });
+            await client.CreateServer("MyServer", "1245", "2", "54321", "key", new List<string>() { "MyGroup" });
 
             Assert.IsTrue(this.simulator.ContentType != string.Empty);
             Assert.AreEqual("application/json", this.simulator.ContentType);
@@ -250,7 +250,7 @@ namespace OpenStack.Test.Compute
             var client =
                 new ComputeServiceRestClient(GetValidContext(), this.ServiceLocator);
 
-            await client.CreateServer("MyServer", "1245", "2", "54321", new List<string>() { "MyGroup" });
+            await client.CreateServer("MyServer", "1245", "2", "54321", "key", new List<string>() { "MyGroup" });
 
             Assert.AreEqual(string.Format("{0}/servers", endpoint), this.simulator.Uri.ToString());
             Assert.AreEqual(HttpMethod.Post, this.simulator.Method);
@@ -264,7 +264,7 @@ namespace OpenStack.Test.Compute
 
             var client = new ComputeServiceRestClient(GetValidContext(), this.ServiceLocator);
 
-            var resp = await client.CreateServer(srvName, "1245", "2", "54321", new List<string>() { "MyGroup" });
+            var resp = await client.CreateServer(srvName, "1245", "2", "54321", string.Empty, new List<string>() { "MyGroup" });
 
             Assert.AreEqual(HttpStatusCode.Accepted, resp.StatusCode);
 
@@ -275,6 +275,77 @@ namespace OpenStack.Test.Compute
 
             var resSrv = this.simulator.Servers.First();
             Assert.AreEqual(srvName, resSrv.Name);
+        }
+
+        [TestMethod]
+        public async Task CanCreateComputeServerWithKeyName()
+        {
+
+            var srvName = "MyServer";
+            var keyName = "MyKey";
+
+            var client = new ComputeServiceRestClient(GetValidContext(), this.ServiceLocator);
+
+            var resp = await client.CreateServer(srvName, "1245", "2", "54321", keyName, new List<string>() { "MyGroup" });
+
+            Assert.AreEqual(HttpStatusCode.Accepted, resp.StatusCode);
+
+            var respContent = TestHelper.GetStringFromStream(resp.Content);
+            Assert.IsTrue(respContent.Length > 0);
+
+            Assert.IsTrue(this.simulator.Servers.Count == 1);
+
+            var resSrv = this.simulator.Servers.First();
+            Assert.AreEqual(srvName, resSrv.Name);
+        }
+
+        [TestMethod]
+        public async Task CreateComputeServerWithKeyNameFormsCorrectBody()
+        {
+            var client =
+                new ComputeServiceRestClient(GetValidContext(), this.ServiceLocator);
+
+            var serverName = "MyServer";
+            var keyName = "MyKey";
+            var imageId = "12345";
+            var flavorId = "2";
+            var networkId = "54321";
+            var secGroupName = "MyGroup";
+
+            await client.CreateServer(serverName, imageId, flavorId, networkId, keyName, new List<string>() { secGroupName });
+
+            this.simulator.Content.Position = 0;
+            var reqContent = TestHelper.GetStringFromStream(this.simulator.Content);
+
+            var srvObj = JObject.Parse(reqContent);
+            Assert.IsNotNull(srvObj["server"]);
+            Assert.IsNotNull(srvObj["server"]["name"]);
+            Assert.AreEqual(serverName, (string)srvObj["server"]["name"]);
+
+            Assert.IsNotNull(srvObj["server"]["imageRef"]);
+            Assert.AreEqual(imageId, (string)srvObj["server"]["imageRef"]);
+
+            Assert.IsNotNull(srvObj["server"]["flavorRef"]);
+            Assert.AreEqual(flavorId, (string)srvObj["server"]["flavorRef"]);
+
+            Assert.IsNotNull(srvObj["server"]["max_count"]);
+            Assert.AreEqual(1, (int)srvObj["server"]["max_count"]);
+
+            Assert.IsNotNull(srvObj["server"]["min_count"]);
+            Assert.AreEqual(1, (int)srvObj["server"]["min_count"]);
+
+            Assert.IsNotNull(srvObj["server"]["key_name"]);
+            Assert.AreEqual(keyName, (string)srvObj["server"]["key_name"]);
+
+            Assert.IsNotNull(srvObj["server"]["networks"]);
+            Assert.IsNotNull(srvObj["server"]["networks"][0]);
+            Assert.IsNotNull(srvObj["server"]["networks"][0]["uuid"]);
+            Assert.AreEqual(networkId, (string)srvObj["server"]["networks"][0]["uuid"]);
+
+            Assert.IsNotNull(srvObj["server"]["security_groups"]);
+            Assert.IsNotNull(srvObj["server"]["security_groups"][0]);
+            Assert.IsNotNull(srvObj["server"]["security_groups"][0]["name"]);
+            Assert.AreEqual(secGroupName, (string)srvObj["server"]["security_groups"][0]["name"]);
         }
 
         [TestMethod]
@@ -289,7 +360,7 @@ namespace OpenStack.Test.Compute
             var networkId = "54321";
             var secGroupName = "MyGroup";
 
-            await client.CreateServer(serverName, imageId, flavorId, networkId, new List<string>() { secGroupName });
+            await client.CreateServer(serverName, imageId, flavorId, networkId, string.Empty, new List<string>() { secGroupName });
 
             this.simulator.Content.Position = 0;
             var reqContent = TestHelper.GetStringFromStream(this.simulator.Content);
@@ -966,6 +1037,96 @@ namespace OpenStack.Test.Compute
 
             Assert.AreEqual(1, image.Metadata.Count);
             Assert.AreEqual("value2", image.Metadata["item2"]);
+        }
+
+        #endregion
+
+        #region Get Key Pairs Test
+
+        [TestMethod]
+        public async Task GetComputeKeyPairsIncludesAuthHeader()
+        {
+            var client =
+                new ComputeServiceRestClient(GetValidContext(), this.ServiceLocator);
+
+            await client.GetKeyPairs();
+
+            Assert.IsTrue(this.simulator.Headers.ContainsKey("X-Auth-Token"));
+            Assert.AreEqual(this.authId, this.simulator.Headers["X-Auth-Token"]);
+        }
+
+        [TestMethod]
+        public async Task GetComputeKeyPairsFormsCorrectUrlAndMethod()
+        {
+            var client =
+                new ComputeServiceRestClient(GetValidContext(), this.ServiceLocator);
+
+            await client.GetKeyPairs();
+
+            Assert.AreEqual(string.Format("{0}/os-keypairs", endpoint), this.simulator.Uri.ToString());
+            Assert.AreEqual(HttpMethod.Get, this.simulator.Method);
+        }
+
+        [TestMethod]
+        public async Task CanGetKeyPairs()
+        {
+            var keyPairName = "Key1";
+            var keyPair = new ComputeKeyPair(keyPairName, "12345", "ABCDEF");
+            this.simulator.KeyPairs.Add(keyPair);
+
+            var client = new ComputeServiceRestClient(GetValidContext(), this.ServiceLocator);
+
+            var resp = await client.GetKeyPairs();
+
+            Assert.AreEqual(HttpStatusCode.OK, resp.StatusCode);
+
+            var respContent = TestHelper.GetStringFromStream(resp.Content);
+            Assert.IsTrue(respContent.Length > 0);
+        }
+
+        #endregion
+
+        #region Get Key Pair Test
+
+        [TestMethod]
+        public async Task GetComputeKeyPairIncludesAuthHeader()
+        {
+            var client =
+                new ComputeServiceRestClient(GetValidContext(), this.ServiceLocator);
+
+            await client.GetKeyPair("12345");
+
+            Assert.IsTrue(this.simulator.Headers.ContainsKey("X-Auth-Token"));
+            Assert.AreEqual(this.authId, this.simulator.Headers["X-Auth-Token"]);
+        }
+
+        [TestMethod]
+        public async Task GetComputeKeyPairFormsCorrectUrlAndMethod()
+        {
+            var keyPairName = "1";
+            var client =
+                new ComputeServiceRestClient(GetValidContext(), this.ServiceLocator);
+
+            await client.GetKeyPair(keyPairName);
+
+            Assert.AreEqual(string.Format("{0}/os-keypairs/{1}", endpoint, keyPairName), this.simulator.Uri.ToString());
+            Assert.AreEqual(HttpMethod.Get, this.simulator.Method);
+        }
+
+        [TestMethod]
+        public async Task CanGetKeyPair()
+        {
+            var keyPairName = "Key1";
+            var keyPair = new ComputeKeyPair(keyPairName, "12345", "ABCDEF");
+            this.simulator.KeyPairs.Add(keyPair);
+
+            var client = new ComputeServiceRestClient(GetValidContext(), this.ServiceLocator);
+
+            var resp = await client.GetKeyPair(keyPairName);
+            Assert.AreEqual(HttpStatusCode.OK, resp.StatusCode);
+
+            var respContent = TestHelper.GetStringFromStream(resp.Content);
+            Assert.IsTrue(respContent.Length > 0);
         }
 
         #endregion

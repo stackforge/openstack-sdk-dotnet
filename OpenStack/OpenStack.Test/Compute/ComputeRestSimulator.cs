@@ -38,11 +38,14 @@ namespace OpenStack.Test.Compute
 
         internal ICollection<ComputeServer> Servers { get; private set; }
 
+        internal ICollection<ComputeKeyPair> KeyPairs { get; private set; }
+
         public ComputeRestSimulator() : base()
         {
             this.Flavors = new List<ComputeFlavor>();
             this.Images = new List<ComputeImage>();
             this.Servers = new List<ComputeServer>();
+            this.KeyPairs = new List<ComputeKeyPair>();
         }
 
         public ComputeRestSimulator(CancellationToken token) : this()
@@ -61,6 +64,8 @@ namespace OpenStack.Test.Compute
                         return HandleGetImage();
                     case "servers":
                         return HandleGetServer();
+                    case "os-keypairs":
+                        return HandleGetKeyPairs();
                 }
             }
             throw new NotImplementedException();
@@ -94,6 +99,34 @@ namespace OpenStack.Test.Compute
             }
 
             return TestHelper.CreateResponse(HttpStatusCode.OK, new Dictionary<string, string>(), flavorContent);
+        }
+
+        internal IHttpResponseAbstraction HandleGetKeyPairs()
+        {
+            Stream keyPairContent;
+            switch (this.Uri.Segments.Count())
+            {
+                case 5:
+                    var keyPairName = this.Uri.Segments[4].TrimEnd('/');
+                    var pair =
+                        this.KeyPairs.FirstOrDefault(
+                            kp => string.Equals(kp.Name, keyPairName, StringComparison.OrdinalIgnoreCase));
+                    if (pair == null)
+                    {
+                        return TestHelper.CreateResponse(HttpStatusCode.NotFound);
+                    }
+
+                    keyPairContent = TestHelper.CreateStream(GenerateKeyPairPayload(pair));
+                    break;
+                case 4:
+                    keyPairContent = TestHelper.CreateStream(GenerateKeyPairsPayload(this.KeyPairs));
+                    break;
+                default:
+                    //Unknown Uri format
+                    throw new NotImplementedException();
+            }
+
+            return TestHelper.CreateResponse(HttpStatusCode.OK, new Dictionary<string, string>(), keyPairContent);
         }
 
         internal IHttpResponseAbstraction HandleGetImage()
@@ -429,6 +462,37 @@ namespace OpenStack.Test.Compute
                 payload.Append("}");
                 first = false;
             }
+            payload.Append("] }");
+            return payload.ToString();
+        }
+
+        private string GenerateKeyPairPayload(ComputeKeyPair keyPair)
+        {
+            var payloadFixture = @"{{
+                ""keypair"": {{
+                    ""public_key"": ""{1}"",
+                    ""name"": ""{0}"",
+                    ""fingerprint"": ""{2}""
+                }}
+            }}";
+            return string.Format(payloadFixture, keyPair.Name, keyPair.PublicKey, keyPair.Fingerprint);
+        }
+
+        private string GenerateKeyPairsPayload(IEnumerable<ComputeKeyPair> keyPairs)
+        {
+            var payload = new StringBuilder();
+            payload.Append("{ \"keypairs\": [");
+            var first = true;
+            foreach (var keyPair in keyPairs)
+            {
+                if (!first)
+                {
+                    payload.Append(",");
+                }
+                payload.Append(GenerateKeyPairPayload(keyPair));
+                first = false;
+            }
+
             payload.Append("] }");
             return payload.ToString();
         }

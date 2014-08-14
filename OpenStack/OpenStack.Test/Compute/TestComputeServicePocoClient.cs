@@ -34,7 +34,7 @@ namespace OpenStack.Test.Compute
 
         public Func<string, Task> DeleteImageDelegate { get; set; }
 
-        public Func<string, string, string, string, IEnumerable<string>,  Task<ComputeServer>> CreateServerDelegate { get; set; }
+        public Func<string, string, string, string, string, IEnumerable<string>,  Task<ComputeServer>> CreateServerDelegate { get; set; }
 
         public Func<string, Task> DeleteServerDelegate { get; set; }
 
@@ -54,7 +54,11 @@ namespace OpenStack.Test.Compute
 
         public Func<string, Task<ComputeServer>> GetServerDelegate { get; set; }
 
-        public Func<Task<IEnumerable<ComputeServer>>> GetServersDelegate { get; set; } 
+        public Func<Task<IEnumerable<ComputeServer>>> GetServersDelegate { get; set; }
+
+        public Func<string, Task<ComputeKeyPair>> GetKeyPairDelegate { get; set; }
+
+        public Func<Task<IEnumerable<ComputeKeyPair>>> GetKeyPairsDelegate { get; set; } 
 
         public async Task<ComputeFlavor> GetFlavor(string flavorId)
         {
@@ -76,6 +80,16 @@ namespace OpenStack.Test.Compute
             await this.DeleteServerMetadataDelegate(serverId, key);
         }
 
+        public async Task<IEnumerable<ComputeKeyPair>> GetKeyPairs()
+        {
+             return await this.GetKeyPairsDelegate();
+        }
+
+        public async Task<ComputeKeyPair> GetKeyPair(string keyPairName)
+        {
+            return await this.GetKeyPairDelegate(keyPairName);
+        }
+
         public async Task<IEnumerable<ComputeImage>> GetImages()
         {
             return await this.GetImagesDelegate();
@@ -91,9 +105,9 @@ namespace OpenStack.Test.Compute
             await this.DeleteImageDelegate(imageId);
         }
 
-        public async Task<ComputeServer> CreateServer(string name, string imageId, string flavorId, string networkId, IEnumerable<string> securityGroups)
+        public async Task<ComputeServer> CreateServer(string name, string imageId, string flavorId, string networkId, string keyName, IEnumerable<string> securityGroups)
         {
-            return await this.CreateServerDelegate(name, imageId, flavorId, networkId, securityGroups);
+            return await this.CreateServerDelegate(name, imageId, flavorId, networkId, keyName, securityGroups);
         }
 
         public async Task DeleteServer(string serverId)

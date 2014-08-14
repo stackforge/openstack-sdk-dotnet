@@ -118,6 +118,40 @@ namespace OpenStack.Compute
         }
 
         /// <inheritdoc/>
+        public async Task<IEnumerable<ComputeKeyPair>> GetKeyPairs()
+        {
+            var client = this.GetRestClient();
+            var resp = await client.GetKeyPairs();
+
+            if (resp.StatusCode != HttpStatusCode.OK && resp.StatusCode != HttpStatusCode.NonAuthoritativeInformation)
+            {
+                throw new InvalidOperationException(string.Format("Failed to get compute key pairs. The remote server returned the following status code: '{0}'.", resp.StatusCode));
+            }
+
+            var converter = this.ServiceLocator.Locate<IComputeKeyPairPayloadConverter>();
+            var pairs = converter.ConvertKeyPairs(await resp.ReadContentAsStringAsync());
+
+            return pairs;
+        }
+
+        /// <inheritdoc/>
+        public async Task<ComputeKeyPair> GetKeyPair(string keyPairName)
+        {
+            var client = this.GetRestClient();
+            var resp = await client.GetKeyPair(keyPairName);
+
+            if (resp.StatusCode != HttpStatusCode.OK && resp.StatusCode != HttpStatusCode.NonAuthoritativeInformation)
+            {
+                throw new InvalidOperationException(string.Format("Failed to get compute key pair. The remote server returned the following status code: '{0}'.", resp.StatusCode));
+            }
+
+            var converter = this.ServiceLocator.Locate<IComputeKeyPairPayloadConverter>();
+            var keyPair = converter.Convert(await resp.ReadContentAsStringAsync());
+
+            return keyPair;
+        }
+
+        /// <inheritdoc/>
         public async Task<IEnumerable<ComputeImage>> GetImages()
         {
             var client = this.GetRestClient();
@@ -164,10 +198,11 @@ namespace OpenStack.Compute
         }
 
         /// <inheritdoc/>
-        public async Task<ComputeServer> CreateServer(string name, string imageId, string flavorId, string networkId, IEnumerable<string> securityGroups)
+        public async Task<ComputeServer> CreateServer(string name, string imageId, string flavorId, string networkId, string keyName,
+            IEnumerable<string> securityGroups)
         {
             var client = this.GetRestClient();
-            var resp = await client.CreateServer(name, imageId, flavorId, networkId, securityGroups);
+            var resp = await client.CreateServer(name, imageId, flavorId, networkId, keyName, securityGroups);
 
             if (resp.StatusCode != HttpStatusCode.Accepted && resp.StatusCode != HttpStatusCode.OK)
             {

@@ -61,6 +61,16 @@ namespace OpenStack.Test.Compute
             return Task.Factory.StartNew(() => Responses.Dequeue());
         }
 
+        public Task<IHttpResponseAbstraction> GetKeyPairs()
+        {
+            return Task.Factory.StartNew(() => Responses.Dequeue());
+        }
+
+        public Task<IHttpResponseAbstraction> GetKeyPair(string keyPairName)
+        {
+            return Task.Factory.StartNew(() => Responses.Dequeue());
+        }
+
         public Task<IHttpResponseAbstraction> GetImages()
         {
             return Task.Factory.StartNew(() => Responses.Dequeue());
@@ -93,6 +103,12 @@ namespace OpenStack.Test.Compute
 
         /// <inheritdoc/>
         public Task<IHttpResponseAbstraction> CreateServer(string name, string imageId, string flavorId, string networkId, IEnumerable<string> securityGroups)
+        {
+            return Task.Factory.StartNew(() => Responses.Dequeue());
+        }
+
+        public Task<IHttpResponseAbstraction> CreateServer(string name, string imageId, string flavorId, string networkId, string keyName,
+            IEnumerable<string> securityGroups)
         {
             return Task.Factory.StartNew(() => Responses.Dequeue());
         }

@@ -90,9 +90,10 @@ namespace OpenStack.Compute
         /// <param name="imageId">The id for the image that this server will be based on.</param>
         /// <param name="flavorId">The id of the flavor to use for this server.</param>
         /// <param name="networkId">The network to connect this server to.</param>
+        /// <param name="keyName">The name of the key pair to associate with this server.</param>
         /// <param name="securityGroups">A list of security group names to associate with this server.</param>
         /// <returns>An HTTP response from the remote server.</returns>
-        Task<IHttpResponseAbstraction> CreateServer(string name, string imageId, string flavorId, string networkId, IEnumerable<string> securityGroups);
+        Task<IHttpResponseAbstraction> CreateServer(string name, string imageId, string flavorId, string networkId, string keyName, IEnumerable<string> securityGroups);
 
         /// <summary>
         /// Gets a list of servers from the remote OpenStack instance.
@@ -145,5 +146,18 @@ namespace OpenStack.Compute
         /// <param name="key">The metadata key to remove.</param>
         /// <returns>An HTTP response from the remote server.</returns>
         Task<IHttpResponseAbstraction> DeleteServerMetadata(string serverId, string key);
+
+        /// <summary>
+        /// Gets a list of key pairs from the remote OpenStack instance.
+        /// </summary>
+        /// <returns>An HTTP response from the remote server.</returns>
+        Task<IHttpResponseAbstraction> GetKeyPairs();
+
+        /// <summary>
+        /// Gets a key pair from the remote OpenStack instance.
+        /// </summary>
+        /// <param name="keyPairName">The name of the key pair to get.</param>
+        /// <returns>An HTTP response from the remote server.</returns>
+        Task<IHttpResponseAbstraction> GetKeyPair(string keyPairName);
     }
 }

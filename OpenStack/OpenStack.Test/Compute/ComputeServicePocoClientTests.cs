@@ -402,6 +402,7 @@ namespace OpenStack.Test.Compute
         public async Task CanCreateComputeServerWithAcceptedResponse()
         {
             var serverId = "98765";
+            var keyName = "MyKey";
             var publicUrl = "http://15.125.87.81:8774/v2/ffe683d1060449d09dac0bf9d7a371cd/servers/" + serverId;
             var permUrl = "http://15.125.87.81:8774/ffe683d1060449d09dac0bf9d7a371cd/servers/" + serverId;
             var adminPassword = "ABCDEF";
@@ -438,7 +439,7 @@ namespace OpenStack.Test.Compute
             this.ComputeServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
-            var result = await client.CreateServer("MyServer", "12345", "1", "54321", new List<string>() { "MyGroup" });
+            var result = await client.CreateServer("MyServer", "12345", "1", "54321", keyName, new List<string>() { "MyGroup" });
 
             Assert.IsNotNull(result);
             
@@ -452,6 +453,7 @@ namespace OpenStack.Test.Compute
         public async Task CanCreateComputeServerWithOkResponse()
         {
             var serverId = "98765";
+            var keyName = "MyKey";
             var publicUrl = "http://15.125.87.81:8774/v2/ffe683d1060449d09dac0bf9d7a371cd/servers/" + serverId;
             var permUrl = "http://15.125.87.81:8774/ffe683d1060449d09dac0bf9d7a371cd/servers/" + serverId;
             var adminPassword = "ABCDEF";
@@ -488,7 +490,7 @@ namespace OpenStack.Test.Compute
             this.ComputeServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
-            var result = await client.CreateServer("MyServer", "12345", "1", "54321", new List<string>() { "MyGroup" });
+            var result = await client.CreateServer("MyServer", "12345", "1", "54321", keyName, new List<string>() { "MyGroup" });
 
             Assert.IsNotNull(result);
 
@@ -506,7 +508,7 @@ namespace OpenStack.Test.Compute
             this.ComputeServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
-            await client.CreateServer("MyServer", "12345", "1", "54321", new List<string>() { "MyGroup" });
+            await client.CreateServer("MyServer", "12345", "1", "54321", string.Empty, new List<string>() { "MyGroup" });
         }
 
         [TestMethod]
@@ -517,7 +519,7 @@ namespace OpenStack.Test.Compute
             this.ComputeServiceRestClient.Responses.Enqueue(restResp);
 
             var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
-            await client.CreateServer("MyServer", "12345", "1", "54321", new List<string>() { "MyGroup"});
+            await client.CreateServer("MyServer", "12345", "1", "54321", string.Empty, new List<string>() { "MyGroup" });
         }
 
         #endregion
@@ -1410,6 +1412,186 @@ namespace OpenStack.Test.Compute
 
             var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
             await client.DeleteImageMetadata("1", "item1");
+        }
+
+        #endregion
+
+        #region Get Compute Key Pairs Tests
+
+        public string KeyPairsPayload = @"{
+            ""keypairs"": [
+                {
+                    ""keypair"": {
+                        ""public_key"": ""ABCDEF"",
+                        ""name"": ""MyKey"",
+                        ""fingerprint"": ""12345""
+                    }
+                }
+            ]
+        }";
+
+        [TestMethod]
+        public async Task CanGetComputeKeyPairsWithOkResponse()
+        {
+            var content = TestHelper.CreateStream(KeyPairsPayload);
+
+            var restResp = new HttpResponseAbstraction(content, new HttpHeadersAbstraction(), HttpStatusCode.OK);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            var result = await client.GetKeyPairs();
+
+            Assert.IsNotNull(result);
+
+            var pairs = result.ToList();
+            Assert.AreEqual(1, pairs.Count());
+
+            var keyPair = pairs.First();
+            Assert.AreEqual("MyKey", keyPair.Name);
+            Assert.AreEqual("ABCDEF", keyPair.PublicKey);
+            Assert.AreEqual("12345", keyPair.Fingerprint);
+        }
+
+        [TestMethod]
+        public async Task CanGetComputeKeyPairsWithNonAuthoritativeResponse()
+        {
+            var content = TestHelper.CreateStream(KeyPairsPayload);
+
+            var restResp = new HttpResponseAbstraction(content, new HttpHeadersAbstraction(), HttpStatusCode.NonAuthoritativeInformation);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            var result = await client.GetKeyPairs();
+
+            Assert.IsNotNull(result);
+
+            var pairs = result.ToList();
+            Assert.AreEqual(1, pairs.Count());
+
+            var keyPair = pairs.First();
+            Assert.AreEqual("MyKey", keyPair.Name);
+            Assert.AreEqual("ABCDEF", keyPair.PublicKey);
+            Assert.AreEqual("12345", keyPair.Fingerprint);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task CannotGetComputeKeyPairsWithNoContent()
+        {
+
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.NoContent);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.GetKeyPairs();
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionthrownWhenGettingComputeKeyPairsAndNotAuthed()
+        {
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.Unauthorized);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.GetKeyPairs();
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionthrownWhenGettingComputeKeyPairsAndServerError()
+        {
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.InternalServerError);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.GetKeyPairs();
+        }
+
+        #endregion
+
+        #region Get Compute Key Pair Tests
+
+        public string KeyPairPayload = @"{
+            ""keypair"": {
+                ""public_key"": ""ABCDEF"",
+                ""user_id"": ""70d48d344b494a1cbe8adbf7c02be7b5"",
+                ""name"": ""MyKey"",
+                ""deleted"": false,
+                ""created_at"": ""2014-08-11T21:15:53.000000"",
+                ""updated_at"": null,
+                ""fingerprint"": ""12345"",
+                ""deleted_at"": null,
+                ""id"": 1
+            }
+        }";
+
+        [TestMethod]
+        public async Task CanGetComputeKeyPairWithOkResponse()
+        {
+            var content = TestHelper.CreateStream(KeyPairPayload);
+
+            var restResp = new HttpResponseAbstraction(content, new HttpHeadersAbstraction(), HttpStatusCode.OK);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            var keyPair = await client.GetKeyPair("MyKey");
+
+            Assert.IsNotNull(keyPair);
+            Assert.AreEqual("MyKey", keyPair.Name);
+            Assert.AreEqual("ABCDEF", keyPair.PublicKey);
+            Assert.AreEqual("12345", keyPair.Fingerprint);
+        }
+
+        [TestMethod]
+        public async Task CanGetComputeKeyPairWithNonAuthoritativeResponse()
+        {
+            var content = TestHelper.CreateStream(KeyPairPayload);
+
+            var restResp = new HttpResponseAbstraction(content, new HttpHeadersAbstraction(), HttpStatusCode.NonAuthoritativeInformation);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            var keyPair = await client.GetKeyPair("MyKey");
+
+            Assert.IsNotNull(keyPair);
+            Assert.AreEqual("MyKey", keyPair.Name);
+            Assert.AreEqual("ABCDEF", keyPair.PublicKey);
+            Assert.AreEqual("12345", keyPair.Fingerprint);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task CannotGetComputeKeyPairWithNoContent()
+        {
+
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.NoContent);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.GetKeyPair("1");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionthrownWhenGettingAComputeKeyPairAndNotAuthed()
+        {
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.Unauthorized);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.GetKeyPair("1");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionthrownWhenGettingAComputeKeyPairAndServerError()
+        {
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.InternalServerError);
+            this.ComputeServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new ComputeServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.GetKeyPair("1");
         }
 
         #endregion
