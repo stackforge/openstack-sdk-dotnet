@@ -34,4 +34,4 @@ For more examples see the *OpenStack/Examples* directory.
 
 Development
 -----------
-The `homepage for the development effort <https://wiki.openstack.org/wiki/OpenStack-SDK-DotNet>`_ is on the OpenStack Wiki. The .NET SDK is developed through the same processes as the OpenStack services. `Features requests <https://blueprints.launchpad.net/openstack-sdk-dotnet>`_ and `bugs <https://bugss.launchpad.net/openstack-sdk-dotnet>`_ are filed through launchpad.
+The `homepage for the development effort <https://wiki.openstack.org/wiki/OpenStack-SDK-DotNet>`_ is on the OpenStack Wiki. The .NET SDK is developed through the same processes as the OpenStack services. `Features requests <https://blueprints.launchpad.net/openstack-sdk-dotnet>`_ and `bugs <https://bugs.launchpad.net/openstack-sdk-dotnet>`_ are filed through launchpad.
