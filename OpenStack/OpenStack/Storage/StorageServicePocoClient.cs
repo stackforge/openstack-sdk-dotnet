@@ -61,7 +61,7 @@ namespace OpenStack.Storage
             }
 
             var converter = this.ServiceLocator.Locate<IStorageObjectPayloadConverter>();
-            var respObj = converter.Convert(obj.ContainerName, obj.FullName, resp.Headers);
+            var respObj = converter.Convert(obj.ContainerName, obj.FullName, resp.Headers, content.Length);
 
             return respObj;
         }
