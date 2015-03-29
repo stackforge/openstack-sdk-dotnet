@@ -1232,7 +1232,7 @@ namespace OpenStack.Test.Storage
 
             var headers = new HttpHeadersAbstraction()
             {
-                {"Content-Length", "1234"},
+                {"Content-Length", "0"},
                 {"Content-Type", "application/octet-stream"},
                 {"Last-Modified", "Wed, 12 Mar 2014 23:42:23 GMT"},
                 {"ETag", "d41d8cd98f00b204e9800998ecf8427e"}
@@ -1250,7 +1250,7 @@ namespace OpenStack.Test.Storage
             Assert.IsNotNull(result);
             Assert.AreEqual(objectName, result.Name);
             Assert.AreEqual(containerName, result.ContainerName);
-            Assert.AreEqual(1234, result.Length);
+            Assert.AreEqual(12, result.Length); //length of content stream
             Assert.AreEqual("application/octet-stream", result.ContentType);
             Assert.AreEqual("d41d8cd98f00b204e9800998ecf8427e", result.ETag);
             Assert.AreEqual(DateTime.Parse("Wed, 12 Mar 2014 23:42:23 GMT"), result.LastModified);
@@ -1264,7 +1264,7 @@ namespace OpenStack.Test.Storage
 
             var headers = new HttpHeadersAbstraction()
             {
-                {"Content-Length", "1234"},
+                {"Content-Length", "0"},
                 {"Content-Type", "application/octet-stream"},
                 {"Last-Modified", "Wed, 12 Mar 2014 23:42:23 GMT"},
                 {"ETag", "d41d8cd98f00b204e9800998ecf8427e"}
@@ -1282,7 +1282,7 @@ namespace OpenStack.Test.Storage
             Assert.IsNotNull(result);
             Assert.AreEqual(objectName, result.FullName);
             Assert.AreEqual(containerName, result.ContainerName);
-            Assert.AreEqual(1234, result.Length);
+            Assert.AreEqual(12, result.Length);//12 length of the content stream
             Assert.AreEqual("application/octet-stream", result.ContentType);
             Assert.AreEqual("d41d8cd98f00b204e9800998ecf8427e", result.ETag);
             Assert.AreEqual(DateTime.Parse("Wed, 12 Mar 2014 23:42:23 GMT"), result.LastModified);
