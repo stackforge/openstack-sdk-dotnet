@@ -105,7 +105,7 @@ namespace OpenStack.Storage
         }
 
         /// <inheritdoc/>
-        public StorageObject Convert(string containerName, string objectName, IHttpHeadersAbstraction headers)
+        public StorageObject Convert(string containerName, string objectName, IHttpHeadersAbstraction headers, long? objectLength = null)
         {
             containerName.AssertIsNotNullOrEmpty("containerName");
             objectName.AssertIsNotNullOrEmpty("objectName");
@@ -116,6 +116,10 @@ namespace OpenStack.Storage
                 var lastModified = DateTime.Parse(headers["Last-Modified"].First());
                 var eTag = headers["ETag"].First();
                 var length = long.Parse(headers["Content-Length"].First());
+                if (objectLength.HasValue)
+                {
+                    length = objectLength.Value;
+                }
                 var contentType = headers["Content-Type"].First();
                 var metadata = headers.Where(kvp => kvp.Key.StartsWith("X-Object-Meta")).ToDictionary(header => header.Key.Substring(14, header.Key.Length - 14), header => header.Value.First());
 

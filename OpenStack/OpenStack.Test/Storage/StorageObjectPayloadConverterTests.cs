@@ -323,6 +323,33 @@ namespace OpenStack.Test.Storage
         }
 
         [TestMethod]
+        public void CanParseObjectFromHeadersAndSpecificObjectLength()
+        {
+            var containerName = "TestContainer";
+            var objectName = "TestObject";
+
+            var headers = new HttpHeadersAbstraction()
+            {
+                {"Content-Length", "1234"},
+                {"Content-Type", "application/octet-stream"},
+                {"Last-Modified", "Wed, 12 Mar 2014 23:42:23 GMT"},
+                {"ETag", "d41d8cd98f00b204e9800998ecf8427e"}
+            };
+
+            var converter = new StorageObjectPayloadConverter();
+            var obj = converter.Convert(containerName, objectName, headers, 100);
+
+            Assert.IsNotNull(obj);
+            Assert.IsInstanceOfType(obj, typeof(StorageObject));
+            Assert.AreEqual(100, obj.Length);
+            Assert.AreEqual("d41d8cd98f00b204e9800998ecf8427e", obj.ETag);
+            Assert.AreEqual("application/octet-stream", obj.ContentType);
+            Assert.AreEqual(DateTime.Parse("Wed, 12 Mar 2014 23:42:23 GMT"), obj.LastModified);
+            Assert.AreEqual(objectName, obj.Name);
+            Assert.AreEqual(containerName, obj.ContainerName);
+        }
+
+        [TestMethod]
         public void CanParseObjectFromHeadersWithMetadata()
         {
             var containerName = "TestContainer";

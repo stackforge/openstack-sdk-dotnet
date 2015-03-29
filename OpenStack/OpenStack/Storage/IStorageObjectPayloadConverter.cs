@@ -39,8 +39,9 @@ namespace OpenStack.Storage
         /// <param name="containerName">The name of the parent container.</param>
         /// <param name="objectName">The name of the storage object.</param>
         /// <param name="headers">The collection of headers</param>
+        /// <param name="objectLength">The storage object length just created</param>
         /// <returns>The storage object.</returns>
-        StorageObject Convert(string containerName, string objectName, IHttpHeadersAbstraction headers);
+        StorageObject Convert(string containerName, string objectName, IHttpHeadersAbstraction headers, long? objectLength = null);
 
         /// <summary>
         /// Converts a collection of StorageObjects into a Json payload.

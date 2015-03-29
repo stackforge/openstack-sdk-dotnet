@@ -70,7 +70,7 @@ namespace OpenStack.Test.HttpAbstraction
                 Assert.IsTrue(response.Headers.Contains("Content-Length"));
                 Assert.IsTrue(response.Headers.Contains("Content-Type"));
 
-                Assert.IsTrue(int.Parse(response.Headers["Content-Length"].First()) > 200);
+                Assert.IsTrue(int.Parse(response.Headers["Content-Length"].First()) > 100);
                 Assert.AreEqual("application/json", response.Headers["Content-Type"].First());
 
                 Assert.IsNotNull(response.Content);
