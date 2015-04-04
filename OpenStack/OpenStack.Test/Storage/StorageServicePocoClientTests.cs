@@ -1375,6 +1375,162 @@ namespace OpenStack.Test.Storage
 
         #endregion
 
+        #region Copy Storage Object Tests
+
+        [TestMethod]
+        public async Task CanCopyStorageObjectWithCreatedResponse()
+        {
+            var containerName = "TestContainer";
+            var objectName = "TestObject";
+            var targetContainerName = "TargetTestContainer";
+
+            var headers = new HttpHeadersAbstraction()
+            {
+                {"Content-Length", "0"},
+                {"Content-Type", "application/octet-stream"},
+                {"X-Copied-From-Last-Modified","Wed, 12 Mar 2014 22:42:23 GMT"},
+                {"X-Copied-From" , "TestContainer/TestObject"},
+                {"Last-Modified", "Wed, 12 Mar 2014 23:42:23 GMT"},
+                {"ETag", "d41d8cd98f00b204e9800998ecf8427e"}
+            };
+
+            var objRequest = new StorageObject(objectName, containerName);
+         
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), headers, HttpStatusCode.Created);
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new StorageServicePocoClient(GetValidContext(), this.ServiceLocator);
+            var result = await client.CopyStorageObject(objRequest, targetContainerName);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(objectName, result.Name);
+            Assert.AreEqual(containerName, result.ContainerName);
+            Assert.AreEqual(0, result.Length); //length of content stream
+            Assert.AreEqual("application/octet-stream", result.ContentType);
+            Assert.AreEqual("d41d8cd98f00b204e9800998ecf8427e", result.ETag);
+            Assert.AreEqual(DateTime.Parse("Wed, 12 Mar 2014 23:42:23 GMT"), result.LastModified);
+        }
+
+        [TestMethod]
+        public async Task CanCopyStorageObjectWithFoldersAndCreatedResponse()
+        {
+            var containerName = "TestContainer";
+            var objectName = "a/b/TestObject";
+            var targetContainerName = "TargetTestContainer";
+
+            var headers = new HttpHeadersAbstraction()
+            {
+                {"Content-Length", "0"},
+                {"Content-Type", "application/octet-stream"},
+                {"X-Copied-From-Last-Modified","Wed, 12 Mar 2014 22:42:23 GMT"},
+                {"X-Copied-From" , "TestContainer/a/b/TestObject"},
+                {"Last-Modified", "Wed, 12 Mar 2014 23:42:23 GMT"},
+                {"ETag", "d41d8cd98f00b204e9800998ecf8427e"}
+            };
+
+            var objRequest = new StorageObject(objectName, containerName);
+    
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), headers, HttpStatusCode.Created);
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new StorageServicePocoClient(GetValidContext(), this.ServiceLocator);
+            var result = await client.CopyStorageObject(objRequest, targetContainerName);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(objectName, result.FullName);
+            Assert.AreEqual(containerName, result.ContainerName);
+            Assert.AreEqual(0, result.Length);
+            Assert.AreEqual("application/octet-stream", result.ContentType);
+            Assert.AreEqual("d41d8cd98f00b204e9800998ecf8427e", result.ETag);
+            Assert.AreEqual(DateTime.Parse("Wed, 12 Mar 2014 23:42:23 GMT"), result.LastModified);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionThrownWhenCopyingaStorageObjectWithMissingLength()
+        {
+            var containerName = "TestContainer";
+            var objectName = "TestObject";
+            var targetContainerName = "TargetTestContainer";
+
+            var objRequest = new StorageObject(objectName, containerName);
+       
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.LengthRequired);
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new StorageServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.CopyStorageObject(objRequest, targetContainerName);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionThrownWhenCopyingaStorageObjectWithBadETag()
+        {
+            var containerName = "TestContainer";
+            var objectName = "TestObject";
+            var targetContainerName = "TargetTestContainer";
+
+            var objRequest = new StorageObject(objectName, containerName);
+  
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), (HttpStatusCode)422);
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new StorageServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.CopyStorageObject(objRequest, targetContainerName);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionThrownWhenCopyingaStorageObjectWithBadAuth()
+        {
+            var containerName = "TestContainer";
+            var objectName = "TestObject";
+            var targetContainerName = "TargetTestContainer";
+
+            var objRequest = new StorageObject(objectName, containerName);
+       
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.Unauthorized);
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new StorageServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.CopyStorageObject(objRequest, targetContainerName);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionThrownWhenCopyingaStorageObjectHasInternalServerError()
+        {
+            var containerName = "TestContainer";
+            var objectName = "TestObject";
+            var targetContainerName = "TargetTestContainer";
+
+            var objRequest = new StorageObject(objectName, containerName);
+          
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.InternalServerError);
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new StorageServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.CopyStorageObject(objRequest, targetContainerName);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public async Task ExceptionThrownWhenCopyingaStorageObjectTimesOut()
+        {
+            var containerName = "TestContainer";
+            var objectName = "TestObject";
+            var targetContainerName = "TargetTestContainer";
+
+            var objRequest = new StorageObject(objectName, containerName);
+       
+            var restResp = new HttpResponseAbstraction(new MemoryStream(), new HttpHeadersAbstraction(), HttpStatusCode.RequestTimeout);
+            this.StorageServiceRestClient.Responses.Enqueue(restResp);
+
+            var client = new StorageServicePocoClient(GetValidContext(), this.ServiceLocator);
+            await client.CopyStorageObject(objRequest, targetContainerName);
+        }
+        #endregion
+
         #region Create Storage Folder Tests
 
         [TestMethod]

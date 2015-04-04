@@ -412,6 +412,55 @@ namespace OpenStack.Test.Storage
         }
 
         [TestMethod]
+        public async Task CanCopyStorageObjects()
+        {
+            var containerName = "TestContainer";
+            var objectName = "TestObject";
+            var targetContainerName = "TargetTestContainer";
+
+            var obj = new StorageObject(objectName, targetContainerName, DateTime.UtcNow, "12345", 12345,
+                "application/octet-stream", new Dictionary<string, string>());
+
+            this.ServicePocoClient.CopyStorageObjectDelegate = async (s, container, destinationObjectName) =>
+            {
+                Assert.AreEqual(container, obj.ContainerName);
+                Assert.AreEqual(s.Name, obj.Name);
+                
+                return await Task.Run(() => obj);
+            };
+
+            var client = new StorageServiceClient(GetValidCreds(), "Swift", CancellationToken.None, this.ServiceLocator);
+            var resp = await client.CopyStorageObject(containerName, objectName, targetContainerName);
+
+            Assert.AreEqual(obj, resp);
+        }
+
+        [TestMethod]
+        public async Task CanCopyStorageObjectsAndChangeName()
+        {
+            var containerName = "TestContainer";
+            var objectName = "TestObject";
+            var targetObjectName = "TargetTestObject";
+            var targetContainerName = "TargetTestContainer";
+
+            var obj = new StorageObject(targetObjectName, targetContainerName, DateTime.UtcNow, "12345", 12345,
+                "application/octet-stream", new Dictionary<string, string>());
+
+            this.ServicePocoClient.CopyStorageObjectDelegate = async (s, container, destinationObjectName) =>
+            {
+                Assert.AreEqual(container, obj.ContainerName);
+                Assert.AreEqual(destinationObjectName, obj.Name);
+
+                return await Task.Run(() => obj);
+            };
+
+            var client = new StorageServiceClient(GetValidCreds(), "Swift", CancellationToken.None, this.ServiceLocator);
+            var resp = await client.CopyStorageObject(containerName, objectName, targetContainerName, targetObjectName);
+
+            Assert.AreEqual(obj, resp);
+        }
+
+        [TestMethod]
         public async Task CreatingAnObjectLargerThanTheThresholdCreatesObjectWithSegments()
         {
             var client = new StorageServiceClient(GetValidCreds(), "Swift", CancellationToken.None, this.ServiceLocator);
@@ -638,6 +687,77 @@ namespace OpenStack.Test.Storage
             var client = new StorageServiceClient(GetValidCreds(), "Swift", CancellationToken.None, this.ServiceLocator);
             await client.CreateStorageObject(containerName, objectName, null, new MemoryStream());
         }
+
+        #region Copy Storage Objects Tests
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task CopyStorageObjectsWithNullContainerNameThrows()
+        {
+            var objectName = "TestObject";
+            var targetContainerName = "TargetTestContainer";
+
+            var client = new StorageServiceClient(GetValidCreds(), "Swift", CancellationToken.None, this.ServiceLocator);
+            await client.CopyStorageObject(null, objectName, targetContainerName);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task CopyStorageObjectsWithEmptyContainerNameThrows()
+        {
+            var objectName = "TestObject";
+            var targetContainerName = "TargetTestContainer";
+
+            var client = new StorageServiceClient(GetValidCreds(), "Swift", CancellationToken.None, this.ServiceLocator);
+            await client.CopyStorageObject(string.Empty, objectName, targetContainerName);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task CopyStorageObjectsWithNullObjectNameThrows()
+        {
+            var containerName = "TestContainer";
+            var targetContainerName = "TargetTestContainer";
+
+            var client = new StorageServiceClient(GetValidCreds(), "Swift", CancellationToken.None, this.ServiceLocator);
+            await client.CopyStorageObject(containerName, null, targetContainerName);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task CopyStorageObjectsWithEmptyObjectNameThrows()
+        {
+            var containerName = "TestContainer";
+            var targetContainerName = "TargetTestContainer";
+
+            var client = new StorageServiceClient(GetValidCreds(), "Swift", CancellationToken.None, this.ServiceLocator);
+            await client.CopyStorageObject(containerName, string.Empty, targetContainerName);
+   
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task CopyStorageObjectsWithNullTargetContainerThrows()
+        {
+            var containerName = "TestContainer";
+            var objectName = "TestObject";
+
+            var client = new StorageServiceClient(GetValidCreds(), "Swift", CancellationToken.None, this.ServiceLocator);
+            await client.CopyStorageObject(containerName, objectName, null);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task CopyStorageObjectsWithEmptyTargetContainerThrows()
+        {
+            var containerName = "TestContainer";
+            var objectName = "TestObject";
+
+            var client = new StorageServiceClient(GetValidCreds(), "Swift", CancellationToken.None, this.ServiceLocator);
+            await client.CopyStorageObject(containerName, objectName, string.Empty);
+        }
+
+        #endregion
 
         [TestMethod]
         public async Task CanCreateStaticStorageManifest()
