@@ -92,6 +92,14 @@ namespace OpenStack.Compute
         /// <returns>A server object.</returns>
         Task<ComputeServer> CreateServer(string name, string imageId, string flavorId, string networkId, IEnumerable<string> securityGroups);
 
+		/// <summary>
+		/// Reboot a server on the remote OpenStack instance.
+		/// </summary>
+		/// <param name="serverId">The id of the server.</param>
+		/// <param name="rebootType">Either hard or soft reboot.</param>
+		/// <returns>A server object.</returns>
+		Task RebootServer(string serverId, string rebootType);
+
         /// <summary>
         /// Deletes a server from the remote OpenStack instance.
         /// </summary>

@@ -221,6 +221,16 @@ namespace OpenStack.Compute
             return await client.CreateServer(name, imageId, flavorId, networkId, keyName, securityGroups);
         }
 
+		/// <inheritdoc/>
+		public async Task RebootServer(string serverId, string rebootType)
+		{
+			serverId.AssertIsNotNullOrEmpty("serverId", "Cannot reboot a server with a null or empty id.");
+			rebootType.AssertIsNotNullOrEmpty("rebootType", "Cannot reboot a server with an null or empty reboot type.");
+
+			var client = this.GetPocoClient();
+			await client.RebootServer(serverId, rebootType);
+		}
+
         /// <summary>
         /// Gets a client to interact with the remote OpenStack instance.
         /// </summary>

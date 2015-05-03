@@ -95,6 +95,15 @@ namespace OpenStack.Compute
         /// <returns>An HTTP response from the remote server.</returns>
         Task<IHttpResponseAbstraction> CreateServer(string name, string imageId, string flavorId, string networkId, string keyName, IEnumerable<string> securityGroups);
 
+		/// <summary>
+		/// Reboot a server on the remote OpenStack instance.
+		/// </summary>
+		/// <param name="serverId">The id of the server.</param>
+		/// <param name="rebootType">Type of the reboot (hard or soft).</param>
+		/// <returns>An HTTP response from the remote server.</returns>
+		Task<IHttpResponseAbstraction> RebootServer(string serverId, string rebootType);
+
+
         /// <summary>
         /// Gets a list of servers from the remote OpenStack instance.
         /// </summary>

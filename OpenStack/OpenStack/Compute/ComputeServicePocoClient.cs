@@ -215,6 +215,19 @@ namespace OpenStack.Compute
             return metadata;
         }
 
+		/// <inheritdoc/>
+		/// TODO: Add Progress, see CreateServer
+		public async Task RebootServer(string serverId, string rebootType)
+		{
+			var client = this.GetRestClient();
+			var resp = await client.RebootServer(serverId, rebootType);
+
+			if (resp.StatusCode != HttpStatusCode.Accepted && resp.StatusCode != HttpStatusCode.OK)
+			{
+				throw new InvalidOperationException(string.Format("Failed to reboot compute server. The remote server returned the following status code: '{0}'.", resp.StatusCode));
+			}
+		}
+
         /// <inheritdoc/>
         public async Task DeleteServer(string serverId)
         {

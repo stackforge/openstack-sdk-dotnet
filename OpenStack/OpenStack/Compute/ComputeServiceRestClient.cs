@@ -225,6 +225,21 @@ namespace OpenStack.Compute
             return await client.SendAsync();
         }
 
+		/// <inheritdoc/>
+		public async Task<IHttpResponseAbstraction> RebootServer(string serverId, string rebootType)
+		{
+			var client = this.GetHttpClient(this.Context);
+
+			client.Uri = CreateRequestUri(this.Context.PublicEndpoint, ServersUrlMoniker, serverId, ActionUrlMoniker);
+			client.Method = HttpMethod.Post;
+
+			var requestBody = this.GenerateRebootServerRequestBody(rebootType);
+			client.Content = requestBody.ConvertToStream();
+			client.ContentType = "application/json";
+
+			return await client.SendAsync();
+		}
+
         /// <inheritdoc/>
         internal async Task<IHttpResponseAbstraction> DeleteItemMetadata(string itemType, string itemId, string key)
         {
@@ -306,6 +321,21 @@ namespace OpenStack.Compute
             body.server = server;
             return JToken.FromObject(body).ToString();
         }
+
+		/// <summary>
+		/// Generates a request body for rebooting a server.
+		/// </summary>
+		/// <param name="rebootType">Can either be SOFT or HARD reboot.</param>
+		/// <returns>A json encoded request body.</returns>
+		internal string GenerateRebootServerRequestBody(string rebootType)
+		{
+			dynamic reboot = new System.Dynamic.ExpandoObject();
+			reboot.type = rebootType;
+				
+			dynamic body = new System.Dynamic.ExpandoObject();
+			body.reboot = reboot;
+			return JToken.FromObject(body).ToString();
+		}
 
         /// <summary>
         /// Generates a request body for creating compute servers.
