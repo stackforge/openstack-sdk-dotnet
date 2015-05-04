@@ -1,0 +1,8 @@
+Verified+2: Jenkins
+Code-Review+2: Wayne Foley <wayne.foley@hp.com>
+Workflow+1: Wayne Foley <wayne.foley@hp.com>
+Submitted-by: Jenkins
+Submitted-at: Mon, 04 May 2015 22:42:02 +0000
+Reviewed-on: https://review.openstack.org/170732
+Project: stackforge/openstack-sdk-dotnet
+Branch: refs/heads/master
