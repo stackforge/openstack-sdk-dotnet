@@ -51,7 +51,8 @@ namespace OpenStack.Storage
             obj.AssertIsNotNull("obj", "Cannot create a null storage object.");
             obj.ContainerName.AssertIsNotNullOrEmpty("obj.ContainerName", "Cannot create a storage object with a null or empty container name.");
             obj.Name.AssertIsNotNullOrEmpty("obj.Name","Cannot create a storage object without a name.");
-
+            
+            var contentLength = content.Length;
             var client = this.GetRestClient();
             var resp = await client.CreateObject(obj.ContainerName, obj.FullName, obj.Metadata, content);
 
@@ -61,7 +62,7 @@ namespace OpenStack.Storage
             }
 
             var converter = this.ServiceLocator.Locate<IStorageObjectPayloadConverter>();
-            var respObj = converter.Convert(obj.ContainerName, obj.FullName, resp.Headers, content.Length);
+            var respObj = converter.Convert(obj.ContainerName, obj.FullName, resp.Headers, contentLength);
 
             return respObj;
         }
