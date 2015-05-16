@@ -1,0 +1,1 @@
+<Playlist Version="1.0"><Add Test="OpenStack.Test.Functional.StorageTests.Containers" /><Add Test="OpenStack.Test.OpenStackClientTests.CanConnect" /></Playlist>

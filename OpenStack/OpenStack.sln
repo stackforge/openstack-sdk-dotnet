@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30110.0
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenStack.Test", "OpenStack.Test\OpenStack.Test.csproj", "{7AF6DEC5-2257-4A29-BB55-66711DE3055D}"
 EndProject
@@ -14,6 +14,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenStack40", "OpenStack\OpenStack40.csproj", "{E9F05CCA-2748-4785-9F72-5D3F8893BC28}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenStack45-PCL", "OpenStack45-PCL\OpenStack45-PCL.csproj", "{5660F8AA-14D5-4B3B-ADA0-F79A286EF483}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenStack.Test.Functional", "OpenStack.Test.Functional\OpenStack.Test.Functional.csproj", "{F4BF7F04-C96B-4287-882D-B0822930DC4F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{5660F8AA-14D5-4B3B-ADA0-F79A286EF483}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5660F8AA-14D5-4B3B-ADA0-F79A286EF483}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5660F8AA-14D5-4B3B-ADA0-F79A286EF483}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F4BF7F04-C96B-4287-882D-B0822930DC4F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F4BF7F04-C96B-4287-882D-B0822930DC4F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F4BF7F04-C96B-4287-882D-B0822930DC4F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F4BF7F04-C96B-4287-882D-B0822930DC4F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
